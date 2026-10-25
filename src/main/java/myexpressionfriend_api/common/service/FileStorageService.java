@@ -1,12 +1,18 @@
 package myexpressionfriend_api.common.service;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import myexpressionfriend_api.common.config.StorageProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,7 +22,7 @@ import java.util.UUID;
 /**
  * 공통 파일 저장 서비스.
  * <p>
- * 파일은 {@code {storageBasePath}/{relativePath}} 에 저장되며,
+ * 파일은 설정에 따라 로컬 {@code {basePath}/{relativePath}} 또는 R2/S3에 저장되며,
  * 공개 URL은 {@code /uploads/{relativePath}} 형식을 따른다.
  * <p>
  * 디렉터리 구조 예시: {@code uploads/profiles/{userId}/{uuid}.jpg}
@@ -24,10 +30,15 @@ import java.util.UUID;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FileStorageService {
 
-    @Value("${app.storage.base-path:uploads}")
-    private String storageBasePath;
+    private final StorageProperties properties;
+    private final ObjectProvider<S3ObjectStorage> objectStorageProvider;
+
+    public boolean isObjectStorage() {
+        return "s3".equals(properties.getType());
+    }
 
     // -------------------------------------------------------------------------
     // Lifecycle
@@ -35,9 +46,13 @@ public class FileStorageService {
 
     @PostConstruct
     public void init() {
+        if (!isObjectStorage() && !"local".equals(properties.getType())) {
+            throw new IllegalArgumentException("APP_STORAGE_TYPE must be local or s3.");
+        }
+        if (isObjectStorage()) return;
         try {
-            Files.createDirectories(Paths.get(storageBasePath));
-            log.info("Storage directory initialized: {}", storageBasePath);
+            Files.createDirectories(Paths.get(properties.getBasePath()));
+            log.info("Storage directory initialized: {}", properties.getBasePath());
         } catch (IOException e) {
             throw new RuntimeException("파일 저장소 초기화에 실패했습니다.", e);
         }
@@ -60,16 +75,36 @@ public class FileStorageService {
         String storedFileName = generateStoredFileName(file.getOriginalFilename());
         String relativePath = subdirectory + "/" + storedFileName;
 
-        try {
-            Path filePath = resolveAndValidate(relativePath);
-            Files.createDirectories(filePath.getParent());
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        try (InputStream input = file.getInputStream()) {
+            store(relativePath, input, file.getSize(), file.getContentType());
         } catch (IOException e) {
             throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
         }
 
         log.debug("File saved: {}", relativePath);
         return relativePath;
+    }
+
+    public String saveBytes(byte[] content, String subdirectory, String filename, String contentType) {
+        String relativePath = subdirectory + "/" + filename;
+        try (InputStream input = new ByteArrayInputStream(content)) {
+            store(relativePath, input, content.length, contentType);
+            return relativePath;
+        } catch (IOException ex) {
+            throw new IllegalStateException("파일 저장 중 오류가 발생했습니다.", ex);
+        }
+    }
+
+    private void store(String relativePath, InputStream input, long length, String contentType) throws IOException {
+        validateKey(relativePath);
+        if (isObjectStorage()) {
+            objectStorageProvider.getObject().put(relativePath, input, length,
+                    contentType == null ? "application/octet-stream" : contentType);
+        } else {
+            Path filePath = resolveAndValidate(relativePath);
+            Files.createDirectories(filePath.getParent());
+            Files.copy(input, filePath, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     /**
@@ -79,6 +114,11 @@ public class FileStorageService {
      */
     public void deleteFile(String relativePath) {
         if (relativePath == null || relativePath.isBlank()) {
+            return;
+        }
+        validateKey(relativePath);
+        if (isObjectStorage()) {
+            objectStorageProvider.getObject().delete(relativePath);
             return;
         }
         try {
@@ -102,13 +142,23 @@ public class FileStorageService {
         if (relativePath == null || relativePath.isBlank()) {
             return null;
         }
-        return "/uploads/" + relativePath;
+        validateKey(relativePath);
+        return "/uploads/" + UriUtils.encodePath(relativePath, StandardCharsets.UTF_8);
+    }
+
+    public String signedDownloadUrl(String relativePath) {
+        validateKey(relativePath);
+        if (!isObjectStorage()) throw new IllegalStateException("Object storage is not enabled.");
+        return objectStorageProvider.getObject().signedDownloadUrl(relativePath);
     }
 
     /**
      * 상대 경로에 해당하는 실제 {@link Path}를 반환한다.
      */
     public Path getFilePath(String relativePath) {
+        if (isObjectStorage()) {
+            throw new IllegalStateException("Object storage files do not have a local filesystem path.");
+        }
         Path filePath = resolveAndValidate(relativePath);
         if (!Files.exists(filePath)) {
             throw new IllegalStateException("파일을 찾을 수 없습니다: " + relativePath);
@@ -136,6 +186,7 @@ public class FileStorageService {
         String extension = "";
         if (originalFileName != null && originalFileName.contains(".")) {
             extension = originalFileName.substring(originalFileName.lastIndexOf(".")).toLowerCase();
+            if (!extension.matches("\\.[a-z0-9]{1,10}")) extension = "";
         }
         return UUID.randomUUID() + extension;
     }
@@ -144,11 +195,25 @@ public class FileStorageService {
      * 상대 경로를 절대 경로로 변환하고, 경로 탈출(Path Traversal) 공격을 방지한다.
      */
     private Path resolveAndValidate(String relativePath) {
-        Path base = Paths.get(storageBasePath).toAbsolutePath().normalize();
+        validateKey(relativePath);
+        Path base = Paths.get(properties.getBasePath()).toAbsolutePath().normalize();
         Path target = base.resolve(relativePath).normalize();
         if (!target.startsWith(base)) {
             throw new SecurityException("잘못된 파일 경로입니다.");
         }
         return target;
+    }
+
+    private void validateKey(String key) {
+        if (key == null || key.isBlank() || key.startsWith("/")
+                || key.contains("\\") || key.contains("%") || key.contains("?") || key.contains("#")
+                || key.contains(":") || key.chars().anyMatch(Character::isISOControl)) {
+            throw new SecurityException("잘못된 파일 경로입니다.");
+        }
+        for (String segment : key.split("/", -1)) {
+            if (segment.isBlank() || ".".equals(segment) || "..".equals(segment)) {
+                throw new SecurityException("잘못된 파일 경로입니다.");
+            }
+        }
     }
 }

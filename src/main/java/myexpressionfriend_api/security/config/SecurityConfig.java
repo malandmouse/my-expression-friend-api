@@ -51,10 +51,12 @@ public class SecurityConfig {
                         // SseEmitter 비동기 처리 시 SecurityContext가 없는 스레드에서 재실행되므로 필수
                         .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers(
-                                "/api/auth/**",
                                 "/api/llm/health-check",
                                 "/api/llm/error-pattern/run",
-                                "/api/llm/dialogue/rebuild",
+                                "/api/llm/dialogue/rebuild"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/auth/**",
                                 "/api/unity/scenarios",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

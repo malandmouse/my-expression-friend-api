@@ -39,9 +39,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         return path.startsWith("/api/auth/")
                 || path.startsWith("/api/public/")
-                || path.equals("/api/llm/health-check")
-                || path.equals("/api/llm/error-pattern/run")
-                || path.equals("/api/llm/dialogue/rebuild")
                 || path.equals("/api/unity/scenarios")
                 || path.startsWith("/actuator/")
                 || path.startsWith("/uploads/")

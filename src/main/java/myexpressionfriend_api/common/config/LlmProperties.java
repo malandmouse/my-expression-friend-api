@@ -11,12 +11,14 @@ import org.springframework.stereotype.Component;
 @Setter
 public class LlmProperties {
     private boolean enabled = false;
-    private String baseUrl = "http://localhost:11434";
+    private String baseUrl = "https://api.openai.com/v1";
     private String apiKey;
-    private String modelFlash = "gemini-3-flash-preview";
-    private String modelPro = "gemini-3-pro-preview";
+    private String modelFlash;
+    private String modelPro;
     private String think;
-    private int maxRetries = 5;
+    private int connectTimeoutSeconds = 10;
+    private int readTimeoutSeconds = 120;
+    private int maxRetries = 2;
     private int maxBackoffSeconds = 64;
 
     // 2-6 v2.3 운영 안전장치

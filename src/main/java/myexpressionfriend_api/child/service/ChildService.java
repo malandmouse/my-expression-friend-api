@@ -287,12 +287,11 @@ public class ChildService {
             throw new InvalidRequestException("프로필 이미지를 변경할 권한이 없습니다.");
         }
 
-        // 기존 이미지 삭제
-        deleteStoredImage(child.getProfileImageUrl());
-
+        // 새 업로드가 실패했을 때 기존 파일이 사라지지 않도록 먼저 저장한다.
         String relativePath = fileStorageService.saveFile(file, "profiles/" + childId);
         String publicUrl = fileStorageService.toPublicUrl(relativePath);
 
+        deleteStoredImage(child.getProfileImageUrl());
         child.changeProfileImageUrl(publicUrl);
 
         log.info("프로필 이미지 업로드 완료 - childId: {}", childId);
@@ -328,6 +327,10 @@ public class ChildService {
      */
     private void deleteStoredImage(String publicUrl) {
         if (publicUrl == null || publicUrl.isBlank()) {
+            return;
+        }
+        // 이 서버가 발급한 파일 주소만 삭제한다. 기존 외부 S3 URL은 유지한다.
+        if (publicUrl.contains("://")) {
             return;
         }
         String relativePath = publicUrl.startsWith("/uploads/")

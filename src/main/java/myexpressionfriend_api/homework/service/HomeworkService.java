@@ -96,7 +96,7 @@ public class HomeworkService {
     public HomeworkAssignmentResponse getCurrentAssignment(UUID userId, UUID childId) {
         loadChildWithAnyPermission(userId, childId, ChildPermissionType.WRITE_NOTE, ChildPermissionType.ASSIGN_MISSION);
         return homeworkAssignmentRepository
-                .findCurrentByChildAndStatus(childId, HomeworkStatus.PENDING)
+                .findCurrentByChildAndStatus(childId, HomeworkStatus.PENDING, LocalDate.now())
                 .map(this::toResponse)
                 .orElse(null);
     }

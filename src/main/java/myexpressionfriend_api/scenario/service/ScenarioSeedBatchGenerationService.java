@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myexpressionfriend_api.game.domain.ScenarioSource;
+import myexpressionfriend_api.common.service.FileStorageService;
 import myexpressionfriend_api.rag.dto.RagGenerateRequest;
 import myexpressionfriend_api.rag.dto.RagGenerateResponse;
 import myexpressionfriend_api.rag.service.RagGenerationService;
@@ -43,6 +44,7 @@ public class ScenarioSeedBatchGenerationService {
     private final ScenarioService scenarioService;
     private final ObjectMapper objectMapper;
     private final ScenarioRenderAssetNormalizer scenarioRenderAssetNormalizer;
+    private final FileStorageService fileStorageService;
 
     @Value("${app.scenario.backup-dir:uploads/exports/scenarios}")
     private String backupDir;
@@ -189,6 +191,13 @@ public class ScenarioSeedBatchGenerationService {
 
     private String writeBackup(String character, int startIndex, int endIndex, List<ScenarioDTO> scenarios) {
         try {
+            if (fileStorageService.isObjectStorage()) {
+                String key = fileStorageService.saveBytes(
+                        objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(scenarios),
+                        "exports/scenarios", character + "_batch_" + startIndex + "_" + endIndex + ".json",
+                        "application/json");
+                return fileStorageService.toPublicUrl(key);
+            }
             Path directory = Path.of(backupDir);
             Files.createDirectories(directory);
             Path path = directory.resolve(character + "_batch_" + startIndex + "_" + endIndex + ".json");
