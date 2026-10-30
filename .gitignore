@@ -1,0 +1,66 @@
+# Keep only application/build sources and deployment instructions at the root.
+# Local docs, tools, references, IDE settings and generated files remain on disk.
+/*
+!/.gitignore
+!/.gitattributes
+!/.dockerignore
+!/.env.example
+!/README.md
+!/Dockerfile
+!/render.yaml
+!/render.yml
+!/build.gradle
+!/settings.gradle
+!/gradlew
+!/gradlew.bat
+!/gradle/
+!/src/
+!/.github/
+
+# Build outputs and caches, including any nested modules.
+**/.gradle/
+**/build/
+**/out/
+**/target/
+**/bin/
+*.class
+*.jar
+*.war
+!/gradle/wrapper/gradle-wrapper.jar
+
+# IDE configuration can contain database passwords and local application keys.
+**/.idea/
+**/.run/
+**/.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# Private configuration and key stores must never be committed.
+.env
+.env.*
+!.env.example
+*.local.properties
+application-local.*
+application-secret.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Logs, diagnostic dumps, editor and OS temporary files.
+*.log
+*.hprof
+hs_err_pid*
+replay_pid*
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store
+Thumbs.db

@@ -1,0 +1,569 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:emotion-friend:foundation:api-error:1",
+  "title": "Core 0.3.0 ApiError with local INTERNAL_ERROR extension",
+  "$ref": "#/$defs/ApiError",
+  "$defs": {
+    "ApiError": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "traceId": {
+          "$ref": "#/$defs/Id"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "$ref": "#/$defs/ErrorDetails"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "traceId",
+        "retryable",
+        "details"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "CHECKPOINT_EXPIRED"
+              }
+            },
+            "required": [
+              "code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "properties": {
+                  "recovery": {
+                    "properties": {
+                      "status": {
+                        "const": "CHECKPOINT_EXPIRED"
+                      },
+                      "localDraftRestorable": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "recovery"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "EXECUTION_LEASE_EXPIRED"
+              }
+            },
+            "required": [
+              "code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "properties": {
+                  "recovery": {
+                    "properties": {
+                      "status": {
+                        "const": "EXECUTION_LEASE_EXPIRED"
+                      },
+                      "localDraftRestorable": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "recovery"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "CONTENT_REVOKED"
+              }
+            },
+            "required": [
+              "code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "properties": {
+                  "recovery": {
+                    "properties": {
+                      "status": {
+                        "const": "CONTENT_REVOKED"
+                      },
+                      "localDraftRestorable": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "recovery"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "RESOURCE_DELETED"
+              }
+            },
+            "required": [
+              "code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "properties": {
+                  "recovery": {
+                    "properties": {
+                      "status": {
+                        "const": "RESOURCE_DELETED"
+                      },
+                      "localDraftRestorable": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "recovery"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ErrorCode": {
+      "type": "string",
+      "enum": [
+        "AUTH_REQUIRED",
+        "TOKEN_EXPIRED",
+        "CHILD_ACCESS_DENIED",
+        "CONSENT_REQUIRED",
+        "POLICY_REVIEW_FORBIDDEN",
+        "RESOURCE_NOT_FOUND",
+        "DAILY_PLAN_NOT_ASSIGNED",
+        "CONTENT_NOT_APPROVED",
+        "CONTENT_HASH_MISMATCH",
+        "POLICY_NOT_APPROVED",
+        "APPROVED_CONTENT_SHORTAGE",
+        "NARRATIVE_PATH_UNAVAILABLE",
+        "PLAN_ALREADY_ACTIVE",
+        "STALE_CHECKPOINT",
+        "STALE_WORLD_STATE",
+        "STALE_DRAFT",
+        "IDEMPOTENCY_CONFLICT",
+        "EVENT_SEQUENCE_GAP",
+        "PAYLOAD_TOO_LARGE",
+        "INVALID_SCHEMA",
+        "INVALID_BRANCH_PATH",
+        "NO_SPEECH",
+        "RATE_LIMITED",
+        "COST_BUDGET_EXCEEDED",
+        "STT_UNAVAILABLE",
+        "CARD_SERVICE_UNAVAILABLE",
+        "WORKER_UNAVAILABLE",
+        "UNSUPPORTED_SCHEMA_VERSION",
+        "EXECUTION_MODE_MISMATCH",
+        "REWARD_WINDOW_EXPIRED",
+        "CHECKPOINT_EXPIRED",
+        "EXECUTION_LEASE_EXPIRED",
+        "CONTENT_REVOKED",
+        "RESOURCE_DELETED",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "ErrorDetails": {
+      "type": "object",
+      "properties": {
+        "expectedCheckpointRevision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "expectedWorldRevision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "expectedClientSeq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "nextAction": {
+          "$ref": "#/$defs/RecoveryAction"
+        },
+        "recovery": {
+          "$ref": "#/$defs/RecoveryResult"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "Revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "RecoveryAction": {
+      "type": "string",
+      "enum": [
+        "RESUME_CHECKPOINT",
+        "REENTER_EXPRESSION",
+        "RETURN_HOME",
+        "RECHECK_ONLINE",
+        "START_REVIEW"
+      ]
+    },
+    "RecoveryResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/RecoveryStatus"
+        },
+        "checkpointRestorable": {
+          "type": "boolean"
+        },
+        "localDraftRestorable": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "nextAction": {
+          "$ref": "#/$defs/RecoveryAction"
+        },
+        "viewPattern": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "U08",
+                "U13"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "regularAwardMutation": {
+          "const": false
+        }
+      },
+      "required": [
+        "status",
+        "checkpointRestorable",
+        "localDraftRestorable",
+        "nextAction",
+        "viewPattern",
+        "regularAwardMutation"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "READY"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nextAction": {
+                "const": "RESUME_CHECKPOINT"
+              },
+              "viewPattern": {
+                "const": null
+              },
+              "checkpointRestorable": {
+                "const": true
+              },
+              "localDraftRestorable": {
+                "anyOf": [
+                  {
+                    "const": true
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "LOCAL_DRAFT_EXPIRED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nextAction": {
+                "const": "REENTER_EXPRESSION"
+              },
+              "viewPattern": {
+                "const": "U08"
+              },
+              "checkpointRestorable": {
+                "const": true
+              },
+              "localDraftRestorable": {
+                "anyOf": [
+                  {
+                    "const": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "CHECKPOINT_EXPIRED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nextAction": {
+                "const": "RETURN_HOME"
+              },
+              "viewPattern": {
+                "const": "U13"
+              },
+              "checkpointRestorable": {
+                "const": false
+              },
+              "localDraftRestorable": {
+                "anyOf": [
+                  {
+                    "const": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "CONTENT_REVOKED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nextAction": {
+                "const": "RETURN_HOME"
+              },
+              "viewPattern": {
+                "const": null
+              },
+              "checkpointRestorable": {
+                "const": false
+              },
+              "localDraftRestorable": {
+                "anyOf": [
+                  {
+                    "const": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "ACCESS_DENIED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nextAction": {
+                "const": "RETURN_HOME"
+              },
+              "viewPattern": {
+                "const": null
+              },
+              "checkpointRestorable": {
+                "const": false
+              },
+              "localDraftRestorable": {
+                "anyOf": [
+                  {
+                    "const": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "EXECUTION_LEASE_EXPIRED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nextAction": {
+                "const": "RECHECK_ONLINE"
+              },
+              "viewPattern": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "REWARD_WINDOW_EXPIRED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nextAction": {
+                "const": "START_REVIEW"
+              },
+              "viewPattern": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "RESOURCE_DELETED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nextAction": {
+                "const": "RETURN_HOME"
+              },
+              "viewPattern": {
+                "const": null
+              },
+              "checkpointRestorable": {
+                "const": false
+              },
+              "localDraftRestorable": {
+                "anyOf": [
+                  {
+                    "const": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "RecoveryStatus": {
+      "type": "string",
+      "enum": [
+        "READY",
+        "LOCAL_DRAFT_EXPIRED",
+        "CHECKPOINT_EXPIRED",
+        "CONTENT_REVOKED",
+        "ACCESS_DENIED",
+        "EXECUTION_LEASE_EXPIRED",
+        "REWARD_WINDOW_EXPIRED",
+        "RESOURCE_DELETED"
+      ]
+    }
+  }
+}

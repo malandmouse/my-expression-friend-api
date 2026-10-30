@@ -1,0 +1,30 @@
+# Allow only the inputs required by the Docker build stage.
+**
+!Dockerfile
+!.dockerignore
+!build.gradle
+!settings.gradle
+!gradlew
+!gradle/
+!gradle/**
+!src/
+!src/main/
+!src/main/**
+
+# Never import local overrides, keys or cached artifacts through an allowed tree.
+**/.gradle/
+**/build/
+**/.idea/
+**/.run/
+**/.env
+**/.env.*
+**/application-local.*
+**/application-secret.*
+**/*.local.properties
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.jks
+**/*.keystore
+**/*.log
