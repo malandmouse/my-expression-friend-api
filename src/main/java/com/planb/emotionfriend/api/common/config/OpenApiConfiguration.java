@@ -16,16 +16,17 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(name = "springdoc.api-docs.enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiConfiguration {
     private static final Set<String> PUBLIC_POSTS = Set.of(
-            "/api/v1/auth/login", "/api/v1/auth/refresh",
+            "/api/v1/auth/signup", "/api/v1/auth/login", "/api/v1/auth/refresh",
             "/api/v1/child-sessions/exchange", "/api/v1/child-sessions/refresh");
 
     @Bean
     OpenAPI emotionFriendOpenApi() {
         return new OpenAPI()
                 .info(new Info().title("표정친구 백엔드 API").version("0.0.1")
-                        .description("현재 서버에 구현된 API를 표시합니다. 공통 기반 단계에서는 health 조회를 확인할 수 있습니다. "
-                                + "기능 명세의 Core 58개 API는 구현되는 순서대로 추가됩니다. "
-                                + "인증 기능 연결 전에는 보호 API가 모든 자격 증명을 거부합니다."))
+                        .description("현재 구현된 인증·회원 승인·역할 관리·아동 등록·치료사 연결·목적별 동의·콘텐츠 요약 검토·학습 세션/결과/기록 및 health API를 표시합니다. "
+                                + "학습 실행은 성인 보호자 adapter의 Day 1·직접 입력 범위이며 실제 생성/발행 연동은 별도입니다. "
+                                + "이메일 확인 요청은 발송 대기함에 저장되며 메일 활성화 설정 시 Resend로 전송합니다. "
+                                + "로그인 응답의 credential.accessToken을 adultBearer에 입력합니다."))
                 .components(new Components()
                         .addSecuritySchemes("adultBearer", bearer("성인 자격 증명. 해당 아동의 현재 접근 권한을 별도로 확인합니다."))
                         .addSecuritySchemes("childBearer", bearer("아동·기기·학습 범위의 자격 증명. 성인 자격 증명과 구분합니다.")))

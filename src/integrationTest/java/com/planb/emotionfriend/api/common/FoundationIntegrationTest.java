@@ -37,7 +37,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class FoundationIntegrationTest {
+public class FoundationIntegrationTest {
     private static final ActorPrincipal ACTOR = new ActorPrincipal("synthetic-adult", ActorPrincipal.Kind.ADULT, null, null, null);
     private static final String PATH = "/api/v1/synthetic-operation";
     @Autowired IdempotencyService idempotency;
@@ -48,7 +48,7 @@ class FoundationIntegrationTest {
     @LocalServerPort int port;
 
     @DynamicPropertySource
-    static void isolatedPostgres(DynamicPropertyRegistry registry) {
+    public static void isolatedPostgres(DynamicPropertyRegistry registry) {
         String url = System.getenv("EF_TEST_DB_URL");
         if (url == null || !url.matches("jdbc:postgresql://(?:127\\.0\\.0\\.1|localhost):[0-9]+/foundation_test")) {
             throw new IllegalStateException("EF_TEST_DB_URL must explicitly name the isolated local foundation_test database");
@@ -60,6 +60,8 @@ class FoundationIntegrationTest {
         registry.add("spring.flyway.locations", () -> "classpath:db/migration,classpath:db/test-migration");
         registry.add("emotion-friend.idempotency.fingerprint-key", () -> Base64.getEncoder().encodeToString(new byte[32]));
         registry.add("emotion-friend.idempotency.encryption-key", () -> Base64.getEncoder().encodeToString("1".repeat(32).getBytes(StandardCharsets.US_ASCII)));
+        registry.add("emotion-friend.auth.signing-key", () -> Base64.getEncoder().encodeToString("2".repeat(32).getBytes(StandardCharsets.US_ASCII)));
+        registry.add("emotion-friend.mail.enabled", () -> false);
     }
 
     @BeforeEach
@@ -117,7 +119,7 @@ class FoundationIntegrationTest {
             assertThat(api.path("components").path("securitySchemes").path("childBearer").path("scheme").asText()).isEqualTo("bearer");
             assertThat(api.path("paths").has("/actuator/health")).isTrue();
             assertThat(api.path("paths").has("/error")).isFalse();
-            assertThat(api.path("paths").has("/api/v1/auth/login")).isFalse();
+            assertThat(api.path("paths").has("/api/v1/auth/login")).isTrue();
             assertThat(api.path("paths").path("/actuator/health").path("get").path("security").isArray()).isTrue();
             assertThat(api.path("paths").path("/actuator/health").path("get").path("security").size()).isZero();
         }

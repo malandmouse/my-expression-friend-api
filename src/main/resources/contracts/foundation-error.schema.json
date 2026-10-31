@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:emotion-friend:foundation:api-error:1",
-  "title": "Core 0.3.0 ApiError with local INTERNAL_ERROR extension",
+  "title": "Core 0.3.0 ApiError with local foundation/auth extensions",
   "$ref": "#/$defs/ApiError",
   "$defs": {
     "ApiError": {
@@ -205,7 +205,17 @@
         "EXECUTION_LEASE_EXPIRED",
         "CONTENT_REVOKED",
         "RESOURCE_DELETED",
-        "INTERNAL_ERROR"
+        "MATERIAL_NOT_READY",
+        "INTERNAL_ERROR",
+        "ACCOUNT_NOT_ACTIVE",
+        "ACCOUNT_ALREADY_EXISTS",
+        "ROLE_FORBIDDEN",
+        "REAUTH_REQUIRED",
+        "VERIFICATION_INVALID",
+        "MEMBER_STATE_CONFLICT",
+        "INVITATION_STATE_CONFLICT",
+        "RESOURCE_STATE_CONFLICT",
+        "CONSENT_NOTICE_CHANGED"
       ]
     },
     "Id": {

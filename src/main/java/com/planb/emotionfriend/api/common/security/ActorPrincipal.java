@@ -3,8 +3,13 @@ package com.planb.emotionfriend.api.common.security;
 import java.security.Principal;
 
 /** Verified identity only. Secrets and mutable child permissions never belong here. */
-public record ActorPrincipal(String actorId, Kind kind, String childId, String deviceId, String planId) implements Principal {
+public record ActorPrincipal(String actorId, Kind kind, String childId, String deviceId, String planId,
+                             String sessionId, boolean accountRestricted) implements Principal {
     public enum Kind { ADULT, CHILD }
+
+    public ActorPrincipal(String actorId, Kind kind, String childId, String deviceId, String planId) {
+        this(actorId, kind, childId, deviceId, planId, null, false);
+    }
 
     public ActorPrincipal {
         requireId(actorId);

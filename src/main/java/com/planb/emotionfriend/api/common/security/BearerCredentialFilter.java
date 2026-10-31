@@ -59,6 +59,13 @@ final class BearerCredentialFilter extends OncePerRequestFilter {
                 List.of(new SimpleGrantedAuthority("CREDENTIAL_" + actor.kind().name()))));
         SecurityContextHolder.setContext(context);
         try {
+            if (actor.accountRestricted() && !(request.getMethod().equals("GET") && request.getRequestURI().equals("/api/v1/me"))
+                    && !(request.getMethod().equals("POST") && (request.getRequestURI().equals("/api/v1/auth/email-verifications")
+                    || request.getRequestURI().equals("/api/v1/auth/email-verifications/confirm")))
+                    && !(request.getMethod().equals("POST") && request.getRequestURI().equals("/api/v1/auth/logout"))) {
+                errors.write(request, response, ErrorCode.ACCOUNT_NOT_ACTIVE);
+                return;
+            }
             chain.doFilter(request, response);
         } finally {
             SecurityContextHolder.clearContext();

@@ -13,7 +13,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import java.util.Map;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -35,7 +37,9 @@ public class SecurityConfiguration {
 
     @Bean
     PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        var pbkdf2 = new Pbkdf2PasswordEncoder("", 16, 600_000, 256);
+        pbkdf2.setAlgorithm(Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
+        return new DelegatingPasswordEncoder("pbkdf2-sha256", Map.of("pbkdf2-sha256", pbkdf2));
     }
 
     @Bean
@@ -58,7 +62,7 @@ public class SecurityConfiguration {
                     }
                     auth
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/liveness").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh",
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/signup", "/api/v1/auth/login", "/api/v1/auth/refresh",
                                 "/api/v1/child-sessions/exchange", "/api/v1/child-sessions/refresh").permitAll()
                         .requestMatchers("/internal/**").denyAll()
                         .requestMatchers("/api/v1/**").authenticated()
