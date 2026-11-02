@@ -74,7 +74,7 @@ public class LearningCatalog {
         for (UUID id: materials) {
             if (!Boolean.TRUE.equals(jdbc.queryForObject("""
                     select exists(select 1 from learning.material where id=? and child_id=?
-                        and current and revoked_at is null and status='CONFIRMED')
+                        and current and revoked_at is null and status='CONFIRMED' and content_origin='LEGACY_REVIEWED')
                     """,Boolean.class,id,child))) throw new ApiException(ErrorCode.CONTENT_NOT_APPROVED);
         }
         if (Boolean.TRUE.equals(jdbc.queryForObject("select exists(select 1 from learning.plan where child_id=?)",Boolean.class,child)))

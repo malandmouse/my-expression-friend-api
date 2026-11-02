@@ -169,6 +169,14 @@ Swagger에서 다음 순서로 확인한다. 응답은 envelope 없이 직접 �
 
 생성/발행 시스템은 서버 내부 `LearningCatalog.storeReviewed`와 `publish` port에 연결한다. 별도 독립 검수 근거, 불변 material/scenario 버전, 검증된 경로와 fictional effects, 정확히 5개의 확인된 자료, 발행 근거와 IANA timezone을 공급해야 한다. 이 port는 공개 REST API가 아니며 현재 실제 생성기·발행/미디어 시스템과 연결되지 않았다. 일반 클라이언트가 본문에 원고나 별 수를 보내 자료를 등록·발행·보상받는 경로는 없다. 준비되지 않은 운영 DB에서는 시작 요청이 `409 MATERIAL_NOT_READY`다.
 
+Core 학습 기반 이관 1차에서는 `LearningService`가 기존 성인 인증·현재 아동 접근·멱등 재생을 담당하고, `LearningLedger`가 시작·입력 확정·완료·별·허구 효과·receipt의 단일 실행 경계를 담당한다. ledger는 호출자의 트랜잭션을 필수로 사용하며 별도의 완료 장부나 아동 registry를 만들지 않는다. 성인 REST 경로·DTO·오류·201 시작/200 복원·receipt 스냅샷은 유지한다. 여러 Day·아동 runtime 인증은 후속이다.
+
+새 Core 전체 원고는 내부 `CoreManuscriptStore.store(childId, Draft)`로 저장한다. Core 0.3.0 `ScenarioVersion`의 고정 JSON Schema와 그래프(순환·미도달·잘못된 참조·종단별 감정/근거)를 검증하고, 원천 문자열 material/scenario ID와 서버 UUID를 명시적으로 대응시킨다. `CORE_0_3`과 생성용 `GENERATED_1_TO_3` 검증 프로필은 별도이며 기존 `storeReviewed`의 3~8회 선택 계약을 완화하지 않는다. 내부 호출자는 현재 접근을 검사하는 신뢰된 adapter여야 하며 이 port를 클라이언트나 AI 서버에 공개하지 않는다.
+
+V6는 기존 자료·계획·세션·보상·receipt·암호화된 멱등 응답을 보존하고 전체 원고와 검증 증거를 추가한다. 정규화 JSON의 SHA-256, 원천 contentHash, 검증 버전/프로필을 각각 보존한다. 원천 contentHash는 의존 자산까지 검증한 발행 hash로 인정하지 않는다. 저장된 원고와 증거는 DB에서도 수정·삭제를 차단하며, 같은 버전의 다른 본문·다른 아동 결속은 거절한다. 저장·요약 projection·검증 증거는 한 트랜잭션이다.
+
+기존 요약 조회·확인/보류 API에서 Core 원고의 주제·요약을 검토할 수 있다. 검증 증거의 `structuralStatus=PASS`는 구조 검사만 의미하며 `dependenciesStatus=NOT_CHECKED`, `publicationStatus=NOT_APPROVED`를 유지한다. 확인 후에도 Core 초안은 기존 발행 port와 실행 gate에서 차단된다. 정책·미디어 검증·전체 검수·사용 허가·발행 연결이 후속 구현되기 전까지 실제 학습 자료로 사용하지 않는다. AI 호출·실제 발행·Unity 연결은 1차 범위에 포함하지 않는다.
+
 현재 실행 adapter는 관리 보호자의 성인 인증을 사용하는 **Day 1·직접 입력·ORIGINAL** 범위다. 치료사는 실행·입력·완료 요청을 할 수 없다. 아동 기기 credential, 학습 재생 화면·콘텐츠/lease·캐릭터 반응, STT·카드·복습·Day 2는 별도다. 이 API를 실기기 학습 완료로 해석하지 않는다.
 
 1. 신뢰된 발행 연결 후 `POST .../learning-sessions`에 `{"schemaVersion":"0.3.0","deviceId":"device-1"}`과 멱등 키를 보낸다. 신규 201, 동일 기기의 기존 세션 복원 200이다. 첫 시작 시 서버의 현지 날짜를 고정한다.
@@ -194,6 +202,8 @@ EF_TEST_DB_URL=jdbc:postgresql://127.0.0.1:55432/foundation_test ./gradlew integ
 ```
 
 테스트 DB에 비밀번호가 있다면 `EF_TEST_DB_PASSWORD`도 지정한다. 개발·운영용 `emotion_friend` DB를 통합 테스트에 사용하지 않는다.
+
+V5→V6 보존 검사는 같은 격리 클러스터 안에 UUID 이름의 합성 DB를 별도 생성하고 검사 후 제거하므로 테스트 사용자에 `CREATEDB` 권한이 필요하다. 로컬 `tools/Test-Foundation.ps1`은 새 임시 클러스터와 해당 권한을 가진 합성 사용자를 준비하고 전체 검사가 끝나면 서버를 종료한다. 이 권한을 운영 애플리케이션 계정에 추가하지 않는다.
 
 ## Render 배포 설정
 

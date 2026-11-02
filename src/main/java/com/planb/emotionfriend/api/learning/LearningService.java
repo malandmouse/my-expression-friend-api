@@ -21,14 +21,12 @@ public class LearningService {
     private final MemberGuard guard;
     private final AuditTrail audit;
     private final IdempotencyService idempotency;
-    private final RequestFingerprint fingerprint;
-    private final ConfirmedExpressions expressions;
+    private final LearningLedger ledger;
     private final Clock clock;
     public LearningService(JdbcTemplate jdbc,JsonMapper mapper,LearningAccess access,MemberGuard guard,
-            AuditTrail audit,IdempotencyService idempotency,RequestFingerprint fingerprint,
-            ConfirmedExpressions expressions,Clock clock) {
+            AuditTrail audit,IdempotencyService idempotency,LearningLedger ledger,Clock clock) {
         this.jdbc=jdbc;this.mapper=mapper;this.access=access;this.guard=guard;this.audit=audit;
-        this.idempotency=idempotency;this.fingerprint=fingerprint;this.expressions=expressions;this.clock=clock;
+        this.idempotency=idempotency;this.ledger=ledger;this.clock=clock;
     }
 
     @Transactional
@@ -89,96 +87,30 @@ public class LearningService {
     public StoredResponse start(ActorPrincipal actor,UUID child,SessionStart request,String key) {
         return idempotency.execute(actor,"POST","/api/v1/children/"+child+"/learning-sessions",key,request,
                 ()->access.manage(actor,child),()->{
-            var plans=jdbc.queryForList("select id,timezone from learning.plan where child_id=? and day_index=1 and revoked_at is null",child);
-            if(plans.isEmpty()) throw new ApiException(ErrorCode.MATERIAL_NOT_READY);
-            UUID plan=(UUID)plans.getFirst().get("id");
-            var previous=jdbc.queryForList("select id,device_id from learning.session where plan_id=?",plan);
-            if(!previous.isEmpty()) {
-                if(!previous.getFirst().get("device_id").equals(request.deviceId())) throw new ApiException(ErrorCode.RESOURCE_STATE_CONFLICT);
-                return json(200,sessionView((UUID)previous.getFirst().get("id")));
-            }
-            for(int slot=1;slot<=5;slot++) requireMaterial(plan,slot);
-            ZoneId zone=ZoneId.of((String)plans.getFirst().get("timezone"));
-            Instant now=clock.instant();
-            LocalDate date=now.atZone(zone).toLocalDate();
-            UUID session=UUID.randomUUID();
-            jdbc.update("""
-                    insert into learning.session(id,plan_id,device_id,local_date,reward_expires_at,started_at)
-                    values(?,?,?,?,?,?)
-                    """,session,plan,request.deviceId(),java.sql.Date.valueOf(date),ts(date.plusDays(1).atStartOfDay(zone).toInstant()),ts(now));
-            return json(201,sessionView(session));
+            var started=ledger.start(child,request);
+            return json(started.status(),started.session());
         });
     }
-
     @Transactional
     public Session session(ActorPrincipal actor,UUID session) {
         sessionAccess(actor,session,false);
-        return sessionView(session);
+        return ledger.session(session);
     }
     public StoredResponse expression(ActorPrincipal actor,UUID session,int slot,ExpressionRequest request,String key) {
         checkSlot(slot);
         return idempotency.execute(actor,"POST","/api/v1/learning-sessions/"+session+"/slots/"+slot+"/confirmed-expressions",key,request,
-                ()->sessionAccess(actor,session,true),()->{
-            var state=sessionView(session);
-            requireWritable(state,slot);
-            requireMaterial(state.planId(),slot);
-            requireWindow(session);
-            // The fingerprint is an HMAC; neither it nor replay storage retains raw text.
-            return json(201,expressions.confirm(session,slot,actor.actorId(),request.draftVersion()));
-        });
+                ()->sessionAccess(actor,session,true),
+                ()->json(201,ledger.expression(session,slot,actor.actorId(),request.draftVersion())));
     }
-
     public StoredResponse complete(ActorPrincipal actor,UUID session,int slot,FinalizeRequest request,String key) {
         checkSlot(slot);
         return idempotency.execute(actor,"POST","/api/v1/learning-sessions/"+session+"/slots/"+slot+"/finalize",key,request,
-                ()->sessionAccess(actor,session,true),()->{
-            String digest=fingerprint.request(request);
-            var previous=jdbc.queryForList("select request_digest,response::text from learning.receipt where session_id=? and slot=?",session,slot);
-            if(!previous.isEmpty()) {
-                if(!previous.getFirst().get("request_digest").equals(digest)) throw new ApiException(ErrorCode.IDEMPOTENCY_CONFLICT);
-                return json(200,mapper.readValue((String)previous.getFirst().get("response"),Receipt.class));
-            }
-            if(Boolean.TRUE.equals(jdbc.queryForObject("select exists(select 1 from learning.receipt where session_id=? and client_commit_id=?)",Boolean.class,session,request.clientCommitId())))
-                throw new ApiException(ErrorCode.IDEMPOTENCY_CONFLICT);
-            var state=sessionView(session);
-            requireWindow(session);
-            requireWritable(state,slot);
-            if(state.revision()!=request.expectedSessionRevision()) throw new ApiException(ErrorCode.STALE_CHECKPOINT);
-            if(state.worldRevision()!=request.expectedWorldRevision()) throw new ApiException(ErrorCode.STALE_WORLD_STATE);
-            var material=requireMaterial(state.planId(),slot);
-            expressions.require(request.confirmedExpressionRef(),session,slot,actor.actorId(),request.draftVersion());
-            var path=material.paths().stream().filter(p->p.choiceIds().equals(request.selectedChoiceIds())
-                    && p.terminalSceneId().equals(request.terminalSceneId()) && p.emotionIds().contains(request.selectedEmotionId()))
-                    .findFirst().orElseThrow(()->new ApiException(ErrorCode.INVALID_BRANCH_PATH));
-            UUID receipt=UUID.randomUUID();
-            Instant now=clock.instant();
-            var result=new Receipt(receipt,session,state.planId(),slot,now,state.worldRevision()+1,1,
-                    state.stars()+1,state.completedCount()+1,request.confirmedExpressionRef(),request.draftVersion(),
-                    "ORIGINAL",path.actorId(),"CHARACTER_REPLY");
-            jdbc.update("""
-                    insert into learning.receipt(id,session_id,plan_id,slot,client_commit_id,request_digest,response,completed_at)
-                    values(?,?,?,?,?,?,?::jsonb,?)
-                    """,receipt,session,state.planId(),slot,request.clientCommitId(),digest,mapper.writeValueAsString(result),ts(now));
-            jdbc.update("insert into learning.star_award(receipt_id,session_id,slot,amount) values(?,?,?,1)",receipt,session,slot);
-            jdbc.update("insert into learning.story_event(receipt_id,child_id,world_revision,effects,recorded_at) values(?,?,?,?::jsonb,?)",
-                    receipt,state.childId(),result.worldRevision(),mapper.writeValueAsString(path.effects()),ts(now));
-            jdbc.update("""
-                    update learning.session set revision=revision+1,world_revision=world_revision+1,
-                        stars=stars+1,completed_count=completed_count+1,completed_at=? where id=?
-                    """,result.completedCount()==5?ts(now):null,session);
-            audit.record(UUID.fromString(actor.actorId()),"LEARNING_SLOT_COMPLETED",receipt,null,
-                    Map.of("completedCount",state.completedCount()),Map.of("sessionId",session,"slot",slot,"starsAwarded",1));
-            return json(200,result);
-        });
+                ()->sessionAccess(actor,session,true),()->json(200,ledger.complete(session,slot,request,actor.actorId())));
     }
-
     @Transactional
     public Receipt receipt(ActorPrincipal actor,UUID session,int slot) {
-        checkSlot(slot);
-        sessionAccess(actor,session,false);
-        var rows=jdbc.queryForList("select response::text from learning.receipt where session_id=? and slot=?",String.class,session,slot);
-        if(rows.isEmpty()) throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND);
-        return mapper.readValue(rows.getFirst(),Receipt.class);
+        checkSlot(slot);sessionAccess(actor,session,false);
+        return ledger.receipt(session,slot);
     }
 
     @Transactional
@@ -235,41 +167,6 @@ public class LearningService {
         UUID child=children.getFirst();
         if(write) access.manage(actor,child); else access.view(actor,child);
         return child;
-    }
-    private Session sessionView(UUID session) {
-        var slots=jdbc.query("""
-                select ps.slot,m.id,m.scenario_version_id,r.id as receipt_id from learning.session s
-                join learning.plan_slot ps on ps.plan_id=s.plan_id join learning.material m on m.id=ps.material_id
-                left join learning.receipt r on r.session_id=s.id and r.slot=ps.slot where s.id=? order by ps.slot
-                """,(rs,n)->new SessionSlot(rs.getInt(1),rs.getObject(2,UUID.class),rs.getObject(3,UUID.class),
-                        rs.getObject(4)!=null,rs.getObject(4,UUID.class)),session);
-        return jdbc.queryForObject("""
-                select s.*,p.child_id,p.day_index,p.timezone from learning.session s join learning.plan p on p.id=s.plan_id where s.id=?
-                """,(rs,n)->new Session(session,rs.getObject("child_id",UUID.class),rs.getObject("plan_id",UUID.class),
-                        rs.getInt("day_index"),"REGULAR",rs.getDate("local_date").toLocalDate(),rs.getString("timezone"),
-                        rs.getTimestamp("completed_at")==null?SessionStatus.ACTIVE:SessionStatus.COMPLETED,
-                        rs.getLong("revision"),rs.getLong("world_revision"),rs.getInt("stars"),rs.getInt("completed_count"),slots),session);
-    }
-    private LearningCatalog.ReviewedMaterial requireMaterial(UUID plan,int slot) {
-        var rows=jdbc.queryForList("""
-                select m.content::text,m.content_hash,ps.content_hash as pinned_hash from learning.plan p
-                join learning.plan_slot ps on ps.plan_id=p.id join learning.material m on m.id=ps.material_id
-                where p.id=? and ps.slot=? and p.revoked_at is null and m.current and m.revoked_at is null and m.status='CONFIRMED'
-                """,plan,slot);
-        if(rows.isEmpty()) throw new ApiException(ErrorCode.MATERIAL_NOT_READY);
-        var row=rows.getFirst();
-        var material=mapper.readValue((String)row.get("content"),LearningCatalog.ReviewedMaterial.class);
-        if(!row.get("content_hash").equals(row.get("pinned_hash"))
-                || !row.get("content_hash").equals(LearningCatalog.hash(mapper.writeValueAsString(material))))
-            throw new ApiException(ErrorCode.CONTENT_HASH_MISMATCH);
-        return material;
-    }
-    private void requireWindow(UUID session) {
-        Instant end=jdbc.queryForObject("select reward_expires_at from learning.session where id=?",Timestamp.class,session).toInstant();
-        if(!clock.instant().isBefore(end)) throw new ApiException(ErrorCode.REWARD_WINDOW_EXPIRED);
-    }
-    private void requireWritable(Session state,int slot) {
-        if(state.completedCount()+1!=slot || state.status()!=SessionStatus.ACTIVE) throw new ApiException(ErrorCode.RESOURCE_STATE_CONFLICT);
     }
     private StoredResponse json(int status,Object value) { return StoredResponse.json(mapper,status,value); }
     private static Timestamp ts(Instant value) { return Timestamp.from(value); }

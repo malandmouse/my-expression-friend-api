@@ -1,0 +1,198 @@
+{
+  "adaptiveSupport": {
+    "mode": "OFFER_NOT_FORCE",
+    "options": [
+      "장면의 말과 표정을 살펴볼래",
+      "지금은 모르겠어"
+    ],
+    "prompt": "지나온 장면에서 어떤 말이나 표정을 보았어?",
+    "questionId": "observed-cue",
+    "replaySceneIds": [
+      "ask",
+      "end-mat",
+      "end-basket"
+    ]
+  },
+  "arcVersionId": "arc-day1-h02-r1",
+  "assetRefs": [
+    "background-room-h02-r1",
+    "expression-jun-calm-h02-r1",
+    "expression-jun-curious-h02-r1",
+    "expression-nara-happy-h02-r1",
+    "lip-d1-s1-prepare-ask-h02-r1",
+    "lip-d1-s1-prepare-end-basket-h02-r1",
+    "lip-d1-s1-prepare-end-mat-h02-r1",
+    "lip-d1-s1-prepare-reply-agree-h02-r1",
+    "lip-d1-s1-prepare-reply-refuse-h02-r1",
+    "lip-d1-s1-prepare-reply-unknown-h02-r1",
+    "model-jun-junghoon-h02-r1",
+    "model-nara-mainplayer-h02-r1",
+    "motion-jun-ask-h02-r1",
+    "motion-jun-listen-h02-r1",
+    "motion-jun-nod-h02-r1",
+    "motion-nara-nod-h02-r1",
+    "voice-d1-s1-prepare-ask-h02-r1",
+    "voice-d1-s1-prepare-end-basket-h02-r1",
+    "voice-d1-s1-prepare-end-mat-h02-r1",
+    "voice-d1-s1-prepare-reply-agree-h02-r1",
+    "voice-d1-s1-prepare-reply-refuse-h02-r1",
+    "voice-d1-s1-prepare-reply-unknown-h02-r1"
+  ],
+  "cardPolicyRef": {
+    "policyHash": "461a28cc02eedfafd41c8fc471f365c9a587b1cdc1667e284ee44b19cc17eb91",
+    "policyVersionId": "policy-ko-h02-r1"
+  },
+  "characterReplyPolicy": {
+    "mode": "APPROVED_TEMPLATES",
+    "rules": [
+      {
+        "ruleId": "reply-refuse",
+        "text": "네가 원하지 않는다는 뜻을 들었어. 여기서 멈출게.",
+        "voiceRef": "voice-d1-s1-prepare-reply-refuse-h02-r1",
+        "whenFunction": "REFUSE"
+      },
+      {
+        "ruleId": "reply-agree",
+        "text": "네가 하고 싶다는 뜻을 들었어. 천천히 해 보자.",
+        "voiceRef": "voice-d1-s1-prepare-reply-agree-h02-r1",
+        "whenFunction": "AGREE"
+      },
+      {
+        "ruleId": "reply-unknown",
+        "text": "네 말을 들었어. 더 말하고 싶으면 기다릴게.",
+        "voiceRef": "voice-d1-s1-prepare-reply-unknown-h02-r1",
+        "whenFunction": "UNKNOWN"
+      }
+    ]
+  },
+  "contentHash": "86cdb8744048ba3864b02fff213bca9839d8ab33e39b68fad83faf22a2153265",
+  "emotionQuestionByTerminal": [
+    {
+      "acceptedEmotionIds": [
+        "CURIOUS"
+      ],
+      "evidenceSceneIds": [
+        "end-mat"
+      ],
+      "options": [
+        {
+          "emotionId": "CURIOUS",
+          "label": "궁금해"
+        },
+        {
+          "emotionId": "UNSURE",
+          "label": "지금은 모르겠어"
+        }
+      ],
+      "prompt": "준은 지금 어떤 기분일까?",
+      "targetActorId": "jun",
+      "terminalSceneId": "end-mat"
+    },
+    {
+      "acceptedEmotionIds": [
+        "HAPPY"
+      ],
+      "evidenceSceneIds": [
+        "end-basket"
+      ],
+      "options": [
+        {
+          "emotionId": "HAPPY",
+          "label": "기뻐"
+        },
+        {
+          "emotionId": "UNSURE",
+          "label": "지금은 모르겠어"
+        }
+      ],
+      "prompt": "나래는 지금 어떤 기분일까?",
+      "targetActorId": "nara",
+      "terminalSceneId": "end-basket"
+    }
+  ],
+  "expressionPrompt": {
+    "socialStoryHelp": {
+      "entryStates": [
+        "EMOTION_PICK",
+        "EMOTION_SUPPORT_OPTIONAL",
+        "ASK_RESPONSE"
+      ],
+      "lines": [
+        "지금 지나온 장면의 말과 표정을 살펴볼 수 있어.",
+        "친구의 생각과 내 생각은 다를 수 있어.",
+        "하고 싶은 말이나 거절하는 말을 내 방식으로 말할 수 있어."
+      ],
+      "playbackSpeeds": [
+        0.75,
+        1,
+        1.25
+      ],
+      "trigger": "USER_BUTTON"
+    },
+    "text": "네 생각을 어떻게 말하고 싶어?"
+  },
+  "personaRefs": [
+    "persona-jun-h02-r1",
+    "persona-nara-h02-r1"
+  ],
+  "preconditions": [],
+  "scenarioVersionId": "sv-d1-s1-prepare-h02-r1",
+  "sceneGraph": {
+    "scenes": [
+      {
+        "actorId": "jun",
+        "animationCue": "ASK",
+        "choices": [
+          {
+            "choiceId": "mat",
+            "effects": [],
+            "label": "돗자리를 살펴볼래",
+            "nextSceneId": "end-mat"
+          },
+          {
+            "choiceId": "basket",
+            "effects": [],
+            "label": "바구니를 살펴볼래",
+            "nextSceneId": "end-basket"
+          }
+        ],
+        "dialogue": "바구니 옆에 돗자리가 있네. 무엇부터 챙겨 볼까?",
+        "expressionCue": "CURIOUS",
+        "sceneId": "ask",
+        "voiceRef": "voice-d1-s1-prepare-ask-h02-r1"
+      },
+      {
+        "actorId": "jun",
+        "animationCue": "NOD",
+        "dialogue": "자리를 펼칠 준비가 됐네. 어떤 모양인지 궁금해.",
+        "end": true,
+        "expressionCue": "CURIOUS",
+        "sceneId": "end-mat",
+        "voiceRef": "voice-d1-s1-prepare-end-mat-h02-r1"
+      },
+      {
+        "actorId": "nara",
+        "animationCue": "NOD",
+        "dialogue": "바구니를 여기 놓았어. 준비하니 마음이 들떠.",
+        "end": true,
+        "expressionCue": "HAPPY",
+        "sceneId": "end-basket",
+        "voiceRef": "voice-d1-s1-prepare-end-basket-h02-r1"
+      }
+    ],
+    "startSceneId": "ask"
+  },
+  "schemaVersion": "0.3.0",
+  "status": "DRAFT",
+  "storyletVersionId": "st-d1-s1-prepare-h02-r1",
+  "teachingGoalIds": [
+    "SHARE_PREPARATION"
+  ],
+  "terminalEffects": [
+    {
+      "key": "picnic_prepared",
+      "op": "SET",
+      "value": true
+    }
+  ]
+}

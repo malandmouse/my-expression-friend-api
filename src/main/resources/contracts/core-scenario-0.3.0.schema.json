@@ -1,0 +1,1040 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "ScenarioVersion dependency closure, unchanged definitions from contracts/current/schemas.json; source SHA-256 1741937f205beaab607036ad38b79d0c57b8df0c3c8ad3e9444ff8d75930624c",
+  "$ref": "#/$defs/ScenarioVersion",
+  "$defs": {
+    "AdaptiveSupport": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "OFFER_NOT_FORCE"
+        },
+        "questionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "prompt": {
+          "$ref": "#/$defs/Text"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "replaySceneIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "minItems": 0,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "mode",
+        "questionId",
+        "prompt",
+        "options",
+        "replaySceneIds"
+      ],
+      "additionalProperties": false
+    },
+    "CardPolicyRef": {
+      "type": "object",
+      "properties": {
+        "policyVersionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "policyHash": {
+          "$ref": "#/$defs/Hash"
+        }
+      },
+      "required": [
+        "policyVersionId",
+        "policyHash"
+      ],
+      "additionalProperties": false
+    },
+    "CharacterReplyPolicy": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "APPROVED_TEMPLATES"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ReplyTemplate"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "mode",
+        "rules"
+      ],
+      "additionalProperties": false
+    },
+    "ChoiceScene": {
+      "type": "object",
+      "properties": {
+        "sceneId": {
+          "$ref": "#/$defs/Id"
+        },
+        "actorId": {
+          "$ref": "#/$defs/Id"
+        },
+        "dialogue": {
+          "$ref": "#/$defs/Text"
+        },
+        "expressionCue": {
+          "$ref": "#/$defs/Id"
+        },
+        "animationCue": {
+          "$ref": "#/$defs/Id"
+        },
+        "voiceRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SceneChoice"
+          },
+          "minItems": 1,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "sceneId",
+        "actorId",
+        "dialogue",
+        "expressionCue",
+        "animationCue",
+        "voiceRef",
+        "choices"
+      ],
+      "additionalProperties": false
+    },
+    "ContentStatus": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "VALIDATING",
+        "REVISION_REQUIRED",
+        "NEEDS_REVIEW",
+        "APPROVED",
+        "PUBLISHED",
+        "REJECTED",
+        "ARCHIVED",
+        "REVOKED"
+      ]
+    },
+    "EmotionOption": {
+      "type": "object",
+      "properties": {
+        "emotionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "label": {
+          "$ref": "#/$defs/Text"
+        }
+      },
+      "required": [
+        "emotionId",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "EpisodeAddEffect": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "const": "relationshipEpisodes"
+        },
+        "op": {
+          "const": "ADD_EPISODE"
+        },
+        "value": {
+          "$ref": "#/$defs/WorldThread"
+        }
+      },
+      "required": [
+        "key",
+        "op",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "ExpressionPrompt": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "$ref": "#/$defs/Text"
+        },
+        "socialStoryHelp": {
+          "$ref": "#/$defs/SocialStoryHelp"
+        }
+      },
+      "required": [
+        "text",
+        "socialStoryHelp"
+      ],
+      "additionalProperties": false
+    },
+    "FactSetEffect": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "enum": [
+            "picnic_prepared",
+            "shared_snack",
+            "picnic_location",
+            "drawing_color",
+            "drawing_completed",
+            "drawing_invite"
+          ]
+        },
+        "op": {
+          "const": "SET"
+        },
+        "value": {
+          "type": [
+            "boolean",
+            "string"
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "op",
+        "value"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "key": {
+                "const": "picnic_prepared"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "key": {
+                "const": "shared_snack"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "key": {
+                "const": "picnic_location"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "enum": [
+                  "INDOOR",
+                  "COVERED"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "key": {
+                "const": "drawing_color"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "enum": [
+                  "GREEN",
+                  "BLUE"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "key": {
+                "const": "drawing_completed"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "key": {
+                "const": "drawing_invite"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "enum": [
+                  "ACCEPTED",
+                  "DECLINED"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Hash": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "LinearScene": {
+      "type": "object",
+      "properties": {
+        "sceneId": {
+          "$ref": "#/$defs/Id"
+        },
+        "actorId": {
+          "$ref": "#/$defs/Id"
+        },
+        "dialogue": {
+          "$ref": "#/$defs/Text"
+        },
+        "expressionCue": {
+          "$ref": "#/$defs/Id"
+        },
+        "animationCue": {
+          "$ref": "#/$defs/Id"
+        },
+        "voiceRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "nextSceneId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "required": [
+        "sceneId",
+        "actorId",
+        "dialogue",
+        "expressionCue",
+        "animationCue",
+        "voiceRef",
+        "nextSceneId"
+      ],
+      "additionalProperties": false
+    },
+    "Predicate": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "enum": [
+            "picnic_prepared",
+            "shared_snack",
+            "picnic_location",
+            "drawing_color",
+            "drawing_completed",
+            "drawing_invite"
+          ]
+        },
+        "op": {
+          "type": "string",
+          "enum": [
+            "EQ",
+            "NOT_EXISTS"
+          ]
+        },
+        "value": {
+          "type": [
+            "boolean",
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "op",
+        "value"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "const": "NOT_EXISTS"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "key": {
+                      "const": "picnic_prepared"
+                    }
+                  },
+                  "required": [
+                    "key"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "key": {
+                      "const": "shared_snack"
+                    }
+                  },
+                  "required": [
+                    "key"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "key": {
+                      "const": "picnic_location"
+                    }
+                  },
+                  "required": [
+                    "key"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "enum": [
+                        "INDOOR",
+                        "COVERED"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "key": {
+                      "const": "drawing_color"
+                    }
+                  },
+                  "required": [
+                    "key"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "enum": [
+                        "GREEN",
+                        "BLUE"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "key": {
+                      "const": "drawing_completed"
+                    }
+                  },
+                  "required": [
+                    "key"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "key": {
+                      "const": "drawing_invite"
+                    }
+                  },
+                  "required": [
+                    "key"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "enum": [
+                        "ACCEPTED",
+                        "DECLINED"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "ReplyTemplate": {
+      "type": "object",
+      "properties": {
+        "ruleId": {
+          "$ref": "#/$defs/Id"
+        },
+        "whenFunction": {
+          "type": "string",
+          "enum": [
+            "REFUSE",
+            "AGREE",
+            "UNKNOWN"
+          ]
+        },
+        "text": {
+          "$ref": "#/$defs/Text"
+        },
+        "voiceRef": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "required": [
+        "ruleId",
+        "whenFunction",
+        "text",
+        "voiceRef"
+      ],
+      "additionalProperties": false
+    },
+    "ScenarioVersion": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "scenarioVersionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "storyletVersionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "arcVersionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "status": {
+          "$ref": "#/$defs/ContentStatus"
+        },
+        "contentHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "personaRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "cardPolicyRef": {
+          "$ref": "#/$defs/CardPolicyRef"
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Predicate"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        },
+        "sceneGraph": {
+          "$ref": "#/$defs/SceneGraph"
+        },
+        "emotionQuestionByTerminal": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TerminalEmotionQuestion"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "adaptiveSupport": {
+          "$ref": "#/$defs/AdaptiveSupport"
+        },
+        "expressionPrompt": {
+          "$ref": "#/$defs/ExpressionPrompt"
+        },
+        "characterReplyPolicy": {
+          "$ref": "#/$defs/CharacterReplyPolicy"
+        },
+        "assetRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "teachingGoalIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "terminalEffects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorldEffect"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "scenarioVersionId",
+        "storyletVersionId",
+        "arcVersionId",
+        "status",
+        "contentHash",
+        "personaRefs",
+        "cardPolicyRef",
+        "preconditions",
+        "sceneGraph",
+        "emotionQuestionByTerminal",
+        "adaptiveSupport",
+        "expressionPrompt",
+        "characterReplyPolicy",
+        "assetRefs",
+        "teachingGoalIds",
+        "terminalEffects"
+      ],
+      "additionalProperties": false
+    },
+    "Scene": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TerminalScene"
+        },
+        {
+          "$ref": "#/$defs/LinearScene"
+        },
+        {
+          "$ref": "#/$defs/ChoiceScene"
+        }
+      ]
+    },
+    "SceneChoice": {
+      "type": "object",
+      "properties": {
+        "choiceId": {
+          "$ref": "#/$defs/Id"
+        },
+        "label": {
+          "$ref": "#/$defs/Text"
+        },
+        "nextSceneId": {
+          "$ref": "#/$defs/Id"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorldEffect"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "choiceId",
+        "label",
+        "nextSceneId",
+        "effects"
+      ],
+      "additionalProperties": false
+    },
+    "SceneGraph": {
+      "type": "object",
+      "properties": {
+        "startSceneId": {
+          "$ref": "#/$defs/Id"
+        },
+        "scenes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Scene"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "startSceneId",
+        "scenes"
+      ],
+      "additionalProperties": false
+    },
+    "SchemaVersion": {
+      "const": "0.3.0"
+    },
+    "Slot": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "SocialStoryHelp": {
+      "type": "object",
+      "properties": {
+        "trigger": {
+          "const": "USER_BUTTON"
+        },
+        "entryStates": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "EMOTION_PICK",
+              "EMOTION_SUPPORT_OPTIONAL",
+              "ASK_RESPONSE"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "playbackSpeeds": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "enum": [
+              0.75,
+              1,
+              1.25
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "trigger",
+        "entryStates",
+        "lines",
+        "playbackSpeeds"
+      ],
+      "additionalProperties": false
+    },
+    "TerminalEmotionQuestion": {
+      "type": "object",
+      "properties": {
+        "terminalSceneId": {
+          "$ref": "#/$defs/Id"
+        },
+        "targetActorId": {
+          "$ref": "#/$defs/Id"
+        },
+        "prompt": {
+          "$ref": "#/$defs/Text"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EmotionOption"
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "acceptedEmotionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "evidenceSceneIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "terminalSceneId",
+        "targetActorId",
+        "prompt",
+        "options",
+        "acceptedEmotionIds",
+        "evidenceSceneIds"
+      ],
+      "additionalProperties": false
+    },
+    "TerminalScene": {
+      "type": "object",
+      "properties": {
+        "sceneId": {
+          "$ref": "#/$defs/Id"
+        },
+        "actorId": {
+          "$ref": "#/$defs/Id"
+        },
+        "dialogue": {
+          "$ref": "#/$defs/Text"
+        },
+        "expressionCue": {
+          "$ref": "#/$defs/Id"
+        },
+        "animationCue": {
+          "$ref": "#/$defs/Id"
+        },
+        "voiceRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "end": {
+          "const": true
+        }
+      },
+      "required": [
+        "sceneId",
+        "actorId",
+        "dialogue",
+        "expressionCue",
+        "animationCue",
+        "voiceRef",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "pattern": "[^\\u0009-\\u000d\\u0020\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]"
+    },
+    "ThreadAddEffect": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "const": "openThreads"
+        },
+        "op": {
+          "const": "ADD_THREAD"
+        },
+        "value": {
+          "$ref": "#/$defs/WorldThread"
+        }
+      },
+      "required": [
+        "key",
+        "op",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "ThreadCloseEffect": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "const": "openThreads"
+        },
+        "op": {
+          "const": "CLOSE_THREAD"
+        },
+        "value": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "required": [
+        "key",
+        "op",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "Timestamp": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 35,
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]{1,9})?Z$",
+      "format": "date-time"
+    },
+    "WorldEffect": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/FactSetEffect"
+        },
+        {
+          "$ref": "#/$defs/ThreadAddEffect"
+        },
+        {
+          "$ref": "#/$defs/ThreadCloseEffect"
+        },
+        {
+          "$ref": "#/$defs/EpisodeAddEffect"
+        }
+      ]
+    },
+    "WorldThread": {
+      "type": "object",
+      "properties": {
+        "threadId": {
+          "$ref": "#/$defs/Id"
+        },
+        "sourcePlanId": {
+          "$ref": "#/$defs/Id"
+        },
+        "sourceSlot": {
+          "$ref": "#/$defs/Slot"
+        },
+        "sourceChoiceId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "commitEventId": {
+          "$ref": "#/$defs/Id"
+        },
+        "observedAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "expiresAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "threadId",
+        "sourcePlanId",
+        "sourceSlot",
+        "sourceChoiceId",
+        "commitEventId",
+        "observedAt",
+        "expiresAt"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

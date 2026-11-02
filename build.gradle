@@ -27,6 +27,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0'
+	// Isolated Jackson 2 parser at the imported Core JSON Schema boundary.
+	implementation 'com.networknt:json-schema-validator:2.0.0'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -46,7 +48,9 @@ tasks.named('test') {
 }
 
 sourceSets {
+	test.resources.srcDir 'src/testFixtures/resources'
 	integrationTest {
+		resources.srcDir 'src/testFixtures/resources'
 		compileClasspath += sourceSets.main.output
 		runtimeClasspath += sourceSets.main.output
 	}

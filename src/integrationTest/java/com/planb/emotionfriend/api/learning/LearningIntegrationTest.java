@@ -29,6 +29,9 @@ class LearningIntegrationTest {
     @Autowired JsonMapper mapper;
     @Autowired AdultJwt jwt;
     @Autowired LearningCatalog catalog;
+    @Autowired CoreManuscriptStore manuscripts;
+    @Autowired LearningLedger ledger;
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
     @Autowired MutableClock clock;
     @Autowired ReplayCipher cipher;
     @Autowired RequestFingerprint fingerprint;
@@ -338,6 +341,125 @@ class LearningIntegrationTest {
         assertThat(json(send("GET",base()+"/learning-summary?from="+instant+"&to="+following,null,guardian,null)).path("completedLoops").asInt()).isEqualTo(1);
         assertCode(send("GET",base()+"/learning-summary?from="+instant+"&to="+instant,null,guardian,null),"INVALID_SCHEMA");
         assertCode(send("GET",base()+"/learning-summary?from=2024-01-01T00:00:00Z&to="+instant,null,guardian,null),"INVALID_SCHEMA");
+    }
+
+    @Test void coreManuscriptStoresThenListsHoldsAndConfirmsWithoutPublishingOrLeakingPayload() throws Exception {
+        var draft=coreDraft(1);UUID summary=manuscripts.store(child,draft);
+        String original=jdbc.queryForObject("select payload from learning.core_manuscript where material_id=?",String.class,draft.materialId());
+        String report=jdbc.queryForObject("select report::text from learning.core_manuscript_validation where material_id=?",String.class,draft.materialId());
+        var response=send("GET",base()+"/learning-material-summaries",null,therapist,null);
+        assertThat(response.headers().firstValue("cache-control")).contains("no-store");
+        var item=json(response).path("items").valueStream().filter(n->n.path("summaryId").asText().equals(summary.toString())).findFirst().orElseThrow();
+        assertThat(item.propertyNames()).containsExactlyInAnyOrder("summaryId","materialId","subject","summary","status");
+        assertThat(response.body()).doesNotContain("sceneGraph","sourceContentHash","personaRefs","CORE_DRAFT_STRUCTURE_ONLY");
+        var held=send("POST",base()+"/learning-material-confirmations",decision("HOLD",List.of(summary)),therapist,key());
+        assertThat(held.statusCode()).isEqualTo(200);
+        assertThat(json(send("GET",base()+"/learning-material-summaries?status=ON_HOLD",null,guardian,null)).path("items")).hasSize(1);
+        var confirmed=send("POST",base()+"/learning-material-confirmations",decision("CONFIRM",List.of(summary)),guardian,key());
+        assertThat(confirmed.statusCode()).isEqualTo(200);
+        assertThat(json(send("GET",base()+"/learning-material-summaries?status=CONFIRMED",null,therapist,null)).path("items")).hasSize(1);
+        assertThat(jdbc.queryForObject("select payload from learning.core_manuscript where material_id=?",String.class,draft.materialId())).isEqualTo(original);
+        assertThat(jdbc.queryForObject("select report::text from learning.core_manuscript_validation where material_id=?",String.class,draft.materialId())).isEqualTo(report);
+        assertThat(mapper.readTree(report).path("dependenciesStatus").asText()).isEqualTo("NOT_CHECKED");
+        assertThat(mapper.readTree(report).path("publicationStatus").asText()).isEqualTo("NOT_APPROVED");
+        confirmAll();var mixed=new ArrayList<>(materials.subList(0,4));mixed.add(draft.materialId());
+        assertThatThrownBy(()->catalog.publish(child,"Asia/Seoul",mixed,"synthetic-reference-cannot-approve-core"))
+                .isInstanceOfSatisfying(ApiException.class,e->assertThat(e.code()).isEqualTo(ErrorCode.CONTENT_NOT_APPROVED));
+        assertCode(send("POST",base()+"/learning-sessions",startBody(),guardian,key()),"MATERIAL_NOT_READY");
+        for(String table:List.of("plan","session","receipt","star_award","story_event")) assertThat(count(table)).isZero();
+        exportContract("core-summary.json",Map.of("childId",child,"pending",json(response),"held",json(held),"confirmed",json(confirmed)));
+    }
+
+    @Test void coreStoreIsIdempotentAndRejectsRebindingOrChangingImmutableVersion() throws Exception {
+        var d=coreDraft(1);UUID summary=manuscripts.store(child,d);
+        assertThat(manuscripts.store(child,d)).isEqualTo(summary);
+        var payload=mapper.readTree(d.payload());var reordered=mapper.createObjectNode();
+        payload.propertyNames().stream().sorted(Comparator.reverseOrder()).forEach(k->reordered.set(k,payload.get(k)));
+        assertThat(manuscripts.store(child,new CoreManuscriptStore.Draft(d.materialId(),d.scenarioVersionId(),d.sourceMaterialId(),d.subject(),d.summary(),reordered.toString(),d.profile()))).isEqualTo(summary);
+        assertThatThrownBy(()->manuscripts.store(child,new CoreManuscriptStore.Draft(d.materialId(),d.scenarioVersionId(),d.sourceMaterialId(),d.subject(),"changed summary",d.payload(),d.profile())))
+                .isInstanceOfSatisfying(ApiException.class,e->assertThat(e.code()).isEqualTo(ErrorCode.CONTENT_HASH_MISMATCH));
+        assertThatThrownBy(()->manuscripts.store(child,new CoreManuscriptStore.Draft(UUID.randomUUID(),UUID.randomUUID(),d.sourceMaterialId(),d.subject(),d.summary(),d.payload(),d.profile())))
+                .isInstanceOfSatisfying(ApiException.class,e->assertThat(e.code()).isEqualTo(ErrorCode.CONTENT_HASH_MISMATCH));
+        assertThat(count("core_manuscript")).isEqualTo(1);assertThat(count("core_manuscript_validation")).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select source_scenario_version_id from learning.core_manuscript",String.class)).isEqualTo("synthetic-core-scenario-1");
+        assertThat(jdbc.queryForObject("select source_material_id from learning.core_manuscript",String.class)).isEqualTo("synthetic-core-material-1");
+    }
+
+    @Test void coreManuscriptAndValidationCannotBeRewrittenBySummaryReviewOrSql() throws Exception {
+        var d=coreDraft(1);manuscripts.store(child,d);
+        assertThatThrownBy(()->jdbc.update("update learning.core_manuscript set payload='{}' where material_id=?",d.materialId())).isInstanceOf(org.springframework.dao.DataAccessException.class);
+        assertThatThrownBy(()->jdbc.update("delete from learning.core_manuscript_validation where material_id=?",d.materialId())).isInstanceOf(org.springframework.dao.DataAccessException.class);
+        assertThat(count("core_manuscript")).isEqualTo(1);assertThat(count("core_manuscript_validation")).isEqualTo(1);
+    }
+
+    @Test void invalidOrUnconsentedCoreDraftLeavesNoProjectionOrEvidenceAndCannotRebindChild() throws Exception {
+        var d=coreDraft(1);var bad=new CoreManuscriptStore.Draft(d.materialId(),d.scenarioVersionId(),d.sourceMaterialId(),d.subject(),d.summary(),"{}",d.profile());
+        assertThatThrownBy(()->manuscripts.store(child,bad)).isInstanceOf(ApiException.class);
+        assertThat(count("material")).isEqualTo(5);assertThat(count("core_manuscript")).isZero();
+        jdbc.update("update care.consent set granted=false where child_id=?",child);
+        assertThatThrownBy(()->manuscripts.store(child,d)).isInstanceOfSatisfying(ApiException.class,e->assertThat(e.code()).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+        jdbc.update("update care.consent set granted=true where child_id=?",child);
+        manuscripts.store(child,d);
+        UUID other=UUID.randomUUID();
+        jdbc.update("insert into care.child(id,guardian_id,pseudonym,profile,profile_version,created_at,updated_at) values(?,?,'SYNTHETIC_OTHER','{}',1,?,?)",other,stranger.id(),ts(),ts());
+        jdbc.update("insert into care.consent(child_id,id,scope,granted,notice_version,verification_ref,recorded_at,revision) values(?,?,'CORE_PROFILE_LEARNING',true,'synthetic',?,?,1)",other,UUID.randomUUID(),UUID.randomUUID(),ts());
+        assertThatThrownBy(()->manuscripts.store(other,d)).isInstanceOfSatisfying(ApiException.class,e->assertThat(e.code()).isEqualTo(ErrorCode.CONTENT_HASH_MISMATCH));
+        jdbc.update("update care.child set deleted_at=? where id=?",ts(),child);
+        assertThatThrownBy(()->manuscripts.store(child,d)).isInstanceOfSatisfying(ApiException.class,e->assertThat(e.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+    }
+
+    @Test void failedCoreEvidenceInsertRollsBackFullManuscriptAndSummary() throws Exception {
+        jdbc.execute("alter table learning.core_manuscript_validation add constraint synthetic_reject_report check(false) not valid");
+        var d=coreDraft(1);
+        try { assertThatThrownBy(()->manuscripts.store(child,d)).isInstanceOf(org.springframework.dao.DataAccessException.class); }
+        finally { jdbc.execute("alter table learning.core_manuscript_validation drop constraint synthetic_reject_report"); }
+        assertThat(count("material")).isEqualTo(5);assertThat(count("core_manuscript")).isZero();assertThat(count("core_manuscript_validation")).isZero();
+        assertThat(manuscripts.store(child,d)).isNotNull();
+    }
+
+    @Test void concurrentCoreStoreReturnsOneMappingAndOneSummary() throws Exception {
+        var d=coreDraft(1);
+        try(var pool=Executors.newFixedThreadPool(2)) {
+            var a=pool.submit(()->manuscripts.store(child,d));var b=pool.submit(()->manuscripts.store(child,d));
+            assertThat(a.get(30,TimeUnit.SECONDS)).isEqualTo(b.get(30,TimeUnit.SECONDS));
+        }
+        assertThat(count("material")).isEqualTo(6);assertThat(count("core_manuscript")).isEqualTo(1);assertThat(count("core_manuscript_validation")).isEqualTo(1);
+    }
+
+    @Test void adultAdapterAndInternalLedgerShareOneCompletionAndRequireCallerTransaction() throws Exception {
+        UUID session=start();var command=completion(session,1);
+        var accepted=send("POST",slotPath(session,1)+"/finalize",command,guardian,key());
+        assertThat(accepted.statusCode()).isEqualTo(200);
+        var request=mapper.convertValue(command,FinalizeRequest.class);
+        var tx=new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+        var internal=tx.execute(status->ledger.complete(session,1,request,guardian.id().toString()));
+        JsonNode internalJson=mapper.readTree(mapper.writeValueAsString(internal));
+        assertThat(internalJson).isEqualTo(json(accepted));
+        Receipt recovered=tx.execute(status->ledger.receipt(session,1));
+        assertThat(recovered).isEqualTo(internal);
+        assertThatThrownBy(()->ledger.complete(session,1,request,guardian.id().toString())).isInstanceOf(org.springframework.transaction.IllegalTransactionStateException.class);
+        assertThat(count("receipt")).isEqualTo(1);assertThat(count("star_award")).isEqualTo(1);assertThat(count("story_event")).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select count(*) from identity.audit_event where action='LEARNING_SLOT_COMPLETED'",Integer.class)).isEqualTo(1);
+        exportContract("core-execution.json",Map.of("childId",child,
+                "session",json(send("GET",sessionPath(session),null,guardian,null)),"receipt",json(accepted),
+                "sessions",json(send("GET",base()+"/learning-sessions",null,guardian,null)),
+                "records",json(send("GET",base()+"/learning-records",null,guardian,null)),
+                "summary",json(send("GET",base()+"/learning-summary",null,guardian,null))));
+    }
+
+    private void exportContract(String file,Object value) throws Exception {
+        var directory=java.nio.file.Path.of("build","core-contract");java.nio.file.Files.createDirectories(directory);
+        java.nio.file.Files.writeString(directory.resolve(file),mapper.writeValueAsString(value));
+    }
+
+    private CoreManuscriptStore.Draft coreDraft(int index) throws Exception {
+        try(var in=getClass().getResourceAsStream("/core/scenario.json")) {
+            var payload=(tools.jackson.databind.node.ObjectNode)mapper.readTree(new String(in.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8));
+            payload.put("scenarioVersionId","synthetic-core-scenario-"+index);
+            return new CoreManuscriptStore.Draft(UUID.nameUUIDFromBytes(("synthetic-material-"+index).getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                    UUID.nameUUIDFromBytes(("synthetic-scenario-"+index).getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                    "synthetic-core-material-"+index,"Core 합성 주제","Core 고정 합성 이야기 요약",payload.toString(),CoreScenarioValidator.Profile.GENERATED_1_TO_3);
+        }
     }
 
     private UUID start() throws Exception {
