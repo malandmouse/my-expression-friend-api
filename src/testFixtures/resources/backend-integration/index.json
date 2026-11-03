@@ -1,0 +1,146 @@
+[
+  {
+    "id": "capabilities",
+    "schema": "Capabilities",
+    "path": "examples/proposed-http/capabilities.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "create-conversation",
+    "schema": "CreateConversationJob",
+    "path": "examples/proposed-http/create-conversation.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "job-accepted",
+    "schema": "JobAccepted",
+    "path": "examples/proposed-http/job-accepted.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "job-held",
+    "schema": "JobStatus",
+    "path": "examples/proposed-http/job-held.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "cancel-job",
+    "schema": "CancelJob",
+    "path": "examples/proposed-http/cancel-job.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "source-edit",
+    "schema": "ProgressRequest",
+    "path": "examples/proposed-http/source-edit.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "source-saved",
+    "schema": "ProgressResponse",
+    "path": "examples/proposed-http/source-saved.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-recompose",
+    "schema": "ExpressionRequest",
+    "path": "examples/proposed-http/expression-recompose.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-accepted",
+    "schema": "ExpressionAccepted",
+    "path": "examples/proposed-http/expression-accepted.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-running",
+    "schema": "ExpressionStatus",
+    "path": "examples/proposed-http/expression-running.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-complete",
+    "schema": "ExpressionStatus",
+    "path": "examples/proposed-http/expression-complete.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "finalize-composed",
+    "schema": "FinalizeRequest",
+    "path": "examples/proposed-http/finalize-composed.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "receipt-composed",
+    "schema": "Receipt",
+    "path": "examples/proposed-http/receipt-composed.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "reaction-start",
+    "schema": "ReactionStart",
+    "path": "examples/proposed-http/reaction-start.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "reaction-unknown",
+    "schema": "ReactionStatus",
+    "path": "examples/proposed-http/reaction-unknown.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "stale-source",
+    "schema": "Error",
+    "path": "examples/proposed-http/stale-source.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "finalize-original-no-catalog",
+    "schema": "FinalizeRequest",
+    "path": "examples/proposed-http/finalize-original-no-catalog.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "finalize-natural",
+    "schema": "FinalizeRequest",
+    "path": "examples/proposed-http/finalize-natural.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "receipt-original-no-reaction",
+    "schema": "Receipt",
+    "path": "examples/proposed-http/receipt-original-no-reaction.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-prepare",
+    "schema": "ExpressionRequest",
+    "path": "examples/proposed-http/expression-prepare.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-refresh",
+    "schema": "ExpressionRequest",
+    "path": "examples/proposed-http/expression-refresh.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-reuse_original",
+    "schema": "ExpressionRequest",
+    "path": "examples/proposed-http/expression-reuse_original.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-rejected",
+    "schema": "ExpressionStatus",
+    "path": "examples/proposed-http/expression-rejected.json",
+    "expectedShapeValid": true
+  },
+  {
+    "id": "expression-uncertain",
+    "schema": "ExpressionStatus",
+    "path": "examples/proposed-http/expression-uncertain.json",
+    "expectedShapeValid": true
+  }
+]

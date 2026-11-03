@@ -2,7 +2,7 @@
 
 Java 21 · Spring Boot 4.1.2 · PostgreSQL · Flyway · Spring Security · Swagger.
 
-공통 기반·인증과 회원 승인·역할 관리, 아동 등록·프로필·치료사 연결·목적별 동의, 생성 콘텐츠 요약 검토와 학습 세션·완료·별·receipt·기록 관리를 구현했다. 신규 회원은 PENDING이며 이메일 확인 후 운영자가 신청 역할을 승인한다. 이메일 확인 메일은 설정 활성화 시 Resend HTTPS API로 전송한다. 치료사 초대·회원 변경 알림의 외부 전송, 생성기·발행 연동, 아동 기기 인증은 후속 작업이다.
+공통 기반·인증과 회원 승인·역할 관리, 아동 등록·프로필·치료사 연결·목적별 동의, 생성 콘텐츠 요약 검토와 학습 세션·완료·별·receipt·기록 관리를 구현했다. Core 콘텐츠의 불변 의존성 검증·승인·발행 증거와 아동 기기 인증·checkpoint·lease·여러 Day 실행 adapter도 포함한다. 운영 콘텐츠 권한과 사용 허가·미디어 제공은 기본 차단이며 합성 격리 검증 범위다. 신규 회원은 PENDING이며 이메일 확인 후 운영자가 신청 역할을 승인한다. 이메일 확인 메일은 설정 활성화 시 Resend HTTPS API로 전송한다. 치료사 초대·회원 변경 알림의 외부 전송, 실제 생성기·미디어 공급자·기기 연결은 후속 작업이다.
 
 ## 소스 구성
 
@@ -169,13 +169,31 @@ Swagger에서 다음 순서로 확인한다. 응답은 envelope 없이 직접 �
 
 생성/발행 시스템은 서버 내부 `LearningCatalog.storeReviewed`와 `publish` port에 연결한다. 별도 독립 검수 근거, 불변 material/scenario 버전, 검증된 경로와 fictional effects, 정확히 5개의 확인된 자료, 발행 근거와 IANA timezone을 공급해야 한다. 이 port는 공개 REST API가 아니며 현재 실제 생성기·발행/미디어 시스템과 연결되지 않았다. 일반 클라이언트가 본문에 원고나 별 수를 보내 자료를 등록·발행·보상받는 경로는 없다. 준비되지 않은 운영 DB에서는 시작 요청이 `409 MATERIAL_NOT_READY`다.
 
-Core 학습 기반 이관 1차에서는 `LearningService`가 기존 성인 인증·현재 아동 접근·멱등 재생을 담당하고, `LearningLedger`가 시작·입력 확정·완료·별·허구 효과·receipt의 단일 실행 경계를 담당한다. ledger는 호출자의 트랜잭션을 필수로 사용하며 별도의 완료 장부나 아동 registry를 만들지 않는다. 성인 REST 경로·DTO·오류·201 시작/200 복원·receipt 스냅샷은 유지한다. 여러 Day·아동 runtime 인증은 후속이다.
+`LearningService`는 기존 성인 인증·현재 아동 접근·멱등 재생을 담당하고, `LearningLedger`는 시작·입력 확정·완료·별·허구 효과·receipt의 단일 실행 경계를 담당한다. ledger는 호출자의 트랜잭션을 필수로 사용하며 별도의 완료 장부나 아동 registry를 만들지 않는다. 성인 REST 경로·DTO·오류·201 시작/200 복원·receipt 스냅샷은 유지한다. 새 runtime adapter도 같은 ledger에 연결한다.
 
 새 Core 전체 원고는 내부 `CoreManuscriptStore.store(childId, Draft)`로 저장한다. Core 0.3.0 `ScenarioVersion`의 고정 JSON Schema와 그래프(순환·미도달·잘못된 참조·종단별 감정/근거)를 검증하고, 원천 문자열 material/scenario ID와 서버 UUID를 명시적으로 대응시킨다. `CORE_0_3`과 생성용 `GENERATED_1_TO_3` 검증 프로필은 별도이며 기존 `storeReviewed`의 3~8회 선택 계약을 완화하지 않는다. 내부 호출자는 현재 접근을 검사하는 신뢰된 adapter여야 하며 이 port를 클라이언트나 AI 서버에 공개하지 않는다.
 
 V6는 기존 자료·계획·세션·보상·receipt·암호화된 멱등 응답을 보존하고 전체 원고와 검증 증거를 추가한다. 정규화 JSON의 SHA-256, 원천 contentHash, 검증 버전/프로필을 각각 보존한다. 원천 contentHash는 의존 자산까지 검증한 발행 hash로 인정하지 않는다. 저장된 원고와 증거는 DB에서도 수정·삭제를 차단하며, 같은 버전의 다른 본문·다른 아동 결속은 거절한다. 저장·요약 projection·검증 증거는 한 트랜잭션이다.
 
-기존 요약 조회·확인/보류 API에서 Core 원고의 주제·요약을 검토할 수 있다. 검증 증거의 `structuralStatus=PASS`는 구조 검사만 의미하며 `dependenciesStatus=NOT_CHECKED`, `publicationStatus=NOT_APPROVED`를 유지한다. 확인 후에도 Core 초안은 기존 발행 port와 실행 gate에서 차단된다. 정책·미디어 검증·전체 검수·사용 허가·발행 연결이 후속 구현되기 전까지 실제 학습 자료로 사용하지 않는다. AI 호출·실제 발행·Unity 연결은 1차 범위에 포함하지 않는다.
+기존 요약 조회·확인/보류 API에서 Core 원고의 주제·요약을 검토할 수 있다. V6 검증 증거의 `structuralStatus=PASS`는 구조 검사만 의미하며 `dependenciesStatus=NOT_CHECKED`, `publicationStatus=NOT_APPROVED`를 유지한다. 이 report를 수정하지 않고 별도 의존성 검증·전체 검수·사용 허가·발행 증거를 추가한다. 확인만 된 Core 초안은 기존 legacy 발행 port와 실행 gate에서 계속 차단된다.
+
+### Core 승인·발행 기반과 아동 runtime
+
+`CorePublicationService`의 신뢰된 내부 artifact/validation port는 정책·persona·catalog의 고정 schema, 실제 bytes hash, source envelope와 recipe/cue/asset 결속을 검증한다. 전체 검수·아동 사용 허가·발행은 각각 별도 불변 증거이며 manifest hash·현재 동의 revision에 결속한다. V7/V8은 기존 V6 원고/report와 receipt·보상·암호화 replay를 재작성하지 않는다. 기존 데이터의 event/reward 불일치는 자동 보정하지 않고 migration을 차단한다.
+
+전체 검수/발행은 별도 `ContentAuthority` adapter가 필요한 `/api/v1/core/validations/{validationId}/full-review`, `/publish`에서 처리한다. `/child-use`는 현재 관리 보호자의 명시 허가와 최근 재인증이 필요하다. `/api/v1/children/{childId}/core-plans`는 정확히 5개의 발행 버전을 결속한다. 모든 경로는 현재 권한·동의·요약·철회·hash를 검사한다. ADMIN/치료사/보호자 역할만으로 전체 검수·발행 권한을 얻지 않는다.
+
+운영 기본값은 **전체 검수/발행 capability 전부 거절, `emotion-friend.core.child-use-enabled=false`, `emotion-friend.core.lease-seconds=0`, 미디어 provider 거절**이다. 합성 권한과 byte provider는 통합 테스트에만 존재한다. 실제 검수자·발행자/권한 운영, 보호자 허가 화면·고지, 미디어 제공자·키·기간·보관 정책은 사용자 결정 전까지 미정으로 둔다.
+
+현재 관리 보호자는 최근 재인증 후 `POST /api/v1/children/{childId}/device-grants`로 5분·일회용 연결 코드를 발급한다. `POST /api/v1/child-sessions/exchange`는 device에 결속된 10분 runtime credential로 교환한다. `/persist`·`/refresh`는 30일 고정 만료의 회전 secret을 사용하며 hash만 저장한다(재시도 응답은 기존 foundation replay에서 암호화). 재사용 탐지·기기 해제·동의 revision/보호자 상태 변경은 generation을 증가시켜 credential·미완료 grant·lease를 차단한다. 성인 JWT와 runtime 인증 chain은 분리한다.
+
+아동은 `GET /api/v1/children/{childId}/learning-home`, `POST .../mission-entries`, `POST /api/v1/daily-plans/{planId}/sessions`, `GET /api/v1/sessions/{sessionId}`, `PUT .../checkpoint`를 사용한다. 시작은 불변 plan/publication pin을 만들고 재접속은 같은 pin/checkpoint를 복구한다. checkpoint의 path/draft/attempt/revision/hash를 검사하며 확정 발화 원문은 영속화하지 않는다. proof 만료·서버 재시작 뒤에는 재확정이 필요하다.
+
+Day 1은 첫 시작 날짜를 고정한다. 다음 Day는 더 뒤 현지 날짜의 새 명시 진입과 바로 다음 계획 준비가 필요하다. GET·refresh·자정·같은 event 재생으로 해금하지 않는다. Day당 순서대로 5별이며 자정 뒤 신규 정규 완료는 차단한다. `child_world`가 누적 revision 정본이고 과거 receipt는 수락 당시 값을 유지한다. runtime 완료도 기존 ledger의 receipt·별·effects·checkpoint·replay 트랜잭션을 사용한다.
+
+슬롯 콘텐츠는 `GET /api/v1/sessions/{sessionId}/slots/{slot}/content`, 개별 asset lease는 `POST .../playback-leases` 및 `POST /api/v1/playback-leases/{leaseId}/renew`로 공급한다. 실제 bytes는 runtime Bearer와 `X-Playback-Lease` 헤더를 요구하며 기기/generation/session/pin/asset/hash·현재 승인·최대30초 TTL을 검사한다. provider 호출 동안 DB 잠금을 유지하지 않고 I/O 전후 재검사한다. 기본 미설정 상태에서는 실제 공급이 차단된다.
+
+새 runtime은 Core 공용 DTO 전체와 동일하지 않다. 확정 원문 snapshot을 받지 않는 proof 기반 Commit/Checkpoint, 기존 ledger Receipt, 고정 5슬롯 계획·개별 asset lease adapter다. 공유 생성 DTO와 기존 성인 React parser는 변경하지 않았다. 상세 경로/DTO/기간·차이·검증 명령은 로컬 `docs/backend/CORE_MIGRATION_PHASE2_3.md` 및 `CORE_MIGRATION_PHASE2_3_VERIFICATION.json`을 따른다. 실제 AI·사용자 발행·미디어 품질/기기·Unity·운영 DB 변경·배포는 검증 범위 밖이다.
 
 현재 실행 adapter는 관리 보호자의 성인 인증을 사용하는 **Day 1·직접 입력·ORIGINAL** 범위다. 치료사는 실행·입력·완료 요청을 할 수 없다. 아동 기기 credential, 학습 재생 화면·콘텐츠/lease·캐릭터 반응, STT·카드·복습·Day 2는 별도다. 이 API를 실기기 학습 완료로 해석하지 않는다.
 

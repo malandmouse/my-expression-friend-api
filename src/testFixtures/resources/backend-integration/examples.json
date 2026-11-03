@@ -1,0 +1,282 @@
+{
+  "format": "EF_EXPRESSION_BINDING_SYNTHETIC_EXAMPLES_V1",
+  "schemaVersion": "0.6.0",
+  "scope": "HUMAN_TEST_DATA_NO_CHILD_RECORD_OR_COMPLETION",
+  "now": "2099-01-01T00:00:00Z",
+  "meaningQuality": "NOT_EVALUATED_FIXTURE_ONLY",
+  "catalog": {
+    "schemaVersion": "0.6.0",
+    "scope": "UNPUBLISHED_PREVIEW",
+    "context": {
+      "clientSession": "synthetic-binding-client-0001",
+      "storyHash": "d25e8db9622613081cab09d1252ea1de40c9304bfc5881c81d5544be0d92f42e",
+      "inputHash": null,
+      "path": [
+        "hello",
+        "design",
+        "wait",
+        "heard",
+        "mixed",
+        "thanks"
+      ],
+      "pathHash": "5b2e12e4b7da576bd68fb906b4da2bf7933bb9251e46632e52466c07320512d6",
+      "playedSpeakers": [
+        "MainPlayer",
+        "MainPlayer",
+        "MainPlayer",
+        "MainPlayer",
+        "MainPlayer",
+        "MainPlayer"
+      ],
+      "recognitionTargetNpcId": "MainPlayer",
+      "recognitionEmotionId": "UNSURE",
+      "reactionNpcId": "MainPlayer",
+      "sourceVersion": 1,
+      "sourceText": "기다리기 싫어.",
+      "sourceHash": "a0da27e769dca945ae18834d5381c2456124daffd7ef347c7ac7484fd1c68792",
+      "catalogId": "synthetic-binding-catalog-0001",
+      "expiresAt": "2099-01-01T00:05:00Z"
+    },
+    "contextHash": "0ebbd312006689c743bf3ca90a5e24000719b6e0a6455ce768a006851cb26277",
+    "cards": [
+      {
+        "cardId": "a",
+        "text": "아쉬움"
+      },
+      {
+        "cardId": "b",
+        "text": "괜찮음"
+      },
+      {
+        "cardId": "c",
+        "text": "더 이야기"
+      },
+      {
+        "cardId": "d",
+        "text": "잠깐 쉬기"
+      },
+      {
+        "cardId": "e",
+        "text": "순서 알기"
+      },
+      {
+        "cardId": "f",
+        "text": "잘 모르겠음"
+      }
+    ],
+    "candidates": [
+      {
+        "candidateId": "candidate-0",
+        "expressionMode": "ORIGINAL",
+        "orderedCardIds": [],
+        "answerText": "기다리기 싫어.",
+        "answerHash": "a0da27e769dca945ae18834d5381c2456124daffd7ef347c7ac7484fd1c68792",
+        "reactionText": "이야기해 줘서 고마워.",
+        "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+        "reactionSpeakerId": "MainPlayer"
+      },
+      {
+        "candidateId": "candidate-1",
+        "expressionMode": "AI_COMPOSED",
+        "orderedCardIds": [
+          "b",
+          "a"
+        ],
+        "answerText": "기다리기 싫어. 괜찮음 아쉬움",
+        "answerHash": "f048108adf3b27d95ae16c74d617098fa2ffb7c6b22e5acfd542cfe015bf8bed",
+        "reactionText": "이야기해 줘서 고마워.",
+        "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+        "reactionSpeakerId": "MainPlayer"
+      }
+    ],
+    "review": {
+      "version": "EF_PREPARED_EXPRESSION_QUALITY_V1",
+      "promptVersion": "EF_PREPARED_EXPRESSION_QUALITY_V4",
+      "sourceTargetHash": "38218eadfc2574dd782eb65f757bd4642bbc07480443460a70bc5a94cd0d625e",
+      "contentHash": "ccd61fc4259c3a1e57c28615e083bd7f66835b604e91f42fff0dd3d23f0f8258",
+      "status": "PASS",
+      "cards": [
+        {
+          "cardId": "a",
+          "meaning": "아쉬움",
+          "verdict": "PASS",
+          "reason": "합성 연결 검사자가 정한 판정이며 실제 의미 평가가 아님."
+        },
+        {
+          "cardId": "b",
+          "meaning": "괜찮음",
+          "verdict": "PASS",
+          "reason": "합성 연결 검사자가 정한 판정이며 실제 의미 평가가 아님."
+        },
+        {
+          "cardId": "c",
+          "meaning": "더 이야기",
+          "verdict": "PASS",
+          "reason": "합성 연결 검사자가 정한 판정이며 실제 의미 평가가 아님."
+        },
+        {
+          "cardId": "d",
+          "meaning": "잠깐 쉬기",
+          "verdict": "PASS",
+          "reason": "합성 연결 검사자가 정한 판정이며 실제 의미 평가가 아님."
+        },
+        {
+          "cardId": "e",
+          "meaning": "순서 알기",
+          "verdict": "PASS",
+          "reason": "합성 연결 검사자가 정한 판정이며 실제 의미 평가가 아님."
+        },
+        {
+          "cardId": "f",
+          "meaning": "잘 모르겠음",
+          "verdict": "PASS",
+          "reason": "합성 연결 검사자가 정한 판정이며 실제 의미 평가가 아님."
+        }
+      ],
+      "deck": {
+        "verdict": "PASS",
+        "reason": "합성 카드 묶음의 검수 전달 경계 확인용."
+      },
+      "candidates": [
+        {
+          "candidateId": "candidate-0",
+          "checks": {
+            "sourceIntent": "PASS",
+            "selectedMeanings": "PASS",
+            "noUnselectedMeanings": "PASS",
+            "selectionOrder": "PASS",
+            "refusalAndUncertainty": "PASS",
+            "reactionRespect": "PASS"
+          },
+          "reason": "합성 원문·선택·반응 검수 전달 경계 확인용."
+        },
+        {
+          "candidateId": "candidate-1",
+          "checks": {
+            "sourceIntent": "PASS",
+            "selectedMeanings": "PASS",
+            "noUnselectedMeanings": "PASS",
+            "selectionOrder": "PASS",
+            "refusalAndUncertainty": "PASS",
+            "reactionRespect": "PASS"
+          },
+          "reason": "합성 원문·선택·반응 검수 전달 경계 확인용."
+        }
+      ]
+    },
+    "catalogHash": "e6bd86978cc54783d613c20a525d9672c983a77443c325adca39d2ee996d1e93"
+  },
+  "current": {
+    "schemaVersion": "0.6.0",
+    "clientSession": "synthetic-binding-client-0001",
+    "storyHash": "d25e8db9622613081cab09d1252ea1de40c9304bfc5881c81d5544be0d92f42e",
+    "sourceVersion": 1,
+    "catalogId": "synthetic-binding-catalog-0001",
+    "contextHash": "0ebbd312006689c743bf3ca90a5e24000719b6e0a6455ce768a006851cb26277",
+    "catalogHash": "e6bd86978cc54783d613c20a525d9672c983a77443c325adca39d2ee996d1e93"
+  },
+  "requests": [
+    {
+      "schemaVersion": "0.6.0",
+      "requestId": "synthetic-binding-request-0",
+      "cursor": {
+        "schemaVersion": "0.6.0",
+        "clientSession": "synthetic-binding-client-0001",
+        "storyHash": "d25e8db9622613081cab09d1252ea1de40c9304bfc5881c81d5544be0d92f42e",
+        "sourceVersion": 1,
+        "catalogId": "synthetic-binding-catalog-0001",
+        "contextHash": "0ebbd312006689c743bf3ca90a5e24000719b6e0a6455ce768a006851cb26277",
+        "catalogHash": "e6bd86978cc54783d613c20a525d9672c983a77443c325adca39d2ee996d1e93"
+      },
+      "candidateId": "candidate-0",
+      "orderedCardIds": [],
+      "expressionMode": "ORIGINAL",
+      "answerHash": "a0da27e769dca945ae18834d5381c2456124daffd7ef347c7ac7484fd1c68792",
+      "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+      "reactionSpeakerId": "MainPlayer"
+    },
+    {
+      "schemaVersion": "0.6.0",
+      "requestId": "synthetic-binding-request-1",
+      "cursor": {
+        "schemaVersion": "0.6.0",
+        "clientSession": "synthetic-binding-client-0001",
+        "storyHash": "d25e8db9622613081cab09d1252ea1de40c9304bfc5881c81d5544be0d92f42e",
+        "sourceVersion": 1,
+        "catalogId": "synthetic-binding-catalog-0001",
+        "contextHash": "0ebbd312006689c743bf3ca90a5e24000719b6e0a6455ce768a006851cb26277",
+        "catalogHash": "e6bd86978cc54783d613c20a525d9672c983a77443c325adca39d2ee996d1e93"
+      },
+      "candidateId": "candidate-1",
+      "orderedCardIds": [
+        "b",
+        "a"
+      ],
+      "expressionMode": "AI_COMPOSED",
+      "answerHash": "f048108adf3b27d95ae16c74d617098fa2ffb7c6b22e5acfd542cfe015bf8bed",
+      "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+      "reactionSpeakerId": "MainPlayer"
+    }
+  ],
+  "results": [
+    {
+      "schemaVersion": "0.6.0",
+      "scope": "UNPUBLISHED_PREVIEW",
+      "requestId": "synthetic-binding-request-0",
+      "requestHash": "04db192fb8014e8c2dffab3558bb14b50b662f60a312586cad1a6ac2da3b9928",
+      "bindingId": "2db926fee16517d4ac6e5866f7493e46f5718b68f9eb420d5eb1aea02b848323",
+      "cursor": {
+        "schemaVersion": "0.6.0",
+        "clientSession": "synthetic-binding-client-0001",
+        "storyHash": "d25e8db9622613081cab09d1252ea1de40c9304bfc5881c81d5544be0d92f42e",
+        "sourceVersion": 1,
+        "catalogId": "synthetic-binding-catalog-0001",
+        "contextHash": "0ebbd312006689c743bf3ca90a5e24000719b6e0a6455ce768a006851cb26277",
+        "catalogHash": "e6bd86978cc54783d613c20a525d9672c983a77443c325adca39d2ee996d1e93"
+      },
+      "candidate": {
+        "candidateId": "candidate-0",
+        "expressionMode": "ORIGINAL",
+        "orderedCardIds": [],
+        "answerText": "기다리기 싫어.",
+        "answerHash": "a0da27e769dca945ae18834d5381c2456124daffd7ef347c7ac7484fd1c68792",
+        "reactionText": "이야기해 줘서 고마워.",
+        "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+        "reactionSpeakerId": "MainPlayer"
+      },
+      "reviewTargetHash": "38218eadfc2574dd782eb65f757bd4642bbc07480443460a70bc5a94cd0d625e",
+      "expiresAt": "2099-01-01T00:05:00Z"
+    },
+    {
+      "schemaVersion": "0.6.0",
+      "scope": "UNPUBLISHED_PREVIEW",
+      "requestId": "synthetic-binding-request-1",
+      "requestHash": "fdc64669a78a1fe09fb4d4f1b0f00c274583bb3f7fcc7bd94838f240c31c21e1",
+      "bindingId": "21f35b23d772810d52bf22248d5ff7b8cb6db6f52e798f9411fe3413f06c35a9",
+      "cursor": {
+        "schemaVersion": "0.6.0",
+        "clientSession": "synthetic-binding-client-0001",
+        "storyHash": "d25e8db9622613081cab09d1252ea1de40c9304bfc5881c81d5544be0d92f42e",
+        "sourceVersion": 1,
+        "catalogId": "synthetic-binding-catalog-0001",
+        "contextHash": "0ebbd312006689c743bf3ca90a5e24000719b6e0a6455ce768a006851cb26277",
+        "catalogHash": "e6bd86978cc54783d613c20a525d9672c983a77443c325adca39d2ee996d1e93"
+      },
+      "candidate": {
+        "candidateId": "candidate-1",
+        "expressionMode": "AI_COMPOSED",
+        "orderedCardIds": [
+          "b",
+          "a"
+        ],
+        "answerText": "기다리기 싫어. 괜찮음 아쉬움",
+        "answerHash": "f048108adf3b27d95ae16c74d617098fa2ffb7c6b22e5acfd542cfe015bf8bed",
+        "reactionText": "이야기해 줘서 고마워.",
+        "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+        "reactionSpeakerId": "MainPlayer"
+      },
+      "reviewTargetHash": "38218eadfc2574dd782eb65f757bd4642bbc07480443460a70bc5a94cd0d625e",
+      "expiresAt": "2099-01-01T00:05:00Z"
+    }
+  ]
+}

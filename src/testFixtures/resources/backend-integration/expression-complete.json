@@ -1,0 +1,69 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "bundleRequestId": "synthetic-bundle-request-0001",
+  "state": "COMPLETE",
+  "result": {
+    "catalogId": "synthetic-binding-catalog-0001",
+    "sourceVersion": 1,
+    "sourceHash": "a0da27e769dca945ae18834d5381c2456124daffd7ef347c7ac7484fd1c68792",
+    "storyHash": "d25e8db9622613081cab09d1252ea1de40c9304bfc5881c81d5544be0d92f42e",
+    "pathHash": "5b2e12e4b7da576bd68fb906b4da2bf7933bb9251e46632e52466c07320512d6",
+    "contextHash": "0ebbd312006689c743bf3ca90a5e24000719b6e0a6455ce768a006851cb26277",
+    "catalogHash": "e6bd86978cc54783d613c20a525d9672c983a77443c325adca39d2ee996d1e93",
+    "inputHash": null,
+    "expiresAt": "2099-01-01T00:05:00Z",
+    "qualityStatus": "SELECTABLE",
+    "cards": [
+      {
+        "cardId": "a",
+        "text": "아쉬움"
+      },
+      {
+        "cardId": "b",
+        "text": "괜찮음"
+      },
+      {
+        "cardId": "c",
+        "text": "더 이야기"
+      },
+      {
+        "cardId": "d",
+        "text": "잠깐 쉬기"
+      },
+      {
+        "cardId": "e",
+        "text": "순서 알기"
+      },
+      {
+        "cardId": "f",
+        "text": "잘 모르겠음"
+      }
+    ],
+    "candidates": [
+      {
+        "candidateId": "candidate-0",
+        "expressionMode": "ORIGINAL",
+        "orderedCardIds": [],
+        "answerText": "기다리기 싫어.",
+        "answerHash": "a0da27e769dca945ae18834d5381c2456124daffd7ef347c7ac7484fd1c68792",
+        "reactionText": "이야기해 줘서 고마워.",
+        "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+        "reactionSpeakerId": "MainPlayer"
+      },
+      {
+        "candidateId": "candidate-1",
+        "expressionMode": "AI_COMPOSED",
+        "orderedCardIds": [
+          "b",
+          "a"
+        ],
+        "answerText": "기다리기 싫어. 괜찮음 아쉬움",
+        "answerHash": "f048108adf3b27d95ae16c74d617098fa2ffb7c6b22e5acfd542cfe015bf8bed",
+        "reactionText": "이야기해 줘서 고마워.",
+        "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+        "reactionSpeakerId": "MainPlayer"
+      }
+    ]
+  },
+  "errorCode": null
+}

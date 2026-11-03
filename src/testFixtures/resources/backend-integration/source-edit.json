@@ -1,0 +1,8 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "eventId": "synthetic-event-0001",
+  "expectedProgressRevision": 8,
+  "kind": "SOURCE_EDIT",
+  "sourceVersion": 1,
+  "sourceText": "기다리기 싫어."
+}

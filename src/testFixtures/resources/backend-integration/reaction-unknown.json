@@ -1,0 +1,11 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "receiptId": "synthetic-receipt-0001",
+  "reactionRef": "synthetic-reaction-ref-0001",
+  "state": "OUTCOME_UNKNOWN",
+  "reactionMediaId": null,
+  "audioHash": null,
+  "timingHash": null,
+  "lipHash": null,
+  "errorCode": "UPSTREAM_OUTCOME_UNKNOWN"
+}

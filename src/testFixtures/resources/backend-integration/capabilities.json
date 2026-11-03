@@ -1,0 +1,11 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "backendContractRef": "NOT_IMPLEMENTED-proposal-2",
+  "supportsChildRuntime": false,
+  "supportsConversationJobs": false,
+  "supportsExpressionBundles": false,
+  "completionModes": [
+    "ORIGINAL"
+  ],
+  "supportsAIComposedCompletion": false
+}

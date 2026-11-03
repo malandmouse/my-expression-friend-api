@@ -31,7 +31,7 @@ public class LearningCatalog {
     }
 
     public record ReviewedPath(List<String> choiceIds, String terminalSceneId,
-            List<String> emotionIds, String actorId, Map<String, Boolean> effects) {
+            List<String> emotionIds, String actorId, Map<String, Object> effects) {
         public ReviewedPath {
             if (choiceIds!=null) choiceIds=Collections.unmodifiableList(new ArrayList<>(choiceIds));
             if (emotionIds!=null) emotionIds=Collections.unmodifiableList(new ArrayList<>(emotionIds));
@@ -115,7 +115,7 @@ public class LearningCatalog {
                     || p.emotionIds().size()>32 || p.emotionIds().stream().anyMatch(s->!text(s,128))
                     || new HashSet<>(p.emotionIds()).size()!=p.emotionIds().size()
                     || p.actorId()==null || !Set.of("jun","nara").contains(p.actorId()) || p.effects()==null || p.effects().size()>32
-                    || p.effects().entrySet().stream().anyMatch(e->!e.getKey().matches("[a-z][a-z0-9_]{0,63}") || e.getValue()==null)) invalid();
+                    || p.effects().entrySet().stream().anyMatch(e->!e.getKey().matches("[a-z][a-z0-9_]{0,63}") || !(e.getValue() instanceof Boolean))) invalid();
         }
     }
     static boolean text(String s,int max) {

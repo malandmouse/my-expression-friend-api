@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/ContextPersona",
+  "$defs": {
+    "ContextPersona": {
+      "type": "object",
+      "properties": {
+        "personaVersionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "actorId": {
+          "enum": [
+            "jun",
+            "nara"
+          ]
+        },
+        "traits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          },
+          "maxItems": 20
+        },
+        "approvalStatus": {
+          "enum": [
+            "APPROVED",
+            "DRAFT"
+          ]
+        },
+        "contentHash": {
+          "$ref": "#/$defs/Hash"
+        }
+      },
+      "required": [
+        "personaVersionId",
+        "actorId",
+        "traits",
+        "approvalStatus",
+        "contentHash"
+      ],
+      "additionalProperties": false
+    },
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "pattern": "[^\\u0009-\\u000d\\u0020\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]"
+    },
+    "Hash": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

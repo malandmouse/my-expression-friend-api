@@ -1,0 +1,23 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "clientCommitId": "synthetic-final-commit-0001",
+  "expectedProgressRevision": 12,
+  "expectedSessionRevision": 2,
+  "expectedWorldRevision": 0,
+  "mode": "AI_COMPOSED",
+  "sourceVersion": 1,
+  "sourceHash": "a0da27e769dca945ae18834d5381c2456124daffd7ef347c7ac7484fd1c68792",
+  "candidateSelection": {
+    "candidateId": "candidate-1",
+    "orderedCardIds": [
+      "b",
+      "a"
+    ],
+    "answerHash": "f048108adf3b27d95ae16c74d617098fa2ffb7c6b22e5acfd542cfe015bf8bed",
+    "reactionTextHash": "989ba4b3725695e65d8bfa0ab1e2d42ed4945df3c51de061a14bfae65ca667e6",
+    "reactionSpeakerId": "MainPlayer",
+    "catalogId": "synthetic-binding-catalog-0001",
+    "catalogHash": "e6bd86978cc54783d613c20a525d9672c983a77443c325adca39d2ee996d1e93",
+    "contextHash": "0ebbd312006689c743bf3ca90a5e24000719b6e0a6455ce768a006851cb26277"
+  }
+}

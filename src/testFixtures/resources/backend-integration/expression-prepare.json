@@ -1,0 +1,9 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "operation": "PREPARE",
+  "expectedProgressRevision": 9,
+  "sourceVersion": 1,
+  "sourceHash": "a0da27e769dca945ae18834d5381c2456124daffd7ef347c7ac7484fd1c68792",
+  "catalogId": null,
+  "orderedCardIds": []
+}

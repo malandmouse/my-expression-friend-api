@@ -1,0 +1,11 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "clientCommitId": "synthetic-final-commit-0001",
+  "expectedProgressRevision": 12,
+  "expectedSessionRevision": 2,
+  "expectedWorldRevision": 0,
+  "mode": "NATURAL",
+  "sourceVersion": 0,
+  "sourceHash": null,
+  "candidateSelection": null
+}

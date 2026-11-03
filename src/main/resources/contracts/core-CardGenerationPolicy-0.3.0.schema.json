@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/CardGenerationPolicy",
+  "$defs": {
+    "CardGenerationPolicy": {
+      "type": "object",
+      "properties": {
+        "policyVersionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "policyHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "status": {
+          "$ref": "#/$defs/ContentStatus"
+        },
+        "allowedCategories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardCategory"
+          },
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "generationConstraints": {
+          "$ref": "#/$defs/GenerationConstraints"
+        },
+        "generatorVersion": {
+          "$ref": "#/$defs/Id"
+        },
+        "validatorVersion": {
+          "$ref": "#/$defs/Id"
+        },
+        "fallback": {
+          "const": "KEEP_ORIGINAL_OR_RERECORD"
+        },
+        "runtimeCardsIndividuallyPreapproved": {
+          "const": false
+        }
+      },
+      "required": [
+        "policyVersionId",
+        "policyHash",
+        "status",
+        "allowedCategories",
+        "generationConstraints",
+        "generatorVersion",
+        "validatorVersion",
+        "fallback",
+        "runtimeCardsIndividuallyPreapproved"
+      ],
+      "additionalProperties": false
+    },
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "Hash": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ContentStatus": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "VALIDATING",
+        "REVISION_REQUIRED",
+        "NEEDS_REVIEW",
+        "APPROVED",
+        "PUBLISHED",
+        "REJECTED",
+        "ARCHIVED",
+        "REVOKED"
+      ]
+    },
+    "CardCategory": {
+      "type": "string",
+      "enum": [
+        "REPHRASE",
+        "EMOTION",
+        "REASON",
+        "REQUEST"
+      ]
+    },
+    "GenerationConstraints": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "const": "ko"
+        },
+        "maxCards": {
+          "const": 8
+        },
+        "maxEojeolPerCard": {
+          "const": 5
+        },
+        "maxRegenerations": {
+          "const": 1
+        },
+        "preserveOriginalIntentByDefault": {
+          "const": true
+        },
+        "requireChildSelectionForNewEmotionOrReason": {
+          "const": true
+        },
+        "noUnconfirmedPastEvents": {
+          "const": true
+        }
+      },
+      "required": [
+        "language",
+        "maxCards",
+        "maxEojeolPerCard",
+        "maxRegenerations",
+        "preserveOriginalIntentByDefault",
+        "requireChildSelectionForNewEmotionOrReason",
+        "noUnconfirmedPastEvents"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/PerformanceCatalog",
+  "$defs": {
+    "PerformanceCatalog": {
+      "type": "object",
+      "properties": {
+        "catalogId": {
+          "$ref": "#/$defs/Id"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "actors": {
+          "$ref": "#/$defs/CatalogActors"
+        },
+        "recipes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PerformanceRecipe"
+          },
+          "minItems": 1,
+          "maxItems": 1000
+        },
+        "contentHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "approvalRef": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "required": [
+        "catalogId",
+        "revision",
+        "actors",
+        "recipes",
+        "contentHash",
+        "approvalRef"
+      ],
+      "additionalProperties": false
+    },
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "Revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "CatalogActors": {
+      "type": "object",
+      "properties": {
+        "jun": {
+          "$ref": "#/$defs/JunPerformanceActor"
+        },
+        "nara": {
+          "$ref": "#/$defs/NaraPerformanceActor"
+        }
+      },
+      "required": [
+        "jun",
+        "nara"
+      ],
+      "additionalProperties": false
+    },
+    "PerformanceRecipe": {
+      "type": "object",
+      "properties": {
+        "recipeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "recipeRevision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "actorId": {
+          "type": "string",
+          "enum": [
+            "jun",
+            "nara"
+          ]
+        },
+        "cue": {
+          "$ref": "#/$defs/Id"
+        },
+        "voiceRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "lipRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "motionRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "propRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        },
+        "contentRevision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "contentHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "approvedAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "recipeId",
+        "recipeRevision",
+        "actorId",
+        "cue",
+        "voiceRef",
+        "lipRef",
+        "motionRef",
+        "propRefs",
+        "contentRevision",
+        "contentHash",
+        "approvedAt"
+      ],
+      "additionalProperties": false
+    },
+    "Hash": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "JunPerformanceActor": {
+      "type": "object",
+      "properties": {
+        "actorId": {
+          "const": "jun"
+        },
+        "personaRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "personaRevision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "modelId": {
+          "const": "JungHoon"
+        },
+        "modelHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "voiceRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "voiceHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "lipRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "lipHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "motionRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "motionHash": {
+          "$ref": "#/$defs/Hash"
+        }
+      },
+      "required": [
+        "actorId",
+        "personaRef",
+        "personaRevision",
+        "modelId",
+        "modelHash",
+        "voiceRef",
+        "voiceHash",
+        "lipRef",
+        "lipHash",
+        "motionRef",
+        "motionHash"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "actorId": {
+                "const": "jun"
+              }
+            },
+            "required": [
+              "actorId"
+            ]
+          },
+          "then": {
+            "properties": {
+              "modelId": {
+                "const": "JungHoon"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "modelId": {
+                "const": "MainPlayer"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "NaraPerformanceActor": {
+      "type": "object",
+      "properties": {
+        "actorId": {
+          "const": "nara"
+        },
+        "personaRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "personaRevision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "modelId": {
+          "const": "MainPlayer"
+        },
+        "modelHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "voiceRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "voiceHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "lipRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "lipHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "motionRef": {
+          "$ref": "#/$defs/Id"
+        },
+        "motionHash": {
+          "$ref": "#/$defs/Hash"
+        }
+      },
+      "required": [
+        "actorId",
+        "personaRef",
+        "personaRevision",
+        "modelId",
+        "modelHash",
+        "voiceRef",
+        "voiceHash",
+        "lipRef",
+        "lipHash",
+        "motionRef",
+        "motionHash"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "actorId": {
+                "const": "jun"
+              }
+            },
+            "required": [
+              "actorId"
+            ]
+          },
+          "then": {
+            "properties": {
+              "modelId": {
+                "const": "JungHoon"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "modelId": {
+                "const": "MainPlayer"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AssetRef": {
+      "type": "object",
+      "properties": {
+        "assetId": {
+          "$ref": "#/$defs/Id"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "hash": {
+          "$ref": "#/$defs/Hash"
+        }
+      },
+      "required": [
+        "assetId",
+        "revision",
+        "hash"
+      ],
+      "additionalProperties": false
+    },
+    "Timestamp": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 35,
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]{1,9})?Z$",
+      "format": "date-time"
+    }
+  }
+}

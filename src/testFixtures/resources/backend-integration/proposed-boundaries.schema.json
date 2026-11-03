@@ -1,0 +1,1640 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:emotionfriend:foundation-integration:proposal-2",
+  "title": "PROPOSED boundaries; not existing HTTP APIs or authorization",
+  "$defs": {
+    "Capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "backendContractRef",
+        "supportsChildRuntime",
+        "supportsConversationJobs",
+        "supportsExpressionBundles",
+        "completionModes",
+        "supportsAIComposedCompletion"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "backendContractRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "supportsChildRuntime": {
+          "type": "boolean"
+        },
+        "supportsConversationJobs": {
+          "type": "boolean"
+        },
+        "supportsExpressionBundles": {
+          "type": "boolean"
+        },
+        "completionModes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL",
+              "AI_COMPOSED",
+              "NATURAL"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "supportsAIComposedCompletion": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "code",
+        "traceId",
+        "retryable",
+        "recovery"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "INVALID_SCHEMA",
+            "INPUT_INCOMPLETE",
+            "UNAUTHORIZED",
+            "FORBIDDEN",
+            "NOT_FOUND",
+            "CONSENT_REQUIRED",
+            "CONSENT_REVOKED",
+            "STALE_CONTEXT",
+            "STALE_PROGRESS",
+            "STALE_SOURCE",
+            "STALE_CATALOG",
+            "SOURCE_REQUIRED",
+            "EXPIRED",
+            "IDEMPOTENCY_CONFLICT",
+            "UNSUPPORTED_COMPLETION_MODE",
+            "NOT_PUBLISHED",
+            "INVALID_TRANSITION",
+            "QA_REJECTED",
+            "RATE_LIMITED",
+            "UPSTREAM_OUTCOME_UNKNOWN",
+            "REACTION_NOT_AVAILABLE"
+          ]
+        },
+        "traceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "retryable": {
+          "const": false
+        },
+        "recovery": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "REAUTHENTICATE",
+            "REFETCH_CURRENT",
+            "REENTER_SOURCE",
+            "QUERY_JOB",
+            "QUERY_RECEIPT",
+            "CONTACT_SUPPORT"
+          ]
+        }
+      }
+    },
+    "CreateConversationJob": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "expectedProfileVersion"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "expectedProfileVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "JobAccepted": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "jobId",
+        "state",
+        "profileVersion"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "jobId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "state": {
+          "const": "QUEUED"
+        },
+        "profileVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "ArtifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactId",
+        "kind",
+        "format",
+        "artifactSha256",
+        "byteLength"
+      ],
+      "properties": {
+        "artifactId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "REVIEWED_AUTHORING_RESULT",
+            "STORY_MEDIA",
+            "EXPRESSION_RESULT",
+            "REACTION_MEDIA"
+          ]
+        },
+        "format": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "artifactSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 33554432
+        }
+      }
+    },
+    "JobStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "jobId",
+        "state",
+        "sourceContextHash",
+        "reviewStatus",
+        "artifactRefs",
+        "publishable",
+        "actualModelCalls",
+        "errorCode"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "jobId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "QUEUED",
+            "RUNNING",
+            "RESULT_READY",
+            "HELD",
+            "FAILED",
+            "CANCELLED",
+            "OUTCOME_UNKNOWN"
+          ]
+        },
+        "sourceContextHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "reviewStatus": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PASS",
+                "REJECT",
+                "UNCERTAIN"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "artifactRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "publishable": {
+          "const": false
+        },
+        "actualModelCalls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 13
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "CancelJob": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "expectedState"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "expectedState": {
+          "type": "string",
+          "enum": [
+            "QUEUED",
+            "RUNNING",
+            "RESULT_READY",
+            "HELD",
+            "OUTCOME_UNKNOWN"
+          ]
+        }
+      }
+    },
+    "Card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cardId",
+        "text"
+      ],
+      "properties": {
+        "cardId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        }
+      }
+    },
+    "Candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "orderedCardIds",
+        "expressionMode",
+        "answerText",
+        "answerHash",
+        "reactionText",
+        "reactionTextHash",
+        "reactionSpeakerId"
+      ],
+      "properties": {
+        "candidateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "orderedCardIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "expressionMode": {
+          "type": "string",
+          "enum": [
+            "ORIGINAL",
+            "AI_COMPOSED"
+          ]
+        },
+        "answerText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "answerHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "reactionText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "reactionTextHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "reactionSpeakerId": {
+          "type": "string",
+          "enum": [
+            "JungHoon",
+            "MainPlayer"
+          ]
+        }
+      }
+    },
+    "ExpressionRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "operation",
+            "expectedProgressRevision",
+            "sourceVersion",
+            "sourceHash",
+            "catalogId",
+            "orderedCardIds"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "operation": {
+              "const": "PREPARE"
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "sourceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            "catalogId": {
+              "type": "null"
+            },
+            "orderedCardIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "minItems": 0,
+              "maxItems": 0
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "operation",
+            "expectedProgressRevision",
+            "sourceVersion",
+            "sourceHash",
+            "catalogId",
+            "orderedCardIds"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "operation": {
+              "const": "RECOMPOSE"
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "sourceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            "catalogId": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 80
+            },
+            "orderedCardIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "minItems": 1,
+              "maxItems": 4,
+              "uniqueItems": true
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "operation",
+            "expectedProgressRevision",
+            "sourceVersion",
+            "sourceHash",
+            "catalogId",
+            "orderedCardIds"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "operation": {
+              "const": "REFRESH"
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "sourceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            "catalogId": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 80
+            },
+            "orderedCardIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "minItems": 0,
+              "maxItems": 4,
+              "uniqueItems": true
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "operation",
+            "expectedProgressRevision",
+            "sourceVersion",
+            "sourceHash",
+            "catalogId",
+            "orderedCardIds"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "operation": {
+              "const": "REUSE_ORIGINAL"
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "sourceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            "catalogId": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 80
+            },
+            "orderedCardIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "minItems": 0,
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "ExpressionAccepted": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "bundleRequestId",
+        "state"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "bundleRequestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "state": {
+          "const": "QUEUED"
+        }
+      }
+    },
+    "ExpressionResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalogId",
+        "sourceVersion",
+        "sourceHash",
+        "storyHash",
+        "pathHash",
+        "contextHash",
+        "catalogHash",
+        "inputHash",
+        "expiresAt",
+        "qualityStatus",
+        "cards",
+        "candidates"
+      ],
+      "properties": {
+        "catalogId": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 80
+        },
+        "sourceVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "sourceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "storyHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "pathHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "contextHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "catalogHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "inputHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$"
+        },
+        "qualityStatus": {
+          "type": "string",
+          "enum": [
+            "SELECTABLE",
+            "REJECTED",
+            "UNCERTAIN"
+          ]
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Card"
+          },
+          "minItems": 4,
+          "maxItems": 8
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Candidate"
+          },
+          "minItems": 1,
+          "maxItems": 2
+        }
+      }
+    },
+    "ExpressionStatus": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "bundleRequestId",
+            "state",
+            "result",
+            "errorCode"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "bundleRequestId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "QUEUED",
+                "RUNNING",
+                "FAILED",
+                "OUTCOME_UNKNOWN",
+                "CANCELLED"
+              ]
+            },
+            "result": {
+              "type": "null"
+            },
+            "errorCode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "bundleRequestId",
+            "state",
+            "result",
+            "errorCode"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "bundleRequestId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "state": {
+              "const": "COMPLETE"
+            },
+            "result": {
+              "$ref": "#/$defs/ExpressionResult"
+            },
+            "errorCode": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "CandidateSelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalogId",
+        "catalogHash",
+        "contextHash",
+        "candidateId",
+        "orderedCardIds",
+        "answerHash",
+        "reactionTextHash",
+        "reactionSpeakerId"
+      ],
+      "properties": {
+        "catalogId": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 80
+        },
+        "catalogHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "contextHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "candidateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "orderedCardIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "answerHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "reactionTextHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "reactionSpeakerId": {
+          "type": "string",
+          "enum": [
+            "JungHoon",
+            "MainPlayer"
+          ]
+        }
+      }
+    },
+    "FinalizeRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "clientCommitId",
+            "expectedProgressRevision",
+            "expectedSessionRevision",
+            "expectedWorldRevision",
+            "mode",
+            "sourceVersion",
+            "sourceHash",
+            "candidateSelection"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "clientCommitId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "expectedSessionRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "expectedWorldRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "mode": {
+              "const": "ORIGINAL"
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "sourceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            "candidateSelection": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/CandidateSelection"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "clientCommitId",
+            "expectedProgressRevision",
+            "expectedSessionRevision",
+            "expectedWorldRevision",
+            "mode",
+            "sourceVersion",
+            "sourceHash",
+            "candidateSelection"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "clientCommitId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "expectedSessionRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "expectedWorldRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "mode": {
+              "const": "AI_COMPOSED"
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "sourceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            "candidateSelection": {
+              "$ref": "#/$defs/CandidateSelection"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "clientCommitId",
+            "expectedProgressRevision",
+            "expectedSessionRevision",
+            "expectedWorldRevision",
+            "mode",
+            "sourceVersion",
+            "sourceHash",
+            "candidateSelection"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "clientCommitId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "expectedSessionRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "expectedWorldRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "mode": {
+              "const": "NATURAL"
+            },
+            "sourceVersion": {
+              "const": 0
+            },
+            "sourceHash": {
+              "type": "null"
+            },
+            "candidateSelection": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "Receipt": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "receiptId",
+            "sessionId",
+            "slot",
+            "mode",
+            "sourceVersion",
+            "answerHash",
+            "bindingRef",
+            "reactionRef",
+            "reactionState",
+            "starsAwarded",
+            "stars",
+            "completedAt"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "receiptId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "sessionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "slot": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "ORIGINAL",
+                "AI_COMPOSED",
+                "NATURAL"
+              ]
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "answerHash": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$",
+                  "minLength": 64,
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "bindingRef": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "reactionRef": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "reactionState": {
+              "const": "PENDING"
+            },
+            "starsAwarded": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "stars": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "completedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "receiptId",
+            "sessionId",
+            "slot",
+            "mode",
+            "sourceVersion",
+            "answerHash",
+            "bindingRef",
+            "reactionRef",
+            "reactionState",
+            "starsAwarded",
+            "stars",
+            "completedAt"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "receiptId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "sessionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "slot": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "ORIGINAL",
+                "AI_COMPOSED",
+                "NATURAL"
+              ]
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "answerHash": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$",
+                  "minLength": 64,
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "bindingRef": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "reactionRef": {
+              "type": "null"
+            },
+            "reactionState": {
+              "const": "NOT_AVAILABLE"
+            },
+            "starsAwarded": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "stars": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "completedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$"
+            }
+          }
+        }
+      ]
+    },
+    "ReactionStart": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "reactionRef"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "reactionRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "ReactionStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "receiptId",
+        "reactionRef",
+        "state",
+        "reactionMediaId",
+        "audioHash",
+        "timingHash",
+        "lipHash",
+        "errorCode"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "receiptId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "reactionRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "READY",
+            "FAILED",
+            "OUTCOME_UNKNOWN"
+          ]
+        },
+        "reactionMediaId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "audioHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timingHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lipHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "ProgressRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "eventId",
+            "expectedProgressRevision",
+            "kind",
+            "nodeId",
+            "sentenceId"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "eventId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "kind": {
+              "const": "PRESENTED"
+            },
+            "nodeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "sentenceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "eventId",
+            "expectedProgressRevision",
+            "kind",
+            "nodeId",
+            "choiceId"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "eventId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "kind": {
+              "const": "ADVANCE"
+            },
+            "nodeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "choiceId": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "eventId",
+            "expectedProgressRevision",
+            "kind",
+            "nodeId",
+            "emotionId"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "eventId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "kind": {
+              "const": "RECOGNIZE"
+            },
+            "nodeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "emotionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "eventId",
+            "expectedProgressRevision",
+            "kind",
+            "sourceVersion",
+            "sourceText"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "eventId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "kind": {
+              "const": "SOURCE_EDIT"
+            },
+            "sourceVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "sourceText": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400,
+              "pattern": "\\S"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integrationVersion",
+            "eventId",
+            "expectedProgressRevision",
+            "kind",
+            "nodeId"
+          ],
+          "properties": {
+            "integrationVersion": {
+              "const": "EF_FOUNDATION_INTEGRATION_V1"
+            },
+            "eventId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "expectedProgressRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "kind": {
+              "const": "REFUSE"
+            },
+            "nodeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        }
+      ]
+    },
+    "ProgressResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrationVersion",
+        "progressRevision",
+        "sourceVersion",
+        "sourceHash",
+        "status"
+      ],
+      "properties": {
+        "integrationVersion": {
+          "const": "EF_FOUNDATION_INTEGRATION_V1"
+        },
+        "progressRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceVersion": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "STOPPED",
+            "COMPLETED"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,645 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://emotionfriend.local/contracts/0.6.0/schemas.json",
+  "title": "Unpublished expression binding only; no Core completion or runtime authorization",
+  "$defs": {
+    "ExpressionBindingContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clientSession",
+        "storyHash",
+        "inputHash",
+        "path",
+        "pathHash",
+        "playedSpeakers",
+        "recognitionTargetNpcId",
+        "recognitionEmotionId",
+        "reactionNpcId",
+        "sourceVersion",
+        "sourceText",
+        "sourceHash",
+        "catalogId",
+        "expiresAt"
+      ],
+      "properties": {
+        "clientSession": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 80
+        },
+        "storyHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "inputHash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "path": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "pathHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "playedSpeakers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "JungHoon",
+              "MainPlayer"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "recognitionTargetNpcId": {
+          "type": "string",
+          "enum": [
+            "JungHoon",
+            "MainPlayer"
+          ]
+        },
+        "recognitionEmotionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "reactionNpcId": {
+          "type": "string",
+          "enum": [
+            "JungHoon",
+            "MainPlayer"
+          ]
+        },
+        "sourceVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "sourceText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "sourceHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "catalogId": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 80
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ExpressionBindingCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cardId",
+        "text"
+      ],
+      "properties": {
+        "cardId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        }
+      }
+    },
+    "ExpressionBindingCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "expressionMode",
+        "orderedCardIds",
+        "answerText",
+        "answerHash",
+        "reactionText",
+        "reactionTextHash",
+        "reactionSpeakerId"
+      ],
+      "properties": {
+        "candidateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "expressionMode": {
+          "type": "string",
+          "enum": [
+            "ORIGINAL",
+            "AI_COMPOSED"
+          ]
+        },
+        "orderedCardIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "answerText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "answerHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "reactionText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "reactionTextHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "reactionSpeakerId": {
+          "type": "string",
+          "enum": [
+            "JungHoon",
+            "MainPlayer"
+          ]
+        }
+      }
+    },
+    "ExpressionBindingCardReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cardId",
+        "meaning",
+        "verdict",
+        "reason"
+      ],
+      "properties": {
+        "cardId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
+    },
+    "ExpressionBindingDeckReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
+    },
+    "ExpressionBindingChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceIntent",
+        "selectedMeanings",
+        "noUnselectedMeanings",
+        "selectionOrder",
+        "refusalAndUncertainty",
+        "reactionRespect"
+      ],
+      "properties": {
+        "sourceIntent": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        },
+        "selectedMeanings": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        },
+        "noUnselectedMeanings": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        },
+        "selectionOrder": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        },
+        "refusalAndUncertainty": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        },
+        "reactionRespect": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        }
+      }
+    },
+    "ExpressionBindingCandidateReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "checks",
+        "reason"
+      ],
+      "properties": {
+        "candidateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "checks": {
+          "$ref": "#/$defs/ExpressionBindingChecks"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
+    },
+    "ExpressionBindingReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "promptVersion",
+        "sourceTargetHash",
+        "contentHash",
+        "status",
+        "cards",
+        "deck",
+        "candidates"
+      ],
+      "properties": {
+        "version": {
+          "const": "EF_PREPARED_EXPRESSION_QUALITY_V1"
+        },
+        "promptVersion": {
+          "const": "EF_PREPARED_EXPRESSION_QUALITY_V4"
+        },
+        "sourceTargetHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contentHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT",
+            "UNCERTAIN"
+          ]
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpressionBindingCardReview"
+          },
+          "minItems": 4,
+          "maxItems": 8
+        },
+        "deck": {
+          "$ref": "#/$defs/ExpressionBindingDeckReview"
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpressionBindingCandidateReview"
+          },
+          "minItems": 1,
+          "maxItems": 2
+        }
+      }
+    },
+    "ExpressionBindingCatalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "scope",
+        "context",
+        "contextHash",
+        "cards",
+        "candidates",
+        "review",
+        "catalogHash"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "0.6.0"
+        },
+        "scope": {
+          "const": "UNPUBLISHED_PREVIEW"
+        },
+        "context": {
+          "$ref": "#/$defs/ExpressionBindingContext"
+        },
+        "contextHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpressionBindingCard"
+          },
+          "minItems": 4,
+          "maxItems": 8
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpressionBindingCandidate"
+          },
+          "minItems": 1,
+          "maxItems": 2
+        },
+        "review": {
+          "$ref": "#/$defs/ExpressionBindingReview"
+        },
+        "catalogHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "ExpressionBindingCursor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "clientSession",
+        "storyHash",
+        "sourceVersion",
+        "catalogId",
+        "contextHash",
+        "catalogHash"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "0.6.0"
+        },
+        "clientSession": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 80
+        },
+        "storyHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sourceVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "catalogId": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 80
+        },
+        "contextHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "catalogHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "ExpressionBindingRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "cursor",
+        "candidateId",
+        "orderedCardIds",
+        "expressionMode",
+        "answerHash",
+        "reactionTextHash",
+        "reactionSpeakerId"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "0.6.0"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 80
+        },
+        "cursor": {
+          "$ref": "#/$defs/ExpressionBindingCursor"
+        },
+        "candidateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "orderedCardIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "expressionMode": {
+          "type": "string",
+          "enum": [
+            "ORIGINAL",
+            "AI_COMPOSED"
+          ]
+        },
+        "answerHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "reactionTextHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "reactionSpeakerId": {
+          "type": "string",
+          "enum": [
+            "JungHoon",
+            "MainPlayer"
+          ]
+        }
+      }
+    },
+    "BoundExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "scope",
+        "requestId",
+        "requestHash",
+        "bindingId",
+        "cursor",
+        "candidate",
+        "reviewTargetHash",
+        "expiresAt"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "0.6.0"
+        },
+        "scope": {
+          "const": "UNPUBLISHED_PREVIEW"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 80
+        },
+        "requestHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "bindingId": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "cursor": {
+          "$ref": "#/$defs/ExpressionBindingCursor"
+        },
+        "candidate": {
+          "$ref": "#/$defs/ExpressionBindingCandidate"
+        },
+        "reviewTargetHash": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

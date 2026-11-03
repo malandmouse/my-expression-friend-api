@@ -1,0 +1,15 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "receiptId": "synthetic-receipt-0001",
+  "sessionId": "synthetic-session-0001",
+  "slot": 1,
+  "mode": "AI_COMPOSED",
+  "sourceVersion": 1,
+  "answerHash": "f048108adf3b27d95ae16c74d617098fa2ffb7c6b22e5acfd542cfe015bf8bed",
+  "bindingRef": "synthetic-bound-ref-0001",
+  "reactionRef": "synthetic-reaction-ref-0001",
+  "reactionState": "PENDING",
+  "starsAwarded": 1,
+  "stars": 1,
+  "completedAt": "2099-01-01T00:00:00Z"
+}

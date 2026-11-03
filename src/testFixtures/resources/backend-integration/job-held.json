@@ -1,0 +1,11 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "jobId": "synthetic-job-0001",
+  "state": "HELD",
+  "sourceContextHash": "0d33afe06d9583beaafcbec66d744df592406578c41c1b210f566ed257cec400",
+  "reviewStatus": "UNCERTAIN",
+  "artifactRefs": [],
+  "publishable": false,
+  "actualModelCalls": 0,
+  "errorCode": "INPUT_INCOMPLETE"
+}

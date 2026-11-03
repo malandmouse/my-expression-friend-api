@@ -1,0 +1,7 @@
+{
+  "integrationVersion": "EF_FOUNDATION_INTEGRATION_V1",
+  "code": "STALE_SOURCE",
+  "traceId": "synthetic-trace-0001",
+  "retryable": false,
+  "recovery": "REFETCH_CURRENT"
+}
