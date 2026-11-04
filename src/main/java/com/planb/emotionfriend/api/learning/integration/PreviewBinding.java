@@ -165,13 +165,24 @@ public final class PreviewBinding {
                 && candidate.answerHash().equals(request.p_answerHash())
                 && candidate.reactionHash().equals(request.p_reactionTextHash())
                 && candidate.speakerId().equals(request.p_reactionSpeakerId()));
+        return new Bound(candidate, bindingId(catalog, candidate, wire.get("cursor")),
+                ProductHashes.digest(wire), catalog.reviewTargetHash());
+    }
+
+    static String bindingId(Catalog catalog, Candidate candidate) {
+        ObjectNode cursor = ProductHashes.JSON.valueToTree(catalog.cursor());
+        cursor.set("schemaVersion", catalog.wire.get("schemaVersion"));
+        return bindingId(catalog, candidate, cursor);
+    }
+
+    private static String bindingId(Catalog catalog, Candidate candidate, JsonNode cursor) {
         var target = ProductHashes.JSON.createObjectNode();
-        target.set("cursor", wire.get("cursor"));
+        target.set("cursor", cursor);
         for (JsonNode row : catalog.wire.path("candidates")) {
             if (candidate.id().equals(row.path("candidateId").asText())) target.set("candidate", row);
         }
         target.put("reviewTargetHash", catalog.reviewTargetHash());
-        return new Bound(candidate, ProductHashes.digest(target), ProductHashes.digest(wire), catalog.reviewTargetHash());
+        return ProductHashes.digest(target);
     }
 
     private static JsonNode checkedCopy(String name, JsonNode value) {

@@ -103,6 +103,15 @@ public final class ExpressionCurrent {
 
     public record CandidateProof(Slot slot, Revision revision, Bound bound) {}
 
+    public record OriginalSelection(Revision revision, String candidateId, String bindingId) {
+        public OriginalSelection {
+            Objects.requireNonNull(revision);
+            if (candidateId == null || candidateId.isBlank() || !ProductHashes.isHash(bindingId)) {
+                throw new IllegalArgumentException("Invalid original selection");
+            }
+        }
+    }
+
     private final Store store;
     private final Clock clock;
 
@@ -228,6 +237,19 @@ public final class ExpressionCurrent {
                     || current.composedCurrent()),
                 "Selection requires a current reviewed candidate");
         return new CandidateProof(slot, current.revision(), bound);
+    }
+
+    /** Caller must hold the store's current-state lock through the completion write. */
+    static Candidate requireOriginal(Current current, OriginalSelection selection, Instant now) {
+        require(current.revision().equals(selection.revision()), "Stale current revision");
+        requireLiveCatalog(current, now);
+        requireContext(current, current.catalog().context(), now);
+        require(current.catalog().quality() == Quality.SELECTABLE && current.orderedCardIds().isEmpty(),
+                "Original candidate unavailable");
+        Candidate candidate = current.catalog().original();
+        require(candidate.id().equals(selection.candidateId())
+                && bindingId(current.catalog(), candidate).equals(selection.bindingId()), "Stale candidate binding");
+        return candidate;
     }
 
     private Current load(Slot slot, Revision expected) {

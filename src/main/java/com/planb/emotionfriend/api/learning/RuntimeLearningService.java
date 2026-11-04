@@ -172,12 +172,13 @@ public class RuntimeLearningService {
         }
     }
     private void requireChild(ActorPrincipal actor,UUID child) {auth.require(actor);if(!actor.childId().equals(child.toString()))fail(ErrorCode.RESOURCE_NOT_FOUND);}
-    private void sessionAccess(ActorPrincipal actor,UUID session) {
-        auth.require(actor);var rows=db.queryForList("select p.id,p.child_id,s.device_id from learning.session s join learning.plan p on p.id=s.plan_id where s.id=?",session);
+    long sessionAccess(ActorPrincipal actor,UUID session) {
+        var device=auth.require(actor);var rows=db.queryForList("select p.id,p.child_id,s.device_id from learning.session s join learning.plan p on p.id=s.plan_id where s.id=?",session);
         if(rows.isEmpty())fail(ErrorCode.RESOURCE_NOT_FOUND);var s=rows.getFirst();
         if(!s.get("child_id").toString().equals(actor.childId()) || !s.get("device_id").equals(actor.deviceId())
                 || actor.planId()==null || !actor.planId().equals(s.get("id").toString()))fail(ErrorCode.CHILD_ACCESS_DENIED);
         pin(session);
+        return ((Number)device.get("generation")).longValue();
     }
     private Map<String,Object> pin(UUID session) {
         var rows=db.queryForList("select session_id,plan_hash,entry_world_revision,manifest from learning.session_pin where session_id=?",session);if(rows.isEmpty())fail(ErrorCode.CONTENT_NOT_APPROVED);
@@ -187,7 +188,7 @@ public class RuntimeLearningService {
     private tools.jackson.databind.JsonNode checkpoint(UUID session) {
         checkpointLive(session);return json.readTree(db.queryForObject("select body::text from learning.runtime_checkpoint where session_id=?",String.class,session));
     }
-    private void checkpointLive(UUID session) {
+    void checkpointLive(UUID session) {
         var rows=db.queryForList("select c.saved_at,s.completed_at from learning.runtime_checkpoint c join learning.session s on s.id=c.session_id where c.session_id=?",session);
         if(rows.isEmpty())return;var r=rows.getFirst();Instant anchor=((Timestamp)(r.get("completed_at")==null?r.get("saved_at"):r.get("completed_at"))).toInstant();
         if(!clock.instant().isBefore(anchor.plus(Duration.ofDays(r.get("completed_at")==null?30:7))))fail(ErrorCode.CHECKPOINT_EXPIRED);

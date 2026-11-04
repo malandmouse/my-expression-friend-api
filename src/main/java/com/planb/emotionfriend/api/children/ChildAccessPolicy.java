@@ -24,6 +24,11 @@ public class ChildAccessPolicy implements ChildAccessChecker {
     @Override
     @Transactional
     public void check(ActorPrincipal actor, String childId, Capability capability) {
+        checkInTransaction(actor, childId, capability);
+    }
+
+    /** For callers already holding a business transaction, including guards that handle denials. */
+    public void checkInTransaction(ActorPrincipal actor, String childId, Capability capability) {
         guard.lockDomain();
         var account = guard.require(actor, Role.GUARDIAN, Role.THERAPIST);
         UUID child;

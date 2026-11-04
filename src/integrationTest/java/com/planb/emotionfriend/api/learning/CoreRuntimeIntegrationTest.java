@@ -2,8 +2,18 @@ package com.planb.emotionfriend.api.learning;
 
 import static org.assertj.core.api.Assertions.*;
 import com.planb.emotionfriend.api.auth.AdultJwt;
+import com.planb.emotionfriend.api.children.ChildContracts.ConsentScope;
 import com.planb.emotionfriend.api.common.FoundationIntegrationTest;
 import com.planb.emotionfriend.api.common.error.*;
+import com.planb.emotionfriend.api.common.security.ActorPrincipal;
+import com.planb.emotionfriend.api.common.security.ChildAccessChecker.Capability;
+import com.planb.emotionfriend.api.learning.integration.CompletionBoundary;
+import com.planb.emotionfriend.api.learning.integration.CurrentJobGuard;
+import com.planb.emotionfriend.api.learning.integration.ExpressionCurrent;
+import com.planb.emotionfriend.api.learning.integration.GenerationJobs;
+import com.planb.emotionfriend.api.learning.integration.OriginalCompletion;
+import com.planb.emotionfriend.api.learning.integration.PostgresGenerationJobs;
+import com.planb.emotionfriend.api.learning.integration.ReactionJobs;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.*;
@@ -11,6 +21,9 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.*;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import java.net.URI;
@@ -19,6 +32,8 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Real loopback HTTP/PostgreSQL; every identity, approval, byte and device is synthetic. */
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"emotion-friend.core.child-use-enabled=true","emotion-friend.core.lease-seconds=30"})
@@ -28,6 +43,12 @@ class CoreRuntimeIntegrationTest {
     @Autowired CoreManuscriptStore manuscripts;@Autowired CorePublicationService content;
     @Autowired TestClock clock;@Autowired SyntheticAuthority authority;
     @Autowired SyntheticMedia media;
+    @Autowired LearningCurrent current;
+    @Autowired RuntimeCredentials credentials;
+    @Autowired PlatformTransactionManager transactions;
+    @Autowired RuntimeLearningService runtime;
+    @Autowired LearningLedger ledger;
+    @Autowired ConfirmedExpressions proofs;
     @LocalServerPort int port;
     HttpClient client;UUID child;User guardian,reviewer,publisher,stranger;CoreSyntheticFixture fixture;
     record User(UUID id,UUID session) {}
@@ -183,6 +204,291 @@ class CoreRuntimeIntegrationTest {
         }
         assertThat(count("receipt")).isEqualTo(1);assertThat(count("star_award")).isEqualTo(1);assertThat(count("story_event")).isEqualTo(1);
         var changed=new LinkedHashMap<>(cmd);changed.put("attemptId",UUID.randomUUID());assertCode(send("POST",finalizePath(s,1),changed,t,key()),"IDEMPOTENCY_CONFLICT");
+    }
+
+    @Test void liveGuardRejectsLateChangesInSeparateAuthorityAndInputDomains() throws Exception {
+        var start = start(day(1), connect());
+        String token = token(start.path("runtimeCredential"));
+        UUID session = id(start.path("session"), "sessionId");
+        command(session, 1, token);
+        db.update("""
+                insert into care.consent(child_id,id,scope,granted,notice_version,verification_ref,recorded_at,revision)
+                values(?,?,'CARD_EXTERNAL_PROCESSING',true,'synthetic-only',?,?,7)
+                """, child, UUID.randomUUID(), UUID.randomUUID(), ts());
+        var query = currentQuery(token, session, 1, Set.of(ConsentScope.CARD_EXTERNAL_PROCESSING));
+        List<Runnable> updates = List.of(
+                () -> db.update("update care.child set profile_version=profile_version+1 where id=?", child),
+                () -> db.update("""
+                        update learning.runtime_checkpoint set revision=revision+1,
+                            body=jsonb_set(body,'{checkpointRevision}',to_jsonb(revision+1))
+                        where session_id=?
+                        """, session),
+                () -> {
+                    UUID attempt = UUID.randomUUID();
+                    db.update("""
+                            update learning.runtime_checkpoint set attempt_id=?,
+                                body=jsonb_set(body,'{attemptId}',to_jsonb(?::text))
+                            where session_id=?
+                            """, attempt, attempt.toString(), session);
+                },
+                () -> db.update("""
+                        update care.consent set granted=false,withdrawn_at=now(),revision=revision+1
+                        where child_id=? and scope='CARD_EXTERNAL_PROCESSING'
+                        """, child));
+        for (Runnable change : updates) {
+            var input = new GuardedInput(query);
+            assertThat(input.pin.snapshot().progress().targetNpcId()).isNotBlank();
+            assertThat(input.pin.snapshot().consentRevisions()).containsEntry(ConsentScope.CORE_PROFILE_LEARNING, 1L);
+            assertLateResultRejected(input, () -> inTransaction(change));
+        }
+        var coreOnly = currentQuery(token, session, 1, Set.of());
+        var settings = new GuardedInput(coreOnly);
+        assertLateResultRejected(settings, () -> inTransaction(() -> settings.liveInput.updateAndGet(input ->
+                new CurrentJobGuard.SourceSettings(input.sourceRef(), input.sourceRevision(),
+                        new CurrentJobGuard.Settings(input.settings().ref(), input.settings().revision() + 1), null))));
+        var revoked = new GuardedInput(coreOnly);
+        assertLateResultRejected(revoked, () -> inTransaction(() ->
+                db.update("update learning.runtime_device set revoked=true,generation=generation+1 where child_id=?", child)));
+    }
+
+    @Test void liveGuardUsesCurrentTherapistRelationshipAndRejectsAnotherGuardian() {
+        UUID invitation = UUID.randomUUID();
+        db.update("""
+                insert into care.therapist_invitation
+                    (id,child_id,guardian_id,therapist_id,target_email,state,created_at,expires_at,resolved_at)
+                values (?,?,?,?,?,'ACCEPTED',now(),now()+interval '1 day',now())
+                """, invitation, child, guardian.id(), reviewer.id(), reviewer.id() + "@example.test");
+        db.update("insert into care.child_therapist values (?,?,?,'ACTIVE',now(),null)", child, reviewer.id(), invitation);
+        var owner = new GuardedInput(adultQuery(guardian));
+        assertThat(owner.pin.snapshot().guardianId()).isEqualTo(guardian.id());
+        assertThatThrownBy(() -> new GuardedInput(adultQuery(stranger))).isInstanceOf(ApiException.class);
+        var therapist = new GuardedInput(adultQuery(reviewer));
+        assertThat(therapist.pin.snapshot().therapistInvitationId()).isEqualTo(invitation);
+        assertLateResultRejected(therapist, () -> inTransaction(() -> db.update("""
+                update care.child_therapist set state='REVOKED',revoked_at=now()
+                where child_id=? and therapist_id=?
+                """, child, reviewer.id())));
+    }
+
+    @Test void resultAdmissionAndRuntimeFinalizeSerializeOnTheSameDomainLock() throws Exception {
+        var start = start(day(1), connect());
+        String token = token(start.path("runtimeCredential"));
+        UUID session = id(start.path("session"), "sessionId");
+        var command = command(session, 1, token);
+        var input = new GuardedInput(currentQuery(token, session, 1, Set.of()));
+        var inWorker = new AtomicBoolean();
+        var read = new CountDownLatch(1);
+        var finishAdmission = new CountDownLatch(1);
+        var jobs = input.jobs(claim -> {
+            assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+            inWorker.set(true);
+            return readyResult();
+        }, () -> {
+            if (inWorker.get()) {
+                read.countDown();
+                await(finishAdmission);
+            }
+        });
+        var job = jobs.reserve(input.pin.request(), clock.now.plusSeconds(30));
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            var settle = executor.submit(() -> jobs.dispatch(job.id()));
+            try {
+                await(read);
+                var finalize = executor.submit(() -> send("POST", finalizePath(session, 1), command, token, key()));
+                long limit = System.nanoTime() + TimeUnit.SECONDS.toNanos(8);
+                boolean blocked;
+                do {
+                    blocked = Boolean.TRUE.equals(db.queryForObject("""
+                            select exists(select 1 from pg_locks where locktype='advisory'
+                                and classid=1771 and objid=31 and not granted)
+                            """, Boolean.class));
+                    if (!blocked) Thread.sleep(20);
+                } while (!blocked && System.nanoTime() < limit);
+                assertThat(blocked).isTrue();
+                assertThat(count("receipt")).isZero();
+                finishAdmission.countDown();
+                assertThat(settle.get(10, TimeUnit.SECONDS)).isTrue();
+                assertThat(rawJobState(job)).isEqualTo("RESULT_READY");
+                assertThat(accepted(finalize.get(20, TimeUnit.SECONDS), 200))
+                        .isEqualTo(accepted(send("POST", finalizePath(session, 1), command, token, key()), 200));
+                assertThat(count("receipt")).isEqualTo(1);
+                assertThat(count("star_award")).isEqualTo(1);
+            } finally {
+                finishAdmission.countDown();
+            }
+        }
+        var next = command(session, 2, token);
+        var pending = new GuardedInput(currentQuery(token, session, 2, Set.of()));
+        assertLateResultRejected(pending, () -> {
+            try {
+                accepted(send("POST", finalizePath(session, 2), next, token, key()), 200);
+            } catch (Exception e) {
+                throw new AssertionError(e);
+            }
+        });
+        assertThat(count("receipt")).isEqualTo(2);
+        assertThat(count("star_award")).isEqualTo(2);
+    }
+
+    @Test void syntheticPublishedReactionBindingRollsBackWithRealLedgerAndReplaysOnce() throws Exception {
+        var start = start(day(1), connect());
+        String token = token(start.path("runtimeCredential"));
+        UUID session = id(start.path("session"), "sessionId");
+        var wire = command(session, 1, token);
+        var query = currentQuery(token, session, 1, Set.of());
+        var commit = json.readValue(json.writeValueAsString(wire), RuntimeContracts.Commit.class);
+        var request = new CompletionBoundary.Command(query, commit, null);
+        var settings = new CurrentJobGuard.Settings(UUID.randomUUID(), 2);
+        String syntheticText = "합성 반응";
+        var reaction = new ReactionJobs.ReviewedReaction(UUID.randomUUID(), syntheticText,
+                LearningCatalog.hash(syntheticText), "synthetic-reaction-npc", settings.ref());
+        var failBinding = new AtomicBoolean(true);
+        var port = new OriginalCompletion.Ledger() {
+            @Override public Optional<LearningContracts.Receipt> lockAndReplay(CompletionBoundary.Command command) {
+                runtime.sessionAccess(command.query().actor(), session);
+                if (count("receipt") == 0) return Optional.empty();
+                return Optional.of(ledger.completeRuntime(session, 1, command.commit(), query.actor().actorId(), guardian.id()));
+            }
+
+            @Override public LearningContracts.Receipt completeFirst(CompletionBoundary.Command command,
+                    Optional<OriginalCompletion.Binding> binding) {
+                var receipt = ledger.completeRuntime(session, 1, command.commit(), query.actor().actorId(), guardian.id());
+                db.update("insert into learning.synthetic_completion_binding values(?,?)", receipt.receiptId(),
+                        failBinding.get() ? null : binding.orElseThrow().reactionRef());
+                return receipt;
+            }
+        };
+        var evidence = new OriginalCompletion.Evidence() {
+            @Override public OriginalCompletion.ExpressionPath lockPath(ExpressionCurrent.Slot slot) {
+                return OriginalCompletion.ExpressionPath.CARDLESS;
+            }
+
+            @Override public Optional<OriginalCompletion.ReactionRoute> lockRoute(LearningCurrent.Progress progress) {
+                return Optional.of(new OriginalCompletion.ReactionRoute(progress.publicationId(),
+                        progress.scenarioVersionId(), progress.terminalSceneId(), "synthetic-ending", reaction.speakerId()));
+            }
+
+            @Override public Optional<CurrentJobGuard.Settings> lockSettings(LearningCurrent.Snapshot snapshot) {
+                return Optional.of(settings);
+            }
+
+            @Override public Optional<OriginalCompletion.CardEvidence> lockCard(ExpressionCurrent.Slot slot) {
+                throw new AssertionError("Cardless completion cannot look up a catalog");
+            }
+
+            @Override public Optional<OriginalCompletion.Review> lockPublishedReview(OriginalCompletion.ReactionRoute route) {
+                return Optional.of(new OriginalCompletion.Review(route, settings, OriginalCompletion.Verdict.PASS,
+                        clock.now.plusSeconds(60), reaction));
+            }
+        };
+        var boundary = new OriginalCompletion(transactions, current, proofs, port, evidence, clock);
+        db.execute("""
+                create table learning.synthetic_completion_binding (
+                    receipt_id uuid primary key references learning.receipt(id), reaction_ref uuid not null
+                )
+                """);
+        try {
+            assertThatThrownBy(() -> boundary.complete(request)).isInstanceOf(org.springframework.dao.DataAccessException.class);
+            assertThat(count("receipt")).isZero();
+            assertThat(count("star_award")).isZero();
+            assertThat(count("story_event")).isZero();
+            assertThat(count("synthetic_completion_binding")).isZero();
+            failBinding.set(false);
+            LearningContracts.Receipt receipt;
+            var race = new CountDownLatch(1);
+            try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                var first = executor.submit(() -> { await(race); return boundary.complete(request); });
+                var second = executor.submit(() -> { await(race); return boundary.complete(request); });
+                race.countDown();
+                receipt = first.get(15, TimeUnit.SECONDS);
+                assertThat(second.get(15, TimeUnit.SECONDS)).isEqualTo(receipt);
+            }
+            assertThat(boundary.complete(request)).isEqualTo(receipt);
+            assertThat(count("receipt")).isEqualTo(1);
+            assertThat(count("star_award")).isEqualTo(1);
+            assertThat(count("synthetic_completion_binding")).isEqualTo(1);
+            assertThat(db.queryForObject("select reaction_ref from learning.synthetic_completion_binding where receipt_id=?",
+                    UUID.class, receipt.receiptId())).isEqualTo(reaction.ref());
+        } finally {
+            db.execute("drop table learning.synthetic_completion_binding");
+        }
+    }
+
+    private LearningCurrent.Query currentQuery(String token, UUID session, int slot, Set<ConsentScope> purposes) {
+        return new LearningCurrent.Query(credentials.verify(token), child, null,
+                new LearningCurrent.SessionSlot(session, slot), purposes);
+    }
+
+    private LearningCurrent.Query adultQuery(User user) {
+        var actor = new ActorPrincipal(user.id().toString(), ActorPrincipal.Kind.ADULT, null, null, null,
+                user.session().toString(), false);
+        return new LearningCurrent.Query(actor, child, Capability.VIEW_PROFILE, null, Set.of());
+    }
+
+    private void inTransaction(Runnable change) {
+        new TransactionTemplate(transactions).executeWithoutResult(status -> {
+            current.lockDomain();
+            change.run();
+        });
+    }
+
+    private final class GuardedInput {
+        final CurrentJobGuard.Pin pin;
+        final AtomicReference<CurrentJobGuard.SourceSettings> liveInput;
+
+        GuardedInput(LearningCurrent.Query query) {
+            var snapshot = new TransactionTemplate(transactions).execute(status -> current.read(query));
+            var settings = new CurrentJobGuard.Settings(UUID.randomUUID(), 11);
+            var scope = new GenerationJobs.Scope(child, UUID.fromString(query.actor().actorId()), GenerationJobs.Kind.AUTHORING);
+            var request = new GenerationJobs.Request(scope, new GenerationJobs.Input(UUID.randomUUID(), 4, 5, settings.ref(), null));
+            pin = new CurrentJobGuard.Pin(request, query, snapshot, settings);
+            liveInput = new AtomicReference<>(new CurrentJobGuard.SourceSettings(request.input().sourceRef(), 4, settings, null));
+        }
+
+        GenerationJobs jobs(GenerationJobs.Worker worker, Runnable afterRead) {
+            var guard = new CurrentJobGuard(current, new CurrentJobGuard.Inputs() {
+                @Override public Optional<CurrentJobGuard.Pin> lockPin(GenerationJobs.Request request) {
+                    return pin.request().equals(request) ? Optional.of(pin) : Optional.empty();
+                }
+                @Override public Optional<CurrentJobGuard.SourceSettings> lockCurrentInput(CurrentJobGuard.Pin ignored) {
+                    afterRead.run();
+                    return Optional.of(liveInput.get());
+                }
+            });
+            return new GenerationJobs(GenerationJobs.Kind.AUTHORING, new PostgresGenerationJobs(db, transactions, clock),
+                    (request, now) -> new GenerationJobs.Fingerprint(LearningCatalog.hash(request.input().sourceRef().toString()), null),
+                    guard, worker);
+        }
+    }
+
+    private void assertLateResultRejected(GuardedInput input, Runnable change) {
+        var jobs = input.jobs(claim -> {
+            assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+            change.run();
+            return readyResult();
+        }, () -> {});
+        var job = jobs.reserve(input.pin.request(), clock.now.plusSeconds(30));
+        assertThat(jobs.dispatch(job.id())).isFalse();
+        assertThat(rawJobState(job)).isEqualTo("CANCELLED");
+        assertThat(db.queryForObject("select artifact_id from learning.generation_job where id=?", UUID.class, job.id())).isNull();
+    }
+
+    private String rawJobState(GenerationJobs.Job job) {
+        return db.queryForObject("select state from learning.generation_job where id=?", String.class, job.id());
+    }
+
+    private static GenerationJobs.Result readyResult() {
+        return new GenerationJobs.Result(GenerationJobs.State.RESULT_READY,
+                new GenerationJobs.Artifact(UUID.randomUUID(), "a".repeat(64)));
+    }
+
+    private static void await(CountDownLatch latch) {
+        try {
+            assertThat(latch.await(15, TimeUnit.SECONDS)).isTrue();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
     }
     @Test void finalizeFailureRollsBackReceiptStarsWorldCheckpointAndReplay() throws Exception {
         var start=start(day(1),connect());String t=token(start.path("runtimeCredential"));UUID s=id(start.path("session"),"sessionId");var cmd=command(s,1,t);

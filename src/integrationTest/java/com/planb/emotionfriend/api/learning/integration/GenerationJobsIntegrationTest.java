@@ -216,7 +216,7 @@ class GenerationJobsIntegrationTest {
         }
     }
 
-    @Test void committedReceiptIsRequiredAndReactionFailureOrUnknownDoesNotTouchCompletion() {
+    @Test void committedReceiptIsRequiredAndReactionFailureOrUnknownDoesNotTouchCompletion() throws Exception {
         var scope = new Scope(child, adult, Kind.REACTION_MEDIA);
         var settings = UUID.randomUUID();
         var reaction = new ReactionJobs.ReviewedReaction(UUID.randomUUID(), "고마워요.",
@@ -244,7 +244,15 @@ class GenerationJobsIntegrationTest {
             var before = completionSnapshot(receipt);
             assertThat(noReaction.reserve(scope, receipt.receiptId(), deadline()).availability())
                     .isEqualTo(ReactionJobs.Availability.NOT_AVAILABLE);
-            var reserved = jobs.reserve(scope, receipt.receiptId(), deadline()).job();
+            Job reserved;
+            var reserve = new CountDownLatch(1);
+            try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                var first = executor.submit(() -> { await(reserve); return jobs.reserve(scope, receipt.receiptId(), deadline()).job(); });
+                var second = executor.submit(() -> { await(reserve); return jobs.reserve(scope, receipt.receiptId(), deadline()).job(); });
+                reserve.countDown();
+                reserved = first.get(10, TimeUnit.SECONDS);
+                assertThat(second.get(10, TimeUnit.SECONDS).id()).isEqualTo(reserved.id());
+            }
             assertThat(jobs.reserve(scope, receipt.receiptId(), deadline()).job().id()).isEqualTo(reserved.id());
             assertThat(jobs.dispatch(reserved.id())).isTrue();
             assertThat(jobs.dispatch(reserved.id())).isFalse();
