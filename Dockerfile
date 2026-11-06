@@ -14,7 +14,7 @@ FROM eclipse-temurin:21-jre-jammy AS java-runtime
 # One deployable service: Java API + private Node worker + Python Typecast bridge.
 # Node's Debian runtime is newer than the copied Jammy JRE's minimum glibc.
 FROM node:24-bookworm-slim AS runtime
-RUN apt-get update && apt-get install -y --no-install-recommends python3 ca-certificates libstdc++6 \
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-certifi ca-certificates libstdc++6 \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=java-runtime /opt/java/openjdk /opt/java/openjdk
 ENV JAVA_HOME=/opt/java/openjdk

@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 import re
+import ssl
 import subprocess
 import sys
 from decimal import Decimal, InvalidOperation
@@ -59,6 +60,11 @@ def configuration_issues(env):
 
 def image_checks(root):
     checks = {'python3': sys.version_info >= (3, 10)}
+    try:
+        import certifi
+        checks['typecastTrustStore'] = bool(ssl.create_default_context(cafile=certifi.where()).get_ca_certs())
+    except (ImportError, OSError):
+        checks['typecastTrustStore'] = False
     for command, minimum, label in ((['java', '-version'], 21, 'java21'), (['node', '--version'], 24, 'node24')):
         try:
             result = subprocess.run(command, capture_output=True, text=True, timeout=10)
