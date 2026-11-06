@@ -37,6 +37,8 @@ public class RuntimeController {
     public ResponseEntity<Object> session(@PathVariable UUID sessionId){return ok(learning.session(child(),sessionId));}
     @PutMapping("/api/v1/sessions/{sessionId}/checkpoint")
     public ResponseEntity<byte[]> checkpoint(@PathVariable UUID sessionId,@Valid @RequestBody Checkpoint body,@RequestHeader("Idempotency-Key") String key){return learning.checkpoint(child(),sessionId,body,key).toResponseEntity();}
+    @PutMapping("/api/v1/sessions/{sessionId}/checkpoint-and-playback")
+    public ResponseEntity<byte[]> checkpointPlayback(@PathVariable UUID sessionId,@Valid @RequestBody CheckpointPlayback body,@RequestHeader("Idempotency-Key") String key){return learning.checkpointPlayback(child(),sessionId,body,key).toResponseEntity();}
     @PostMapping("/api/v1/sessions/{sessionId}/slots/{slot}/confirmed-expressions")
     public ResponseEntity<byte[]> expression(@PathVariable UUID sessionId,@PathVariable int slot,@RequestBody tools.jackson.databind.JsonNode body,@RequestHeader("Idempotency-Key") String key){if(body.has("schemaVersion"))return p1.confirm(child(),sessionId,slot,body,key).toResponseEntity();
         var old=new tools.jackson.databind.json.JsonMapper().treeToValue(body,LearningContracts.ExpressionRequest.class);try(var factory=jakarta.validation.Validation.buildDefaultValidatorFactory()){if(!factory.getValidator().validate(old).isEmpty())throw new ApiException(ErrorCode.INVALID_SCHEMA);}return learning.expression(child(),sessionId,slot,old,key).toResponseEntity();}

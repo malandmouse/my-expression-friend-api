@@ -200,7 +200,10 @@ class CoreRuntimeIntegrationTest {
         assertThat(db.queryForObject("select revoked from learning.runtime_device where child_id=?",Boolean.class,child)).isTrue();
     }
     @Test void expiredRuntimeAndGrantAndRefreshCannotBeUsed() throws Exception {
-        var grant=accepted(send("POST",base()+"/device-grants",device(),adult(guardian),key()),201);clock.now=clock.now.plusSeconds(301);
+        var grant=accepted(send("POST",base()+"/device-grants",device(),adult(guardian),key()),201);
+        var grantExpiry=Instant.parse(grant.path("expiresAt").asText());
+        assertThat(grantExpiry).isEqualTo(clock.now.plus(Duration.ofDays(1)));
+        clock.now=grantExpiry;
         assertCode(send("POST","/api/v1/child-sessions/exchange",Map.of("deviceId","synthetic-device","oneTimeCode",grant.path("oneTimeCode").asText()),null,key()),"AUTH_REQUIRED");
         String pre=connect();var p=accepted(send("POST","/api/v1/child-sessions/persist",device(),pre,key()),200);
         clock.now=clock.now.plusSeconds(601);assertCode(send("GET",homePath(),null,pre,null),"TOKEN_EXPIRED");
@@ -564,6 +567,42 @@ class CoreRuntimeIntegrationTest {
         clock.now=clock.now.plusSeconds(30);assertCode(asset(s,a.id(),id,t),"EXECUTION_LEASE_EXPIRED");
         accepted(send("DELETE",base()+"/devices/synthetic-device",null,adult(guardian),key()),200);assertCode(asset(s,a.id(),id,t),"AUTH_REQUIRED");
     }
+    @Test void checkpointAndPlaybackCommitsTogetherAndRechecksRevocationOnReplay() throws Exception {
+        var day=day(1);
+        UUID release=bindReadyPrototypeDay(day.plan(),1,LocalDate.of(2026,11,2));
+        var audio=fixture.artifacts.values().stream().filter(a->a.kind().equals("MEDIA")).toList();
+        var bound=audio.getFirst();var other=audio.get(1);
+        var sentence=Map.of("voiceAssetId",bound.id(),"audioHash",bound.bytesHash());
+        var body=Map.of("presentation",Map.of("nodes",List.of(Map.of("sceneId","end-mat","sentences",List.of(sentence)))));
+        db.update("insert into learning.prototype_package(validation_id,release_id,slot,body,source_hash) values(?,?,1,?::jsonb,?)",
+                day.validations().getFirst(),release,json.writeValueAsString(body),bound.bytesHash());
+
+        var started=start(day,connect());String token=token(started.path("runtimeCredential"));UUID session=id(started.path("session"),"sessionId");
+        var capabilities=accepted(send("GET","/api/v1/child-sessions/capabilities",null,token,null),200);
+        assertThat(capabilities.path("checkpointPlaybackSupported").asBoolean()).isTrue();
+        var checkpoint=checkpointRequest(session,token);
+        checkpoint.put("presentationCursor",Map.of("sceneId","end-mat","sentenceIndex",0));
+        var playback=Map.of("slot",1,"assetId",bound.id(),"contentHash",bound.bytesHash());
+        var request=Map.of("checkpoint",checkpoint,"playback",playback);
+        String path="/api/v1/sessions/"+session+"/checkpoint-and-playback", key=key();
+        long revision=((Number)checkpoint.get("checkpointRevision")).longValue();
+        assertCode(send("PUT",path,Map.of("checkpoint",checkpoint,"playback",Map.of("slot",2,"assetId",bound.id(),"contentHash",bound.bytesHash())),token,key),"INVALID_BRANCH_PATH");
+        assertCode(send("PUT",path,Map.of("checkpoint",checkpoint,"playback",Map.of("slot",1,"assetId",bound.id(),"contentHash","0".repeat(64))),token,key),"CONTENT_HASH_MISMATCH");
+        assertCode(send("PUT",path,Map.of("checkpoint",checkpoint,"playback",Map.of("slot",1,"assetId",other.id(),"contentHash",other.bytesHash())),token,key),"CONTENT_HASH_MISMATCH");
+        assertThat(checkpointRequest(session,token).get("checkpointRevision")).isEqualTo(revision);
+        assertThat(count("asset_lease")).isZero();
+
+        var accepted=accepted(send("PUT",path,request,token,key),200);
+        assertThat(accepted.path("checkpoint").path("checkpointRevision").asLong()).isEqualTo(revision+1);
+        assertThat(accepted(send("PUT",path,request,token,key),200)).isEqualTo(accepted);
+        assertCode(send("PUT",path,request,token,key()),"STALE_CHECKPOINT");
+        assertThat(asset(session,bound.id(),id(accepted.path("playbackLease"),"leaseId"),token).statusCode()).isEqualTo(200);
+        db.update("insert into learning.core_revocation(target_id,actor_id,reason,recorded_at) values(?,?,'synthetic',?)",bound.id(),guardian.id(),ts());
+        assertCode(send("PUT",path,request,token,key),"CONTENT_REVOKED");
+        assertThat(checkpointRequest(session,token).get("checkpointRevision")).isEqualTo(revision+1);
+        assertThat(count("asset_lease")).isEqualTo(1);
+        assertThat(count("star_award")).isZero();
+    }
     @Test void leaseRenewalRechecksPinAndSupersedesOldTicket() throws Exception {
         var start=start(day(1),connect());String t=token(start.path("runtimeCredential"));UUID s=id(start.path("session"),"sessionId");
         var a=fixture.artifacts.values().stream().filter(x->x.kind().equals("MEDIA")).findFirst().orElseThrow();var request=Map.of("slot",1,"assetId",a.id(),"contentHash",a.bytesHash());
@@ -636,7 +675,7 @@ class CoreRuntimeIntegrationTest {
         }
         assertCode(send("POST",finalizePath(s,1),cmd,t,key()),"AUTH_REQUIRED");
     }
-    private void bindReadyPrototypeDay(UUID plan, int day, LocalDate date) {
+    private UUID bindReadyPrototypeDay(UUID plan, int day, LocalDate date) {
         UUID job = UUID.randomUUID(), release = UUID.randomUUID();
         String hash = LearningCatalog.hash(job.toString());
         db.update("""
@@ -652,6 +691,7 @@ class CoreRuntimeIntegrationTest {
                 """, release, child, job, hash, guardian.id(), plan, ts(), ts());
         db.update("insert into learning.prototype_day(child_id,local_date,program_day,job_id,release_id,plan_id,created_at) values(?,?,?,?,?,?,?)",
                 child, java.sql.Date.valueOf(date), day, job, release, plan, ts());
+        return release;
     }
 
     private Day day(int day) throws Exception {

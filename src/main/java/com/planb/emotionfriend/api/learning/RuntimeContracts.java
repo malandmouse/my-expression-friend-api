@@ -49,6 +49,8 @@ public final class RuntimeContracts {
     public record LeaseRequest(@NotNull @Min(1) @Max(5) Integer slot,@NotNull UUID assetId,
             @NotBlank @Pattern(regexp="[0-9a-f]{64}") String contentHash) {}
     public record Lease(UUID leaseId,Instant expiresAt,String contentHash) {}
+    public record CheckpointPlayback(@NotNull @Valid Checkpoint checkpoint,@NotNull @Valid LeaseRequest playback) {}
+    public record Advanced(tools.jackson.databind.JsonNode checkpoint,Lease playbackLease) {}
     public record Pin(UUID sessionId,String planManifestHash,long entryWorldRevision,tools.jackson.databind.JsonNode planManifest) {}
     public record Mission(UUID planId,int dayIndex,String timezone,java.time.LocalDate unlockedDate) {}
     public record Home(UUID childId,Instant serverNow,List<Mission> plans) {}

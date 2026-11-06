@@ -22,13 +22,14 @@ public class CorePublicationService {
     private final ChildAccessPolicy access;private final ContentAuthority authority;private final CoreDependencyValidator validator;
     private final CoreScenarioValidator structure;private final Clock clock;private final boolean useEnabled;
     private final PrototypeBinding prototype;
+    private final CoreVerifiedContentCache verified;
     @Value("${emotion-friend.prototype.publication-enabled:false}") private boolean prototypeEnabled;
     public CorePublicationService(JdbcTemplate db,JsonMapper json,MemberGuard guard,ChildAccessPolicy access,
             ContentAuthority authority,CoreDependencyValidator validator,CoreScenarioValidator structure,Clock clock,
             @Value("${emotion-friend.core.child-use-enabled:false}") boolean useEnabled,PrototypeBinding prototype) {
         this.db=db;this.json=json;this.guard=guard;this.access=access;this.authority=authority;
         this.validator=validator;this.structure=structure;this.clock=clock;this.useEnabled=useEnabled;
-        this.prototype=prototype;
+        this.prototype=prototype;this.verified=new CoreVerifiedContentCache(clock);
     }
     public UUID artifact(CoreDependencyValidator.Artifact artifact) {
         guard.lockDomain();validator.artifact(artifact);
@@ -134,20 +135,22 @@ public class CorePublicationService {
     public Map<String,Object> publication(UUID id,UUID child) {
         guard.lockDomain();var e=one("select * from learning.core_evidence where id=? and kind='PUBLICATION'",id);
         if(!e.get("child_id").equals(child))fail(ErrorCode.CHILD_ACCESS_DENIED);
-        var d=dependency((UUID)e.get("validation_id"));requireEvidence(id,"PUBLICATION",d);requireConfirmed(d);revalidate(d);
+        var d=dependency((UUID)e.get("validation_id"));requireEvidence(id,"PUBLICATION",d);requireConfirmed(d);requireSavedDependencies(d);
         if(PrototypeBinding.VERSION.equals(d.get("validator_version"))) {requirePrototype(d,e);return d;}
         var parents=(java.sql.Array)e.get("parents");
         try {var ids=(UUID[])parents.getArray();if(ids.length!=2)fail(ErrorCode.CONTENT_NOT_APPROVED);requireEvidence(ids[0],"FULL_REVIEW",d);requireEvidence(ids[1],"CHILD_USE",d);}
         catch(java.sql.SQLException ex){throw new IllegalStateException(ex);}
         return d;
     }
-    public List<LearningCatalog.ReviewedPath> execution(UUID plan,int slot) {
+    public List<LearningCatalog.ReviewedPath> execution(UUID plan,int slot) {return paths(executionDependency(plan,slot));}
+    /** 이미 확인한 실행 의존성을 lease 검사에서도 함께 사용합니다. */
+    Map<String,Object> executionDependency(UUID plan,int slot) {
         var row=one("select p.child_id,p.revoked_at,ps.publication_id,ps.content_hash,p.manifest,p.manifest_hash from learning.plan p join learning.plan_slot ps on ps.plan_id=p.id where p.id=? and ps.slot=?",plan,slot);
         if(row.get("revoked_at")!=null)fail(ErrorCode.CONTENT_REVOKED);
         if(!LearningCatalog.hash((String)row.get("manifest")).equals(row.get("manifest_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
         var d=publication((UUID)row.get("publication_id"),(UUID)row.get("child_id"));
         if(!d.get("manifest_hash").equals(row.get("content_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
-        return paths(d);
+        return d;
     }
     public CoreDependencyValidator.Artifact readArtifact(UUID id) {
         var a=one("select * from learning.core_artifact where id=?",id);live(id);
@@ -209,6 +212,34 @@ public class CorePublicationService {
         for(var item:authored)if(item.path("slot").asInt()==slot){String place=item.path("place").asText();if(List.of("Home","Class","Park","Traffic","School","Mall","Canteen").contains(place))((tools.jackson.databind.node.ObjectNode)body.path("presentation")).put("place",place);}
         return body;
     }
+    private String validationKey(Map<String,Object> d){return d.get("id")+":"+d.get("payload_hash")+":"+d.get("manifest_hash")+":"+d.get("validator_version");}
+    /**
+     * 발행 때 실제 바이트로 만든 변경 불가 검사 증거를 읽습니다.
+     * 서버 재시작 직후에도 기존 다섯 편의 WAV 전체를 다시 내려받지 않습니다.
+     * V6/V7/V14의 불변 트리거와 신뢰된 validate/publishPrototype만 이 증거를 생성합니다.
+     * 권한·동의·발행/부모 승인·원고 상태 검사는 publication()에서 매 요청 유지됩니다.
+     */
+    private void requireSavedDependencies(Map<String,Object> d){
+        String version=(String)d.get("validator_version");
+        if(!Set.of(CoreDependencyValidator.VERSION,PrototypeBinding.VERSION).contains(version))fail(ErrorCode.CONTENT_NOT_APPROVED);
+        String key=validationKey(d);var cached=verified.get(key);if(cached!=null){requireArtifactsLive(cached);return;}
+        var m=one("select payload_hash from learning.core_manuscript where material_id=?",d.get("material_id"));
+        if(!m.get("payload_hash").equals(d.get("payload_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+        var manifest=json.readTree((String)d.get("manifest"));
+        if(PrototypeBinding.VERSION.equals(version)){
+            if(!manifest.path("prototypeBindingHash").asText().equals(d.get("manifest_hash"))||!manifest.path("payloadHash").asText().equals(d.get("payload_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+        }else if(!LearningCatalog.hash((String)d.get("manifest")).equals(d.get("manifest_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+        var expected=new LinkedHashMap<UUID,tools.jackson.databind.JsonNode>();
+        for(var ref:manifest.path("artifacts"))if(expected.put(UUID.fromString(ref.path("id").asText()),ref)!=null)fail(ErrorCode.CONTENT_HASH_MISMATCH);
+        if(expected.isEmpty()||expected.size()>500)fail(ErrorCode.CONTENT_NOT_APPROVED);
+        String marks=String.join(",",Collections.nCopies(expected.size(),"?"));
+        // 음원 BLOB 없이 ID/hash/종류/원천/철회만 한 SQL로 확인합니다.
+        var rows=db.queryForList("select a.id,a.kind,a.source_id,a.bytes_hash,r.target_id as revoked from learning.core_artifact a left join learning.core_revocation r on r.target_id=a.id where a.id in ("+marks+")",expected.keySet().toArray());
+        if(rows.size()!=expected.size())fail(ErrorCode.CONTENT_HASH_MISMATCH);
+        for(var row:rows){var ref=expected.get((UUID)row.get("id"));if(row.get("revoked")!=null)fail(ErrorCode.CONTENT_REVOKED);
+            if(ref==null||!ref.path("kind").asText().equals(row.get("kind"))||!ref.path("sourceId").asText().equals(row.get("source_id"))||!ref.path("bytesHash").asText().equals(row.get("bytes_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);}
+        verified.remember(key,new ArrayList<>(expected.keySet()));
+    }
     private void revalidate(Map<String,Object> d) {
         if(PrototypeBinding.VERSION.equals(d.get("validator_version"))) {
             var row=one("select body::text from learning.prototype_package where validation_id=?",d.get("id"));var p=json.readTree((String)row.get("body"));var artifacts=new ArrayList<CoreDependencyValidator.Artifact>();
@@ -224,6 +255,24 @@ public class CorePublicationService {
         var result=validator.validate((String)m.get("payload"),artifacts,cues);
         if(!result.manifestHash().equals(d.get("manifest_hash")) || !m.get("payload_hash").equals(d.get("payload_hash"))
                 || !json.readTree(json.writeValueAsString(result.paths())).equals(json.readTree(d.get("paths").toString())))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+    }
+    private void requireArtifactsLive(List<UUID> ids) {
+        if(ids.isEmpty())fail(ErrorCode.CONTENT_NOT_APPROVED);
+        String marks=String.join(",",Collections.nCopies(ids.size(),"?"));
+        if(Boolean.TRUE.equals(db.queryForObject("select exists(select 1 from learning.core_revocation where target_id in ("+marks+"))",Boolean.class,ids.toArray())))fail(ErrorCode.CONTENT_REVOKED);
+    }
+    /** 재생 허가는 음원 바이트를 보내지 않으므로 고정 hash와 현재 철회만 확인합니다. */
+    void requireMediaArtifact(UUID id,String hash){
+        live(id);var a=one("select kind,bytes_hash from learning.core_artifact where id=?",id);
+        if(!"MEDIA".equals(a.get("kind"))||!hash.equals(a.get("bytes_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+    }
+    /** 같은 트랜잭션의 실행 검사를 통과한 문장의 위치·음원 연결을 확인합니다. */
+    void requirePresentationCursor(UUID plan,int slot,String scene,int index,RuntimeContracts.LeaseRequest playback){
+        var row=one("select p.body::text from learning.plan_slot s join learning.core_evidence e on e.id=s.publication_id join learning.prototype_package p on p.validation_id=e.validation_id where s.plan_id=? and s.slot=?",plan,slot);
+        var node=json.readTree((String)row.get("body")).path("presentation").path("nodes").valueStream().filter(n->scene.equals(n.path("sceneId").asText())).findFirst().orElseThrow(()->new ApiException(ErrorCode.INVALID_BRANCH_PATH));
+        if(index<0||index>=node.path("sentences").size())fail(ErrorCode.INVALID_BRANCH_PATH);
+        if(playback!=null){var line=node.path("sentences").get(index);
+            if(!line.path("voiceAssetId").asText().equals(playback.assetId().toString())||!line.path("audioHash").asText().equals(playback.contentHash()))fail(ErrorCode.CONTENT_HASH_MISMATCH);}
     }
     private UUID evidence(ActorPrincipal actor,Map<String,Object> d,String kind,String reference,List<UUID> parents) {
         if(!LearningCatalog.text(reference,200))fail(ErrorCode.INVALID_SCHEMA);UUID child=child(d);long revision=requireChild(child);UUID id=UUID.randomUUID();
@@ -246,7 +295,7 @@ public class CorePublicationService {
     private void requireConfirmed(Map<String,Object> d) {
         if(!Boolean.TRUE.equals(db.queryForObject("select exists(select 1 from learning.material where id=? and current and revoked_at is null and status='CONFIRMED')",Boolean.class,d.get("material_id"))))fail(ErrorCode.CONTENT_NOT_APPROVED);
     }
-    private UUID child(Map<String,Object> d) {return (UUID)manuscript((UUID)d.get("material_id")).get("child_id");}
+    private UUID child(Map<String,Object> d) {return db.queryForObject("select child_id from learning.core_manuscript where material_id=?",UUID.class,d.get("material_id"));}
     private long requireChild(UUID child) {
         if(!Boolean.TRUE.equals(db.queryForObject("select exists(select 1 from care.child c join identity.member m on m.id=c.guardian_id where c.id=? and c.deleted_at is null and m.status='ACTIVE' and m.role='GUARDIAN' and m.email_verified_at is not null)",Boolean.class,child)))fail(ErrorCode.CHILD_ACCESS_DENIED);
         access.requireConsent(child,ChildContracts.ConsentScope.CORE_PROFILE_LEARNING);

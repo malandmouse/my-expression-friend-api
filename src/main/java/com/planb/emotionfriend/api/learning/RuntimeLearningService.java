@@ -58,26 +58,37 @@ public class RuntimeLearningService {
     }
     public StoredResponse checkpoint(ActorPrincipal actor,UUID session,Checkpoint request,String key) {
         return idempotency.execute(actor,"PUT","/api/v1/sessions/"+session+"/checkpoint",key,request,
-                ()->{sessionAccess(actor,session);checkpointLive(session);content.execution(ledger.session(session).planId(),request.slot());},()->{
-            var current=checkpoint(session);var state=ledger.session(session);
-            if(request.checkpointRevision()!=current.path("checkpointRevision").asLong() || !request.attemptId().toString().equals(current.path("attemptId").asText())
-                    || request.slot()!=state.completedCount()+1)fail(ErrorCode.STALE_CHECKPOINT);
-            if(!request.manifestHash().equals(pin(session).get("plan_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
-            if(request.worldRevision()!=state.worldRevision())fail(ErrorCode.STALE_WORLD_STATE);
-            if(request.draftVersion()<current.path("draftVersion").asLong())fail(ErrorCode.STALE_DRAFT);
-            validatePath(state,request);
-            if(request.presentationCursor()!=null) {
-                var cursor=request.presentationCursor();
-                if(!Objects.equals(cursor.sceneId(),request.sceneId()))fail(ErrorCode.INVALID_BRANCH_PATH);
-                var packageView=content.prototypePackage(state.planId(),request.slot());
-                var node=packageView.path("presentation").path("nodes").valueStream().filter(n->n.path("sceneId").asText().equals(cursor.sceneId())).findFirst().orElseThrow(()->new ApiException(ErrorCode.INVALID_BRANCH_PATH));
-                if(cursor.sentenceIndex()>=node.path("sentences").size())fail(ErrorCode.INVALID_BRANCH_PATH);
-            }
-            if(request.confirmedExpressionRef()!=null)PrototypeExpressionProof.require(db,json,expressions,clock,request.confirmedExpressionRef(),session,request.slot(),actor.actorId(),request.draftVersion(),PrototypeExpressionProof.choice(db,request.confirmedExpressionRef()));
-            var body=(tools.jackson.databind.node.ObjectNode)json.valueToTree(request);body.put("checkpointRevision",request.checkpointRevision()+1);
-            db.update("update learning.runtime_checkpoint set revision=revision+1,body=?::jsonb,saved_at=? where session_id=?",body.toString(),ts(),session);
-            return response(200,body);
+                ()->{sessionAccess(actor,session);checkpointLive(session);content.execution(ledger.session(session).planId(),request.slot());},
+                ()->response(200,saveCheckpoint(actor,session,request,null)));
+    }
+    /** 한 번의 왕복에서 진행 저장과 해당 문장의 30초 재생 허가를 함께 확정합니다. */
+    public StoredResponse checkpointPlayback(ActorPrincipal actor,UUID session,CheckpointPlayback request,String key){
+        return idempotency.execute(actor,"PUT","/api/v1/sessions/"+session+"/checkpoint-and-playback",key,request,()->{
+            sessionAccess(actor,session);
+            if(!request.checkpoint().slot().equals(request.playback().slot())||request.checkpoint().presentationCursor()==null)fail(ErrorCode.INVALID_BRANCH_PATH);
+            // 재전송 때에도 현재 동의/연결/발행/음원 철회를 확인합니다.
+            asset(session,request.playback().slot(),request.playback().assetId(),request.playback().contentHash());
+        },()->{
+            var cp=saveCheckpoint(actor,session,request.checkpoint(),request.playback());
+            return response(200,new Advanced(cp,issueLease(actor,session,request.playback())));
         });
+    }
+    private tools.jackson.databind.JsonNode saveCheckpoint(ActorPrincipal actor,UUID session,Checkpoint request,LeaseRequest playback){
+        var current=checkpoint(session);var state=ledger.session(session);
+        if(request.checkpointRevision()!=current.path("checkpointRevision").asLong() || !request.attemptId().toString().equals(current.path("attemptId").asText())
+                || request.slot()!=state.completedCount()+1)fail(ErrorCode.STALE_CHECKPOINT);
+        if(!request.manifestHash().equals(pin(session).get("plan_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+        if(request.worldRevision()!=state.worldRevision())fail(ErrorCode.STALE_WORLD_STATE);
+        if(request.draftVersion()<current.path("draftVersion").asLong())fail(ErrorCode.STALE_DRAFT);
+        validatePath(state,request);
+        if(request.presentationCursor()!=null){var cursor=request.presentationCursor();
+            if(!Objects.equals(cursor.sceneId(),request.sceneId()))fail(ErrorCode.INVALID_BRANCH_PATH);
+            content.requirePresentationCursor(state.planId(),request.slot(),cursor.sceneId(),cursor.sentenceIndex(),playback);
+        }
+        if(request.confirmedExpressionRef()!=null)PrototypeExpressionProof.require(db,json,expressions,clock,request.confirmedExpressionRef(),session,request.slot(),actor.actorId(),request.draftVersion(),PrototypeExpressionProof.choice(db,request.confirmedExpressionRef()));
+        var body=(tools.jackson.databind.node.ObjectNode)json.valueToTree(request);body.put("checkpointRevision",request.checkpointRevision()+1);
+        db.update("update learning.runtime_checkpoint set revision=revision+1,body=?::jsonb,saved_at=? where session_id=?",body.toString(),ts(),session);
+        return body;
     }
     public StoredResponse expression(ActorPrincipal actor,UUID session,int slot,LearningContracts.ExpressionRequest request,String key) {
         return idempotency.execute(actor,"POST","/api/v1/sessions/"+session+"/slots/"+slot+"/confirmed-expressions",key,request,
@@ -118,19 +129,22 @@ public class RuntimeLearningService {
     }
     public StoredResponse lease(ActorPrincipal actor,UUID session,LeaseRequest request,String key) {
         return idempotency.execute(actor,"POST","/api/v1/sessions/"+session+"/playback-leases",key,request,
-                ()->{sessionAccess(actor,session);asset(actor,session,request.slot(),request.assetId(),request.contentHash());},()->{
-            if(leaseSeconds==0)fail(ErrorCode.CONTENT_NOT_APPROVED);
-            UUID id=UUID.randomUUID();Instant expires=clock.instant().plusSeconds(leaseSeconds);var d=auth.require(actor);
-            db.update("insert into learning.asset_lease(id,device,generation,session_id,slot,plan_hash,asset_id,asset_hash,expires_at) values(?,?,?,?,?,?,?,?,?)",id,UUID.fromString(actor.actorId()),d.get("generation"),session,request.slot(),pin(session).get("plan_hash"),request.assetId(),request.contentHash(),Timestamp.from(expires));
-            return response(201,new Lease(id,expires,request.contentHash()));
+                ()->{sessionAccess(actor,session);asset(session,request.slot(),request.assetId(),request.contentHash());},()->{
+            return response(201,issueLease(actor,session,request));
         });
+    }
+    private Lease issueLease(ActorPrincipal actor,UUID session,LeaseRequest request){
+        if(leaseSeconds==0)fail(ErrorCode.CONTENT_NOT_APPROVED);
+        UUID id=UUID.randomUUID();Instant expires=clock.instant().plusSeconds(leaseSeconds);var d=auth.require(actor);
+        db.update("insert into learning.asset_lease(id,device,generation,session_id,slot,plan_hash,asset_id,asset_hash,expires_at) values(?,?,?,?,?,?,?,?,?)",id,UUID.fromString(actor.actorId()),d.get("generation"),session,request.slot(),pin(session).get("plan_hash"),request.assetId(),request.contentHash(),Timestamp.from(expires));
+        return new Lease(id,expires,request.contentHash());
     }
     public StoredResponse renewLease(ActorPrincipal actor,UUID lease,LeaseRequest request,String key) {
         return idempotency.execute(actor,"POST","/api/v1/playback-leases/"+lease+"/renew",key,request,()->{
             auth.require(actor);var old=leaseRow(lease);UUID session=(UUID)old.get("session_id");
             sessionAccess(actor,session);leaseBinding(actor,old,session,request.slot(),request.assetId());
             if(!old.get("asset_hash").equals(request.contentHash()))fail(ErrorCode.CONTENT_HASH_MISMATCH);
-            asset(actor,session,request.slot(),request.assetId(),request.contentHash());
+            asset(session,request.slot(),request.assetId(),request.contentHash());
         },()->{
             var old=leaseRow(lease);if(Boolean.TRUE.equals(old.get("superseded")))fail(ErrorCode.EXECUTION_LEASE_EXPIRED);
             if(leaseSeconds==0)fail(ErrorCode.CONTENT_NOT_APPROVED);UUID id=UUID.randomUUID();Instant expires=clock.instant().plusSeconds(leaseSeconds);
@@ -144,14 +158,14 @@ public class RuntimeLearningService {
         if(rows.isEmpty())fail(ErrorCode.EXECUTION_LEASE_EXPIRED);var l=rows.getFirst();var d=auth.require(actor);
         if(Boolean.TRUE.equals(l.get("superseded")) || !l.get("device").toString().equals(actor.actorId()) || !l.get("generation").equals(d.get("generation"))
                 || !l.get("plan_hash").equals(pin(session).get("plan_hash")) || !((Timestamp)l.get("expires_at")).toInstant().isAfter(clock.instant()))fail(ErrorCode.EXECUTION_LEASE_EXPIRED);
-        asset(actor,session,slot,asset,(String)l.get("asset_hash"));return (String)l.get("asset_hash");
+        asset(session,slot,asset,(String)l.get("asset_hash"));return (String)l.get("asset_hash");
     }
-    private void asset(ActorPrincipal actor,UUID session,int slot,UUID asset,String hash) {
+    private void asset(UUID session,int slot,UUID asset,String hash) {
         checkpointLive(session);var state=ledger.session(session);
         if(slot!=Math.min(5,state.completedCount()+1))fail(ErrorCode.INVALID_BRANCH_PATH);
-        content.execution(state.planId(),slot);var manifest=json.readTree((String)dependency(state.planId(),slot).get("manifest"));
+        var verified=content.executionDependency(state.planId(),slot);var manifest=json.readTree((String)verified.get("manifest"));
         boolean found=false;for(var a:manifest.path("artifacts"))if(a.path("id").asText().equals(asset.toString()) && a.path("kind").asText().equals("MEDIA") && a.path("bytesHash").asText().equals(hash))found=true;
-        if(!found)fail(ErrorCode.CONTENT_HASH_MISMATCH);content.readArtifact(asset);
+        if(!found)fail(ErrorCode.CONTENT_HASH_MISMATCH);content.requireMediaArtifact(asset,hash);
     }
     private Map<String,Object> leaseRow(UUID id) {var rows=db.queryForList("select * from learning.asset_lease where id=?",id);if(rows.isEmpty())fail(ErrorCode.EXECUTION_LEASE_EXPIRED);return rows.getFirst();}
     private void leaseBinding(ActorPrincipal actor,Map<String,Object> lease,UUID session,int slot,UUID asset) {

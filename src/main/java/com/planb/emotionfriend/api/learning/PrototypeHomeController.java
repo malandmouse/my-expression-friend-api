@@ -28,6 +28,6 @@ public class PrototypeHomeController {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("schemaVersion","EF_DAY_INDEX_P1","childId",a.childId(),"days",rows));
     }
     @GetMapping("/api/v1/child-sessions/capabilities") @Transactional public ResponseEntity<Object> capabilities(){var a=child();var scopes=db.queryForList("select scope from care.consent where child_id=? and granted and withdrawn_at is null",String.class,UUID.fromString(a.childId()));
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("childId",a.childId(),"localDraftResumeAllowed",scopes.contains("LOCAL_DRAFT_RESUME"),"cardsAllowed",scopes.contains("CARD_EXTERNAL_PROCESSING")));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("childId",a.childId(),"localDraftResumeAllowed",scopes.contains("LOCAL_DRAFT_RESUME"),"cardsAllowed",scopes.contains("CARD_EXTERNAL_PROCESSING"),"checkpointPlaybackSupported",true));
     }
 }
