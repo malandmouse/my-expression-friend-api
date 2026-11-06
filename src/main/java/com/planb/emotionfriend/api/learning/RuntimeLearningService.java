@@ -66,7 +66,14 @@ public class RuntimeLearningService {
             if(request.worldRevision()!=state.worldRevision())fail(ErrorCode.STALE_WORLD_STATE);
             if(request.draftVersion()<current.path("draftVersion").asLong())fail(ErrorCode.STALE_DRAFT);
             validatePath(state,request);
-            if(request.confirmedExpressionRef()!=null)expressions.require(request.confirmedExpressionRef(),session,request.slot(),actor.actorId(),request.draftVersion());
+            if(request.presentationCursor()!=null) {
+                var cursor=request.presentationCursor();
+                if(!Objects.equals(cursor.sceneId(),request.sceneId()))fail(ErrorCode.INVALID_BRANCH_PATH);
+                var packageView=content.prototypePackage(state.planId(),request.slot());
+                var node=packageView.path("presentation").path("nodes").valueStream().filter(n->n.path("sceneId").asText().equals(cursor.sceneId())).findFirst().orElseThrow(()->new ApiException(ErrorCode.INVALID_BRANCH_PATH));
+                if(cursor.sentenceIndex()>=node.path("sentences").size())fail(ErrorCode.INVALID_BRANCH_PATH);
+            }
+            if(request.confirmedExpressionRef()!=null)PrototypeExpressionProof.require(db,json,expressions,clock,request.confirmedExpressionRef(),session,request.slot(),actor.actorId(),request.draftVersion(),PrototypeExpressionProof.choice(db,request.confirmedExpressionRef()));
             var body=(tools.jackson.databind.node.ObjectNode)json.valueToTree(request);body.put("checkpointRevision",request.checkpointRevision()+1);
             db.update("update learning.runtime_checkpoint set revision=revision+1,body=?::jsonb,saved_at=? where session_id=?",body.toString(),ts(),session);
             return response(200,body);
@@ -98,8 +105,16 @@ public class RuntimeLearningService {
     @Transactional public LearningContracts.Receipt receipt(ActorPrincipal actor,UUID session,int slot) {sessionAccess(actor,session);return ledger.receipt(session,slot);}
     @Transactional public Object content(ActorPrincipal actor,UUID session,int slot) {
         sessionAccess(actor,session);var state=ledger.session(session);content.execution(state.planId(),slot);
+        if(PrototypeBinding.VERSION.equals(dependency(state.planId(),slot).get("validator_version")))fail(ErrorCode.UNSUPPORTED_SCHEMA_VERSION);
         UUID material=state.slots().stream().filter(s->s.slot()==slot).findFirst().orElseThrow(()->new ApiException(ErrorCode.INVALID_SCHEMA)).materialId();
         return Map.of("pin",pinView(session),"scenario",json.readTree((String)content.manuscript(material).get("payload")),"dependencyManifest",json.readTree((String)dependency(state.planId(),slot).get("manifest")));
+    }
+    @Transactional public Object runtimePackage(ActorPrincipal actor,UUID session,int slot) {
+        sessionAccess(actor,session);var state=ledger.session(session);var source=content.prototypePackage(state.planId(),slot);var pin=pin(session);
+        var out=json.createObjectNode().put("schemaVersion","EF_FOUNDATION_RUNTIME_P1");
+        var scope=out.putObject("pin");scope.put("sessionId",session.toString()).put("planManifestHash",(String)pin.get("plan_hash")).put("entryWorldRevision",((Number)pin.get("entry_world_revision")).longValue());scope.set("planManifest",json.readTree((String)pin.get("manifest")));
+        for(String field:List.of("scenario","dependencyManifest","presentation"))out.set(field,source.path(field));
+        out.put("packageHash",com.planb.emotionfriend.api.agent.PrototypeJson.digest(out));return out;
     }
     public StoredResponse lease(ActorPrincipal actor,UUID session,LeaseRequest request,String key) {
         return idempotency.execute(actor,"POST","/api/v1/sessions/"+session+"/playback-leases",key,request,
@@ -155,6 +170,7 @@ public class RuntimeLearningService {
         String cursor=s.path("sceneGraph").path("startSceneId").asText();int choice=0;
         while(true) {
             var n=scenes.get(cursor);if(n==null)fail(ErrorCode.INVALID_BRANCH_PATH);
+            if(cp.sceneId()!=null&&cp.sceneId().equals(cursor)&&choice==cp.selectedChoiceIds().size())break;
             if(n.path("end").asBoolean())break;
             if(n.has("nextSceneId")){cursor=n.path("nextSceneId").asText();continue;}
             if(choice==cp.selectedChoiceIds().size())break;

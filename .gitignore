@@ -64,3 +64,19 @@ replay_pid*
 *~
 .DS_Store
 Thumbs.db
+
+# Tracked integration source, documentation, and empty configuration template.
+!/worker/
+!/runtime/
+!/docs/
+/docs/*
+!/docs/AGENT_API.md
+!/docs/DEPLOY_PROTOTYPE.md
+!/docs/INTEGRATION.md
+!/docs/PROFILE_MAPPING.md
+!/docs/PROTOTYPE_CONNECTIONS.md
+!/.env.integration.example
+/worker/data/*
+!/worker/data/.gitkeep
+**/__pycache__/
+**/*.pyc

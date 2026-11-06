@@ -1,0 +1,61 @@
+{
+  "contractVersion": "EF_ST_AGENT_DRAFT_V1",
+  "childId": "00000000-0000-4000-8000-000000000001",
+  "observationSnapshotId": "00000000-0000-4000-8000-000000000030",
+  "observationRevision": 1,
+  "counts": {
+    "completedSlots": 3,
+    "starsFromReceipts": 3,
+    "recognition": {
+      "validFirstResponses": 3,
+      "matched": 2,
+      "mismatched": 1,
+      "matchedWithoutRecordedSupport": 1,
+      "matchedWithReplayOrHint": 1,
+      "supportUnknown": 0
+    },
+    "expression": {
+      "childOriginal": 1,
+      "preparedChoice": 0,
+      "cards": 0,
+      "aiComposed": 1,
+      "unknown": 0,
+      "refused": 0
+    },
+    "excluded": {
+      "duplicateEvents": 0,
+      "invalidOrUnpresented": 0,
+      "technicalFailure": 1,
+      "noResponse": 0
+    }
+  },
+  "caregiverText": "5회기 중 3회기 완료. 유효한 첫 감정 응답 3건 중 2건이 문항의 허용 답과 일치했습니다. 일치한 응답 중 1건은 다시 듣기를 사용했습니다. 자기표현은 아동 원문 1건과 AI 확장문 1건으로 구분했습니다. 기술 장애 1건은 감정 응답 집계에서 제외했습니다.",
+  "limitations": [
+    "NOT_A_DIAGNOSTIC_SCORE",
+    "SUPPORT_CONDITIONS_MUST_BE_READ",
+    "AI_COMPOSED_IS_NOT_INDEPENDENT_CHILD_LANGUAGE",
+    "DOCUMENTATION_FIXTURE_NOT_REAL_CHILD_RECORD"
+  ],
+  "nextTraining": {
+    "priorityGoals": [
+      "EMOTION_CONTEXT",
+      "SELF_FEELING"
+    ],
+    "explanationHint": "RECAP_CAUSE",
+    "reasonCodes": [
+      "MAINTAIN_GOAL_WITH_NEW_EVENT"
+    ],
+    "evidenceEventIds": [
+      "example-event-1",
+      "example-event-2",
+      "example-event-3"
+    ],
+    "repeatItemIds": [],
+    "profileChanged": false,
+    "publishedScenarioChanged": false
+  },
+  "schedulerMode": "DISABLED_NO_FIXED_BANK",
+  "modelCalls": 0,
+  "completionWrites": 0,
+  "starWrites": 0
+}

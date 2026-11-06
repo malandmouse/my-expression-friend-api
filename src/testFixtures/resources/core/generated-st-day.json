@@ -1,0 +1,2338 @@
+{
+  "contractVersion": "EF_FOUNDATION_AGENT_1",
+  "jobId": "00000000-0000-4000-8000-000000000010",
+  "sourceSnapshot": {
+    "snapshotId": "00000000-0000-4000-8000-000000000011",
+    "inputRevision": 1,
+    "profileVersion": 3,
+    "authorityRevision": 1
+  },
+  "result": {
+    "contractVersion": "EF_ST_AGENT_DRAFT_V1",
+    "jobId": "00000000-0000-4000-8000-000000000010",
+    "inputRevision": 1,
+    "status": "DRAFT_READY",
+    "publicationAllowed": false,
+    "program": {
+      "programDay": 1,
+      "localDate": "2026-11-05",
+      "timeZone": "Asia/Seoul",
+      "sessionsPerDay": 5
+    },
+    "scenarios": [
+      {
+        "slot": 1,
+        "place": "Class",
+        "meetingReason": "Class에서 같은 학교 친구와 잠깐 이야기하는 허구 상황이다.",
+        "draft": {
+          "format": "EF_PREPARED_CONVERSATION_V1",
+          "npcId": "JungHoon",
+          "topic": "Day 1 · 새 교실 앞에서",
+          "summary": "준이 새 교실에 들어오기 전 걱정했던 일을 이야기한다.",
+          "startNodeId": "greeting",
+          "nodes": [
+            {
+              "nodeId": "greeting",
+              "text": "어, 안녕. 난 준이야. 혹시 옆자리 비었어? 여기 앉아도 돼?",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 대화에 반응한다.",
+              "emotionEvidenceQuote": "어, 안녕. 난 준이야. 혹시 옆자리 비었어? 여기 앉아도 돼?",
+              "causeNodeIds": [
+                "greeting"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [
+                {
+                  "choiceId": "seat_yes",
+                  "text": "응, 여기는 비어 있어.",
+                  "targetNodeId": "greeting_reply_a",
+                  "observationFocus": "CONTEXTUAL_RESPONSE",
+                  "contextualMeaning": "빈자리 질문에 답하는 허구 선택지다."
+                },
+                {
+                  "choiceId": "seat_taken",
+                  "text": "여기는 다른 친구 자리야.",
+                  "targetNodeId": "greeting_reply_b",
+                  "observationFocus": "CLARIFICATION",
+                  "contextualMeaning": "자리의 상황을 알려 주는 허구 선택지다."
+                }
+              ],
+              "nextNodeId": null,
+              "isEnding": false
+            },
+            {
+              "nodeId": "greeting_reply_a",
+              "text": "알려 줘서 고마워. 가방을 들고 자리를 찾고 있었어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 대화에 반응한다.",
+              "emotionEvidenceQuote": "알려 줘서 고마워. 가방을 들고 자리를 찾고 있었어.",
+              "causeNodeIds": [
+                "greeting_reply_a"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "start",
+              "isEnding": false
+            },
+            {
+              "nodeId": "greeting_reply_b",
+              "text": "아, 그럼 다른 빈자리를 찾아볼게. 알려 줘서 고마워.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 대화에 반응한다.",
+              "emotionEvidenceQuote": "아, 그럼 다른 빈자리를 찾아볼게. 알려 줘서 고마워.",
+              "causeNodeIds": [
+                "greeting_reply_b"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "start",
+              "isEnding": false
+            },
+            {
+              "nodeId": "start",
+              "text": "아까 교실 문 앞에서 잠깐 멈췄어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "아까 교실 문 앞에서 잠깐 멈췄어.",
+              "causeNodeIds": [
+                "start"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "moment",
+              "isEnding": false
+            },
+            {
+              "nodeId": "moment",
+              "text": "아는 친구가 한 명도 없을까 봐 걱정됐어. 문을 열기 전에 손잡이만 만졌어.",
+              "emotionId": "FEAR",
+              "emotionIntensity": 0.5,
+              "emotionCause": "아는 친구가 한 명도 없을까 봐 걱정됐어. 문을 열기 전에 손잡이만 만졌어.",
+              "emotionEvidenceQuote": "아는 친구가 한 명도 없을까 봐 걱정됐어. 문을 열기 전에 손잡이만 만졌어.",
+              "causeNodeIds": [
+                "moment"
+              ],
+              "faceCue": "SAD",
+              "animationCue": "NOD",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "text": "들어오기 전이 걱정됐구나.",
+                  "targetNodeId": "reply_a",
+                  "observationFocus": "CONTEXTUAL_RESPONSE",
+                  "contextualMeaning": "방금 들은 사건에 연결해 답한다."
+                },
+                {
+                  "choiceId": "b",
+                  "text": "지금은 어때?",
+                  "targetNodeId": "reply_b",
+                  "observationFocus": "CLARIFICATION",
+                  "contextualMeaning": "관련 질문이나 자신의 다른 생각을 표현한다."
+                }
+              ],
+              "nextNodeId": null,
+              "isEnding": false
+            },
+            {
+              "nodeId": "reply_a",
+              "text": "응. 지금은 일단 내 자리를 찾아보려고.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "응. 지금은 일단 내 자리를 찾아보려고.",
+              "causeNodeIds": [
+                "reply_a"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            },
+            {
+              "nodeId": "reply_b",
+              "text": "아까보다는 괜찮아. 이름표부터 보려고.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "아까보다는 괜찮아. 이름표부터 보려고.",
+              "causeNodeIds": [
+                "reply_b"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            }
+          ],
+          "expressionSupport": {
+            "prompt": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+            "feelings": [
+              "FEAR",
+              "HAPPY"
+            ],
+            "reasons": [
+              "내가 떠올린 일을 내 말로 이야기하고 싶어."
+            ],
+            "wishes": [
+              "내 생각도 들어 주면 좋겠어."
+            ]
+          },
+          "emotionQuestions": [
+            {
+              "terminalNodeId": "reply_a",
+              "targetNodeId": "moment",
+              "prompt": "“아는 친구가 한 명도 없을까 봐 걱정됐어. 문을 열기 전에 손잡이만 만졌어.”에서 준은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "FEAR",
+              "options": [
+                {
+                  "emotionId": "FEAR",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "DISTRESS",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "SHOCK",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "HAPPY",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            },
+            {
+              "terminalNodeId": "reply_b",
+              "targetNodeId": "moment",
+              "prompt": "“아는 친구가 한 명도 없을까 봐 걱정됐어. 문을 열기 전에 손잡이만 만졌어.”에서 준은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "FEAR",
+              "options": [
+                {
+                  "emotionId": "FEAR",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "DISTRESS",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "SHOCK",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "HAPPY",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            }
+          ]
+        },
+        "questionBindings": [
+          {
+            "terminalNodeId": "reply_a",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-fear",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          },
+          {
+            "terminalNodeId": "reply_b",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-fear",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          }
+        ]
+      },
+      {
+        "slot": 2,
+        "place": "School",
+        "meetingReason": "School에서 같은 학교 친구와 잠깐 이야기하는 허구 상황이다.",
+        "draft": {
+          "format": "EF_PREPARED_CONVERSATION_V1",
+          "npcId": "MainPlayer",
+          "topic": "Day 1 · 나래가 들은 소문",
+          "summary": "나래가 담임 선생님에 대해 확실하지 않은 소식을 듣고 느낀 마음을 나눈다.",
+          "startNodeId": "greeting",
+          "nodes": [
+            {
+              "nodeId": "greeting",
+              "text": "안녕! 난 나래야. 우리 담임 선생님 어떤 분일까? 아까 복도에서 되게 친절하시다는 얘길 들었는데, 아직 직접 못 봤어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 대화에 반응한다.",
+              "emotionEvidenceQuote": "안녕! 난 나래야. 우리 담임 선생님 어떤 분일까? 아까 복도에서 되게 친절하시다는 얘길 들었는데, 아직 직접 못 봤어.",
+              "causeNodeIds": [
+                "greeting"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [
+                {
+                  "choiceId": "teacher_unknown",
+                  "text": "나도 아직 직접 못 봤어.",
+                  "targetNodeId": "greeting_reply_a",
+                  "observationFocus": "CONTEXTUAL_RESPONSE",
+                  "contextualMeaning": "확인하지 못한 사실을 구분한다."
+                },
+                {
+                  "choiceId": "teacher_wait",
+                  "text": "직접 만나면 알 수 있겠네.",
+                  "targetNodeId": "greeting_reply_b",
+                  "observationFocus": "CONTEXTUAL_RESPONSE",
+                  "contextualMeaning": "소문을 확정하지 않는 응답이다."
+                }
+              ],
+              "nextNodeId": null,
+              "isEnding": false
+            },
+            {
+              "nodeId": "greeting_reply_a",
+              "text": "그러게. 나도 직접 만나 봐야 알 것 같아.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 대화에 반응한다.",
+              "emotionEvidenceQuote": "그러게. 나도 직접 만나 봐야 알 것 같아.",
+              "causeNodeIds": [
+                "greeting_reply_a"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "start",
+              "isEnding": false
+            },
+            {
+              "nodeId": "greeting_reply_b",
+              "text": "맞아. 아직은 들은 이야기니까.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 대화에 반응한다.",
+              "emotionEvidenceQuote": "맞아. 아직은 들은 이야기니까.",
+              "causeNodeIds": [
+                "greeting_reply_b"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "start",
+              "isEnding": false
+            },
+            {
+              "nodeId": "start",
+              "text": "담임 선생님이 마술을 하신다는 얘길 들었어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "담임 선생님이 마술을 하신다는 얘길 들었어.",
+              "causeNodeIds": [
+                "start"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "moment",
+              "isEnding": false
+            },
+            {
+              "nodeId": "moment",
+              "text": "그 얘기를 처음 들었을 때 깜짝 놀랐어. 학교에서 마술을 본 적은 없거든. 아직 진짜인지는 몰라.",
+              "emotionId": "SURPRISE",
+              "emotionIntensity": 0.5,
+              "emotionCause": "그 얘기를 처음 들었을 때 깜짝 놀랐어. 학교에서 마술을 본 적은 없거든. 아직 진짜인지는 몰라.",
+              "emotionEvidenceQuote": "그 얘기를 처음 들었을 때 깜짝 놀랐어. 학교에서 마술을 본 적은 없거든. 아직 진짜인지는 몰라.",
+              "causeNodeIds": [
+                "moment"
+              ],
+              "faceCue": "HAPPY",
+              "animationCue": "NOD",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "text": "직접 봐야 알겠네.",
+                  "targetNodeId": "reply_a",
+                  "observationFocus": "CONTEXTUAL_RESPONSE",
+                  "contextualMeaning": "방금 들은 사건에 연결해 답한다."
+                },
+                {
+                  "choiceId": "b",
+                  "text": "어떤 마술이래?",
+                  "targetNodeId": "reply_b",
+                  "observationFocus": "CLARIFICATION",
+                  "contextualMeaning": "관련 질문이나 자신의 다른 생각을 표현한다."
+                }
+              ],
+              "nextNodeId": null,
+              "isEnding": false
+            },
+            {
+              "nodeId": "reply_a",
+              "text": "맞아. 아직은 들은 이야기니까.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "맞아. 아직은 들은 이야기니까.",
+              "causeNodeIds": [
+                "reply_a"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            },
+            {
+              "nodeId": "reply_b",
+              "text": "그건 못 들었어. 나도 그 부분이 궁금해.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "그건 못 들었어. 나도 그 부분이 궁금해.",
+              "causeNodeIds": [
+                "reply_b"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            }
+          ],
+          "expressionSupport": {
+            "prompt": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+            "feelings": [
+              "SURPRISE",
+              "HAPPY"
+            ],
+            "reasons": [
+              "내가 떠올린 일을 내 말로 이야기하고 싶어."
+            ],
+            "wishes": [
+              "내 생각도 들어 주면 좋겠어."
+            ]
+          },
+          "emotionQuestions": [
+            {
+              "terminalNodeId": "reply_a",
+              "targetNodeId": "moment",
+              "prompt": "“그 얘기를 처음 들었을 때 깜짝 놀랐어. 학교에서 마술을 본 적은 없거든. 아직 진짜인지는 몰라.”에서 나래은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "SURPRISE",
+              "options": [
+                {
+                  "emotionId": "SURPRISE",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "SHOCK",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "FEAR",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "SATISFACTION",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            },
+            {
+              "terminalNodeId": "reply_b",
+              "targetNodeId": "moment",
+              "prompt": "“그 얘기를 처음 들었을 때 깜짝 놀랐어. 학교에서 마술을 본 적은 없거든. 아직 진짜인지는 몰라.”에서 나래은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "SURPRISE",
+              "options": [
+                {
+                  "emotionId": "SURPRISE",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "SHOCK",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "FEAR",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "SATISFACTION",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            }
+          ]
+        },
+        "questionBindings": [
+          {
+            "terminalNodeId": "reply_a",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-surprise",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          },
+          {
+            "terminalNodeId": "reply_b",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-surprise",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          }
+        ]
+      },
+      {
+        "slot": 3,
+        "place": "Canteen",
+        "meetingReason": "Canteen에서 같은 학교 친구와 잠깐 이야기하는 허구 상황이다.",
+        "draft": {
+          "format": "EF_PREPARED_CONVERSATION_V1",
+          "npcId": "JungHoon",
+          "topic": "Day 1 · 말하지 못한 농담",
+          "summary": "준이 재미있는 말을 떠올렸지만 이야기할 타이밍을 놓친 일을 나눈다.",
+          "startNodeId": "start",
+          "nodes": [
+            {
+              "nodeId": "start",
+              "text": "아까 친구한테 들려주고 싶은 농담이 떠올랐어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "아까 친구한테 들려주고 싶은 농담이 떠올랐어.",
+              "causeNodeIds": [
+                "start"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "moment",
+              "isEnding": false
+            },
+            {
+              "nodeId": "moment",
+              "text": "그런데 말하려는 순간 수업 종이 울렸어. 웃겨 주고 싶었는데 말을 못 해서 아쉬웠어.",
+              "emotionId": "DISAPPOINTMENT",
+              "emotionIntensity": 0.5,
+              "emotionCause": "그런데 말하려는 순간 수업 종이 울렸어. 웃겨 주고 싶었는데 말을 못 해서 아쉬웠어.",
+              "emotionEvidenceQuote": "그런데 말하려는 순간 수업 종이 울렸어. 웃겨 주고 싶었는데 말을 못 해서 아쉬웠어.",
+              "causeNodeIds": [
+                "moment"
+              ],
+              "faceCue": "SAD",
+              "animationCue": "NOD",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "text": "다음 쉬는 시간에 말할 수도 있겠네.",
+                  "targetNodeId": "reply_a",
+                  "observationFocus": "CONTEXTUAL_RESPONSE",
+                  "contextualMeaning": "방금 들은 사건에 연결해 답한다."
+                },
+                {
+                  "choiceId": "b",
+                  "text": "어떤 농담이었어?",
+                  "targetNodeId": "reply_b",
+                  "observationFocus": "CLARIFICATION",
+                  "contextualMeaning": "관련 질문이나 자신의 다른 생각을 표현한다."
+                }
+              ],
+              "nextNodeId": null,
+              "isEnding": false
+            },
+            {
+              "nodeId": "reply_a",
+              "text": "응. 그때까지 잊어버리지 않으려고 짧게 적어 뒀어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "응. 그때까지 잊어버리지 않으려고 짧게 적어 뒀어.",
+              "causeNodeIds": [
+                "reply_a"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            },
+            {
+              "nodeId": "reply_b",
+              "text": "제목만 먼저 말하면 재미없어질 것 같아. 나중에 제대로 들려줄게.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "제목만 먼저 말하면 재미없어질 것 같아. 나중에 제대로 들려줄게.",
+              "causeNodeIds": [
+                "reply_b"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            }
+          ],
+          "expressionSupport": {
+            "prompt": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+            "feelings": [
+              "DISAPPOINTMENT",
+              "HAPPY"
+            ],
+            "reasons": [
+              "내가 떠올린 일을 내 말로 이야기하고 싶어."
+            ],
+            "wishes": [
+              "내 생각도 들어 주면 좋겠어."
+            ]
+          },
+          "emotionQuestions": [
+            {
+              "terminalNodeId": "reply_a",
+              "targetNodeId": "moment",
+              "prompt": "“그런데 말하려는 순간 수업 종이 울렸어. 웃겨 주고 싶었는데 말을 못 해서 아쉬웠어.”에서 준은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "DISAPPOINTMENT",
+              "options": [
+                {
+                  "emotionId": "DISAPPOINTMENT",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "SAD",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "DISTRESS",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "GRATITUDE",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            },
+            {
+              "terminalNodeId": "reply_b",
+              "targetNodeId": "moment",
+              "prompt": "“그런데 말하려는 순간 수업 종이 울렸어. 웃겨 주고 싶었는데 말을 못 해서 아쉬웠어.”에서 준은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "DISAPPOINTMENT",
+              "options": [
+                {
+                  "emotionId": "DISAPPOINTMENT",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "SAD",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "DISTRESS",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "GRATITUDE",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            }
+          ]
+        },
+        "questionBindings": [
+          {
+            "terminalNodeId": "reply_a",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-disappointment",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          },
+          {
+            "terminalNodeId": "reply_b",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-disappointment",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          }
+        ]
+      },
+      {
+        "slot": 4,
+        "place": "Class",
+        "meetingReason": "Class에서 같은 학교 친구와 잠깐 이야기하는 허구 상황이다.",
+        "draft": {
+          "format": "EF_PREPARED_CONVERSATION_V1",
+          "npcId": "MainPlayer",
+          "topic": "Day 1 · 숟가락을 찾아 준 친구",
+          "summary": "나래가 식사 전에 필요한 물건을 찾도록 도와준 친구에게 고마웠던 일을 나눈다.",
+          "startNodeId": "start",
+          "nodes": [
+            {
+              "nodeId": "start",
+              "text": "급식 줄을 다 지나왔는데 숟가락을 안 가져왔더라.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "급식 줄을 다 지나왔는데 숟가락을 안 가져왔더라.",
+              "causeNodeIds": [
+                "start"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "moment",
+              "isEnding": false
+            },
+            {
+              "nodeId": "moment",
+              "text": "옆에 있던 친구가 숟가락 있는 곳을 알려 줬어. 내가 찾고 있는 걸 알아봐 줘서 고마웠어.",
+              "emotionId": "GRATITUDE",
+              "emotionIntensity": 0.5,
+              "emotionCause": "옆에 있던 친구가 숟가락 있는 곳을 알려 줬어. 내가 찾고 있는 걸 알아봐 줘서 고마웠어.",
+              "emotionEvidenceQuote": "옆에 있던 친구가 숟가락 있는 곳을 알려 줬어. 내가 찾고 있는 걸 알아봐 줘서 고마웠어.",
+              "causeNodeIds": [
+                "moment"
+              ],
+              "faceCue": "HAPPY",
+              "animationCue": "NOD",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "text": "찾는 걸 알아봐 줬구나.",
+                  "targetNodeId": "reply_a",
+                  "observationFocus": "CONTEXTUAL_RESPONSE",
+                  "contextualMeaning": "방금 들은 사건에 연결해 답한다."
+                },
+                {
+                  "choiceId": "b",
+                  "text": "그래서 가져왔어?",
+                  "targetNodeId": "reply_b",
+                  "observationFocus": "CLARIFICATION",
+                  "contextualMeaning": "관련 질문이나 자신의 다른 생각을 표현한다."
+                }
+              ],
+              "nextNodeId": null,
+              "isEnding": false
+            },
+            {
+              "nodeId": "reply_a",
+              "text": "응. 내가 두리번거리고 있었거든.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "응. 내가 두리번거리고 있었거든.",
+              "causeNodeIds": [
+                "reply_a"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            },
+            {
+              "nodeId": "reply_b",
+              "text": "응, 그 친구가 가리킨 곳에서 찾았어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "응, 그 친구가 가리킨 곳에서 찾았어.",
+              "causeNodeIds": [
+                "reply_b"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            }
+          ],
+          "expressionSupport": {
+            "prompt": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+            "feelings": [
+              "GRATITUDE",
+              "HAPPY"
+            ],
+            "reasons": [
+              "내가 떠올린 일을 내 말로 이야기하고 싶어."
+            ],
+            "wishes": [
+              "내 생각도 들어 주면 좋겠어."
+            ]
+          },
+          "emotionQuestions": [
+            {
+              "terminalNodeId": "reply_a",
+              "targetNodeId": "moment",
+              "prompt": "“옆에 있던 친구가 숟가락 있는 곳을 알려 줬어. 내가 찾고 있는 걸 알아봐 줘서 고마웠어.”에서 나래은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "GRATITUDE",
+              "options": [
+                {
+                  "emotionId": "GRATITUDE",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "LOVE",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "HAPPY",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "ANGRY",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            },
+            {
+              "terminalNodeId": "reply_b",
+              "targetNodeId": "moment",
+              "prompt": "“옆에 있던 친구가 숟가락 있는 곳을 알려 줬어. 내가 찾고 있는 걸 알아봐 줘서 고마웠어.”에서 나래은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "GRATITUDE",
+              "options": [
+                {
+                  "emotionId": "GRATITUDE",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "LOVE",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "HAPPY",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "ANGRY",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            }
+          ]
+        },
+        "questionBindings": [
+          {
+            "terminalNodeId": "reply_a",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-gratitude",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          },
+          {
+            "terminalNodeId": "reply_b",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-gratitude",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          }
+        ]
+      },
+      {
+        "slot": 5,
+        "place": "School",
+        "meetingReason": "School에서 같은 학교 친구와 잠깐 이야기하는 허구 상황이다.",
+        "draft": {
+          "format": "EF_PREPARED_CONVERSATION_V1",
+          "npcId": "JungHoon",
+          "topic": "Day 1 · 발표가 끝난 뒤",
+          "summary": "준이 발표에서 잠깐 막혔지만 끝낸 뒤 안심했던 마음을 이야기한다.",
+          "startNodeId": "start",
+          "nodes": [
+            {
+              "nodeId": "start",
+              "text": "오늘 발표할 때 첫말이 잠깐 생각 안 났어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "오늘 발표할 때 첫말이 잠깐 생각 안 났어.",
+              "causeNodeIds": [
+                "start"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": "moment",
+              "isEnding": false
+            },
+            {
+              "nodeId": "moment",
+              "text": "종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.",
+              "emotionId": "RELIEF",
+              "emotionIntensity": 0.5,
+              "emotionCause": "종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.",
+              "emotionEvidenceQuote": "종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.",
+              "causeNodeIds": [
+                "moment"
+              ],
+              "faceCue": "HAPPY",
+              "animationCue": "NOD",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "text": "끝내서 마음이 놓였구나.",
+                  "targetNodeId": "reply_a",
+                  "observationFocus": "CONTEXTUAL_RESPONSE",
+                  "contextualMeaning": "방금 들은 사건에 연결해 답한다."
+                },
+                {
+                  "choiceId": "b",
+                  "text": "나는 발표할 때 재미있기도 해.",
+                  "targetNodeId": "reply_b",
+                  "observationFocus": "SELF_EXPRESSION",
+                  "contextualMeaning": "관련 질문이나 자신의 다른 생각을 표현한다."
+                },
+                {
+                  "choiceId": "reported_experience",
+                  "text": "체육 시간에 팀이 바뀌었다.",
+                  "targetNodeId": "experience_reply",
+                  "observationFocus": "SELF_EXPRESSION",
+                  "contextualMeaning": "보호자 보고를 바탕으로 아동이 꺼낼 수 있는 경험 후보이며 실제 발언은 선택 후에만 성립한다."
+                }
+              ],
+              "nextNodeId": null,
+              "isEnding": false
+            },
+            {
+              "nodeId": "reply_a",
+              "text": "응. 완벽하진 않았는데 끝까지 말한 건 좋았어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "응. 완벽하진 않았는데 끝까지 말한 건 좋았어.",
+              "causeNodeIds": [
+                "reply_a"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            },
+            {
+              "nodeId": "reply_b",
+              "text": "너는 재미있는 마음도 드는구나. 나는 시작 전에는 좀 떨리는 편이야.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 자신의 허구 사건을 이야기한다.",
+              "emotionEvidenceQuote": "너는 재미있는 마음도 드는구나. 나는 시작 전에는 좀 떨리는 편이야.",
+              "causeNodeIds": [
+                "reply_b"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            },
+            {
+              "nodeId": "experience_reply",
+              "text": "네가 꺼낸 이야기구나. 지금 네 말을 듣고 있어.",
+              "emotionId": "NEUTRAL",
+              "emotionIntensity": 0,
+              "emotionCause": "현재 대화에 반응한다.",
+              "emotionEvidenceQuote": "네가 꺼낸 이야기구나. 지금 네 말을 듣고 있어.",
+              "causeNodeIds": [
+                "experience_reply"
+              ],
+              "faceCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "choices": [],
+              "nextNodeId": null,
+              "isEnding": true
+            }
+          ],
+          "expressionSupport": {
+            "prompt": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+            "feelings": [
+              "RELIEF",
+              "HAPPY"
+            ],
+            "reasons": [
+              "내가 떠올린 일을 내 말로 이야기하고 싶어."
+            ],
+            "wishes": [
+              "내 생각도 들어 주면 좋겠어."
+            ]
+          },
+          "emotionQuestions": [
+            {
+              "terminalNodeId": "reply_a",
+              "targetNodeId": "moment",
+              "prompt": "“종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.”에서 준은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "RELIEF",
+              "options": [
+                {
+                  "emotionId": "RELIEF",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "SATISFACTION",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "HAPPY",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "FEAR",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            },
+            {
+              "terminalNodeId": "reply_b",
+              "targetNodeId": "moment",
+              "prompt": "“종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.”에서 준은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "RELIEF",
+              "options": [
+                {
+                  "emotionId": "RELIEF",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "SATISFACTION",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "HAPPY",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "FEAR",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            },
+            {
+              "terminalNodeId": "experience_reply",
+              "targetNodeId": "moment",
+              "prompt": "“종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.”에서 준은 어떤 마음을 이야기했을까?",
+              "correctEmotionId": "RELIEF",
+              "options": [
+                {
+                  "emotionId": "RELIEF",
+                  "relation": "CORRECT",
+                  "reason": "지정한 대사의 감정과 연결하는 문서용 예시다. 사람 검토 전이다."
+                },
+                {
+                  "emotionId": "SATISFACTION",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "HAPPY",
+                  "relation": "SIMILAR",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                },
+                {
+                  "emotionId": "FEAR",
+                  "relation": "DIFFERENT",
+                  "reason": "실제 문제은행에 넣기 전 목표 감정과의 구분을 사람이 검토한다."
+                }
+              ]
+            }
+          ]
+        },
+        "questionBindings": [
+          {
+            "terminalNodeId": "reply_a",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-relief",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          },
+          {
+            "terminalNodeId": "reply_b",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-relief",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          },
+          {
+            "terminalNodeId": "experience_reply",
+            "targetNodeId": "moment",
+            "bankItemId": "lab-relief",
+            "bankVersion": "lab-fixture-0.1",
+            "source": "DOCUMENTATION_FIXTURE",
+            "semanticReview": "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+          }
+        ]
+      }
+    ],
+    "webPreview": [
+      {
+        "slot": 1,
+        "npcId": "JungHoon",
+        "place": "Class",
+        "title": "Day 1 · 새 교실 앞에서",
+        "summary": "준이 새 교실에 들어오기 전 걱정했던 일을 이야기한다.",
+        "goalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "targetEmotionId": "FEAR",
+        "usesReportedExperience": false,
+        "reviewStatus": "PENDING_HUMAN_REVIEW"
+      },
+      {
+        "slot": 2,
+        "npcId": "MainPlayer",
+        "place": "School",
+        "title": "Day 1 · 나래가 들은 소문",
+        "summary": "나래가 담임 선생님에 대해 확실하지 않은 소식을 듣고 느낀 마음을 나눈다.",
+        "goalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "targetEmotionId": "SURPRISE",
+        "usesReportedExperience": false,
+        "reviewStatus": "PENDING_HUMAN_REVIEW"
+      },
+      {
+        "slot": 3,
+        "npcId": "JungHoon",
+        "place": "Canteen",
+        "title": "Day 1 · 말하지 못한 농담",
+        "summary": "준이 재미있는 말을 떠올렸지만 이야기할 타이밍을 놓친 일을 나눈다.",
+        "goalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "targetEmotionId": "DISAPPOINTMENT",
+        "usesReportedExperience": false,
+        "reviewStatus": "PENDING_HUMAN_REVIEW"
+      },
+      {
+        "slot": 4,
+        "npcId": "MainPlayer",
+        "place": "Class",
+        "title": "Day 1 · 숟가락을 찾아 준 친구",
+        "summary": "나래가 식사 전에 필요한 물건을 찾도록 도와준 친구에게 고마웠던 일을 나눈다.",
+        "goalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "targetEmotionId": "GRATITUDE",
+        "usesReportedExperience": false,
+        "reviewStatus": "PENDING_HUMAN_REVIEW"
+      },
+      {
+        "slot": 5,
+        "npcId": "JungHoon",
+        "place": "School",
+        "title": "Day 1 · 발표가 끝난 뒤",
+        "summary": "준이 발표에서 잠깐 막혔지만 끝낸 뒤 안심했던 마음을 이야기한다.",
+        "goalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "targetEmotionId": "RELIEF",
+        "usesReportedExperience": true,
+        "reviewStatus": "PENDING_HUMAN_REVIEW"
+      }
+    ],
+    "provenance": {
+      "generationMode": "DOCUMENTATION_FIXTURE",
+      "sillyTavernCommit": "06bde939fb1e9c4c8d8641d810f0a916b5bce127",
+      "configurationRef": "example-st-authoring-0.1",
+      "cardVersions": [
+        {
+          "npcId": "JungHoon",
+          "version": "0.3.0",
+          "fileSha256": "c61749788b8064a5e460241e6e0821ab70d3a75b76563bd12e58e8db9e6b1559"
+        },
+        {
+          "npcId": "MainPlayer",
+          "version": "0.3.0",
+          "fileSha256": "e125f247c74a6fb5aa3e5cc5c8f64fd3f0b0299760a867a6c3cddf53125e338f"
+        }
+      ],
+      "ragItemIds": [
+        "emotion-agency",
+        "dialogue-authoring",
+        "continuity-scenes"
+      ],
+      "quizBankVersion": "lab-fixture-0.1",
+      "modelRef": null,
+      "modelCalls": 0,
+      "providerRequestId": null,
+      "usage": null,
+      "automaticRepairCalls": 0,
+      "quizLlmCalls": 0,
+      "summaryLlmCalls": 0
+    }
+  },
+  "coreDrafts": [
+    {
+      "slot": 1,
+      "materialId": "d8cfac34-2e6f-4b8f-9854-21ef013539fc",
+      "scenarioVersionId": "70f9a58c-b08d-413b-aa99-f8580a096453",
+      "subject": "Day 1 · 새 교실 앞에서",
+      "summary": "준이 새 교실에 들어오기 전 걱정했던 일을 이야기한다.",
+      "payload": {
+        "schemaVersion": "0.3.0",
+        "status": "DRAFT",
+        "scenarioVersionId": "st-00000000-0000-4000-8000-000000000010-1",
+        "arcVersionId": "st-day-00000000-0000-4000-8000-000000000010",
+        "storyletVersionId": "st-slot-00000000-0000-4000-8000-000000000010-1",
+        "contentHash": "d9fb0dc6b6ccdebc9f72caf55f045eb4dbcf461dc025453e085376053bf5005d",
+        "teachingGoalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "preconditions": [],
+        "terminalEffects": [],
+        "personaRefs": [
+          "unbound-persona-jun",
+          "unbound-persona-nara"
+        ],
+        "cardPolicyRef": {
+          "policyVersionId": "unbound-card-policy",
+          "policyHash": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "assetRefs": [
+          "unbound-00000000-0000-4000-8000-000000000010-1-greeting",
+          "unbound-00000000-0000-4000-8000-000000000010-1-greeting_reply_a",
+          "unbound-00000000-0000-4000-8000-000000000010-1-greeting_reply_b",
+          "unbound-00000000-0000-4000-8000-000000000010-1-start",
+          "unbound-00000000-0000-4000-8000-000000000010-1-moment",
+          "unbound-00000000-0000-4000-8000-000000000010-1-reply_a",
+          "unbound-00000000-0000-4000-8000-000000000010-1-reply_b",
+          "unbound-00000000-0000-4000-8000-000000000010-1-original-reply"
+        ],
+        "sceneGraph": {
+          "startSceneId": "greeting",
+          "scenes": [
+            {
+              "sceneId": "greeting",
+              "actorId": "jun",
+              "dialogue": "어, 안녕. 난 준이야. 혹시 옆자리 비었어? 여기 앉아도 돼?",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-1-greeting",
+              "choices": [
+                {
+                  "choiceId": "seat_yes",
+                  "label": "응, 여기는 비어 있어.",
+                  "nextSceneId": "greeting_reply_a",
+                  "effects": []
+                },
+                {
+                  "choiceId": "seat_taken",
+                  "label": "여기는 다른 친구 자리야.",
+                  "nextSceneId": "greeting_reply_b",
+                  "effects": []
+                }
+              ]
+            },
+            {
+              "sceneId": "greeting_reply_a",
+              "actorId": "jun",
+              "dialogue": "알려 줘서 고마워. 가방을 들고 자리를 찾고 있었어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-1-greeting_reply_a",
+              "nextSceneId": "start"
+            },
+            {
+              "sceneId": "greeting_reply_b",
+              "actorId": "jun",
+              "dialogue": "아, 그럼 다른 빈자리를 찾아볼게. 알려 줘서 고마워.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-1-greeting_reply_b",
+              "nextSceneId": "start"
+            },
+            {
+              "sceneId": "start",
+              "actorId": "jun",
+              "dialogue": "아까 교실 문 앞에서 잠깐 멈췄어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-1-start",
+              "nextSceneId": "moment"
+            },
+            {
+              "sceneId": "moment",
+              "actorId": "jun",
+              "dialogue": "아는 친구가 한 명도 없을까 봐 걱정됐어. 문을 열기 전에 손잡이만 만졌어.",
+              "expressionCue": "SAD",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-1-moment",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "label": "들어오기 전이 걱정됐구나.",
+                  "nextSceneId": "reply_a",
+                  "effects": []
+                },
+                {
+                  "choiceId": "b",
+                  "label": "지금은 어때?",
+                  "nextSceneId": "reply_b",
+                  "effects": []
+                }
+              ]
+            },
+            {
+              "sceneId": "reply_a",
+              "actorId": "jun",
+              "dialogue": "응. 지금은 일단 내 자리를 찾아보려고.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-1-reply_a",
+              "end": true
+            },
+            {
+              "sceneId": "reply_b",
+              "actorId": "jun",
+              "dialogue": "아까보다는 괜찮아. 이름표부터 보려고.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-1-reply_b",
+              "end": true
+            }
+          ]
+        },
+        "emotionQuestionByTerminal": [
+          {
+            "terminalSceneId": "reply_a",
+            "targetActorId": "jun",
+            "prompt": "“아는 친구가 한 명도 없을까 봐 걱정됐어. 문을 열기 전에 손잡이만 만졌어.”에서 준은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "FEAR"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "FEAR",
+                "label": "FEAR"
+              },
+              {
+                "emotionId": "DISTRESS",
+                "label": "DISTRESS"
+              },
+              {
+                "emotionId": "SHOCK",
+                "label": "SHOCK"
+              },
+              {
+                "emotionId": "HAPPY",
+                "label": "HAPPY"
+              }
+            ]
+          },
+          {
+            "terminalSceneId": "reply_b",
+            "targetActorId": "jun",
+            "prompt": "“아는 친구가 한 명도 없을까 봐 걱정됐어. 문을 열기 전에 손잡이만 만졌어.”에서 준은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "FEAR"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "FEAR",
+                "label": "FEAR"
+              },
+              {
+                "emotionId": "DISTRESS",
+                "label": "DISTRESS"
+              },
+              {
+                "emotionId": "SHOCK",
+                "label": "SHOCK"
+              },
+              {
+                "emotionId": "HAPPY",
+                "label": "HAPPY"
+              }
+            ]
+          }
+        ],
+        "adaptiveSupport": {
+          "mode": "OFFER_NOT_FORCE",
+          "questionId": "support-1",
+          "prompt": "이야기를 다시 들어 볼까?",
+          "options": [
+            "다시 듣기",
+            "계속하기"
+          ],
+          "replaySceneIds": [
+            "greeting"
+          ]
+        },
+        "expressionPrompt": {
+          "text": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+          "socialStoryHelp": {
+            "entryStates": [
+              "EMOTION_PICK",
+              "EMOTION_SUPPORT_OPTIONAL",
+              "ASK_RESPONSE"
+            ],
+            "lines": [
+              "내 마음은 내가 정해요.",
+              "다른 마음이어도 괜찮아요.",
+              "말하고 싶지 않으면 쉬어도 돼요."
+            ],
+            "playbackSpeeds": [
+              0.75,
+              1,
+              1.25
+            ],
+            "trigger": "USER_BUTTON"
+          }
+        },
+        "characterReplyPolicy": {
+          "mode": "APPROVED_TEMPLATES",
+          "rules": [
+            {
+              "ruleId": "original-fallback",
+              "whenFunction": "UNKNOWN",
+              "text": "네 이야기를 들려줘서 고마워.",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-1-original-reply"
+            }
+          ]
+        }
+      },
+      "validationProfile": "GENERATED_1_TO_3",
+      "dependenciesStatus": "UNBOUND_NOT_PUBLISHABLE"
+    },
+    {
+      "slot": 2,
+      "materialId": "61b9da25-90dd-422e-9599-0b3a130a3709",
+      "scenarioVersionId": "c71f27e4-5ae9-4f7d-aec1-2dbb0980b861",
+      "subject": "Day 1 · 나래가 들은 소문",
+      "summary": "나래가 담임 선생님에 대해 확실하지 않은 소식을 듣고 느낀 마음을 나눈다.",
+      "payload": {
+        "schemaVersion": "0.3.0",
+        "status": "DRAFT",
+        "scenarioVersionId": "st-00000000-0000-4000-8000-000000000010-2",
+        "arcVersionId": "st-day-00000000-0000-4000-8000-000000000010",
+        "storyletVersionId": "st-slot-00000000-0000-4000-8000-000000000010-2",
+        "contentHash": "9203727742332f5f310ec4e1ff9ae98c28780540fb18bd5562fa41bb26b2adf7",
+        "teachingGoalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "preconditions": [],
+        "terminalEffects": [],
+        "personaRefs": [
+          "unbound-persona-jun",
+          "unbound-persona-nara"
+        ],
+        "cardPolicyRef": {
+          "policyVersionId": "unbound-card-policy",
+          "policyHash": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "assetRefs": [
+          "unbound-00000000-0000-4000-8000-000000000010-2-greeting",
+          "unbound-00000000-0000-4000-8000-000000000010-2-greeting_reply_a",
+          "unbound-00000000-0000-4000-8000-000000000010-2-greeting_reply_b",
+          "unbound-00000000-0000-4000-8000-000000000010-2-start",
+          "unbound-00000000-0000-4000-8000-000000000010-2-moment",
+          "unbound-00000000-0000-4000-8000-000000000010-2-reply_a",
+          "unbound-00000000-0000-4000-8000-000000000010-2-reply_b",
+          "unbound-00000000-0000-4000-8000-000000000010-2-original-reply"
+        ],
+        "sceneGraph": {
+          "startSceneId": "greeting",
+          "scenes": [
+            {
+              "sceneId": "greeting",
+              "actorId": "nara",
+              "dialogue": "안녕! 난 나래야. 우리 담임 선생님 어떤 분일까? 아까 복도에서 되게 친절하시다는 얘길 들었는데, 아직 직접 못 봤어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-2-greeting",
+              "choices": [
+                {
+                  "choiceId": "teacher_unknown",
+                  "label": "나도 아직 직접 못 봤어.",
+                  "nextSceneId": "greeting_reply_a",
+                  "effects": []
+                },
+                {
+                  "choiceId": "teacher_wait",
+                  "label": "직접 만나면 알 수 있겠네.",
+                  "nextSceneId": "greeting_reply_b",
+                  "effects": []
+                }
+              ]
+            },
+            {
+              "sceneId": "greeting_reply_a",
+              "actorId": "nara",
+              "dialogue": "그러게. 나도 직접 만나 봐야 알 것 같아.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-2-greeting_reply_a",
+              "nextSceneId": "start"
+            },
+            {
+              "sceneId": "greeting_reply_b",
+              "actorId": "nara",
+              "dialogue": "맞아. 아직은 들은 이야기니까.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-2-greeting_reply_b",
+              "nextSceneId": "start"
+            },
+            {
+              "sceneId": "start",
+              "actorId": "nara",
+              "dialogue": "담임 선생님이 마술을 하신다는 얘길 들었어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-2-start",
+              "nextSceneId": "moment"
+            },
+            {
+              "sceneId": "moment",
+              "actorId": "nara",
+              "dialogue": "그 얘기를 처음 들었을 때 깜짝 놀랐어. 학교에서 마술을 본 적은 없거든. 아직 진짜인지는 몰라.",
+              "expressionCue": "HAPPY",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-2-moment",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "label": "직접 봐야 알겠네.",
+                  "nextSceneId": "reply_a",
+                  "effects": []
+                },
+                {
+                  "choiceId": "b",
+                  "label": "어떤 마술이래?",
+                  "nextSceneId": "reply_b",
+                  "effects": []
+                }
+              ]
+            },
+            {
+              "sceneId": "reply_a",
+              "actorId": "nara",
+              "dialogue": "맞아. 아직은 들은 이야기니까.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-2-reply_a",
+              "end": true
+            },
+            {
+              "sceneId": "reply_b",
+              "actorId": "nara",
+              "dialogue": "그건 못 들었어. 나도 그 부분이 궁금해.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-2-reply_b",
+              "end": true
+            }
+          ]
+        },
+        "emotionQuestionByTerminal": [
+          {
+            "terminalSceneId": "reply_a",
+            "targetActorId": "nara",
+            "prompt": "“그 얘기를 처음 들었을 때 깜짝 놀랐어. 학교에서 마술을 본 적은 없거든. 아직 진짜인지는 몰라.”에서 나래은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "SURPRISE"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "SURPRISE",
+                "label": "SURPRISE"
+              },
+              {
+                "emotionId": "SHOCK",
+                "label": "SHOCK"
+              },
+              {
+                "emotionId": "FEAR",
+                "label": "FEAR"
+              },
+              {
+                "emotionId": "SATISFACTION",
+                "label": "SATISFACTION"
+              }
+            ]
+          },
+          {
+            "terminalSceneId": "reply_b",
+            "targetActorId": "nara",
+            "prompt": "“그 얘기를 처음 들었을 때 깜짝 놀랐어. 학교에서 마술을 본 적은 없거든. 아직 진짜인지는 몰라.”에서 나래은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "SURPRISE"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "SURPRISE",
+                "label": "SURPRISE"
+              },
+              {
+                "emotionId": "SHOCK",
+                "label": "SHOCK"
+              },
+              {
+                "emotionId": "FEAR",
+                "label": "FEAR"
+              },
+              {
+                "emotionId": "SATISFACTION",
+                "label": "SATISFACTION"
+              }
+            ]
+          }
+        ],
+        "adaptiveSupport": {
+          "mode": "OFFER_NOT_FORCE",
+          "questionId": "support-2",
+          "prompt": "이야기를 다시 들어 볼까?",
+          "options": [
+            "다시 듣기",
+            "계속하기"
+          ],
+          "replaySceneIds": [
+            "greeting"
+          ]
+        },
+        "expressionPrompt": {
+          "text": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+          "socialStoryHelp": {
+            "entryStates": [
+              "EMOTION_PICK",
+              "EMOTION_SUPPORT_OPTIONAL",
+              "ASK_RESPONSE"
+            ],
+            "lines": [
+              "내 마음은 내가 정해요.",
+              "다른 마음이어도 괜찮아요.",
+              "말하고 싶지 않으면 쉬어도 돼요."
+            ],
+            "playbackSpeeds": [
+              0.75,
+              1,
+              1.25
+            ],
+            "trigger": "USER_BUTTON"
+          }
+        },
+        "characterReplyPolicy": {
+          "mode": "APPROVED_TEMPLATES",
+          "rules": [
+            {
+              "ruleId": "original-fallback",
+              "whenFunction": "UNKNOWN",
+              "text": "네 이야기를 들려줘서 고마워.",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-2-original-reply"
+            }
+          ]
+        }
+      },
+      "validationProfile": "GENERATED_1_TO_3",
+      "dependenciesStatus": "UNBOUND_NOT_PUBLISHABLE"
+    },
+    {
+      "slot": 3,
+      "materialId": "37b2860e-6d18-4fed-97c5-bba76fa2ea2c",
+      "scenarioVersionId": "56ad6041-d4c3-472b-aa84-2a3f5d8612fd",
+      "subject": "Day 1 · 말하지 못한 농담",
+      "summary": "준이 재미있는 말을 떠올렸지만 이야기할 타이밍을 놓친 일을 나눈다.",
+      "payload": {
+        "schemaVersion": "0.3.0",
+        "status": "DRAFT",
+        "scenarioVersionId": "st-00000000-0000-4000-8000-000000000010-3",
+        "arcVersionId": "st-day-00000000-0000-4000-8000-000000000010",
+        "storyletVersionId": "st-slot-00000000-0000-4000-8000-000000000010-3",
+        "contentHash": "40b3f75c9925309b0589cd5ea96a64ef6747d48c5ab0494b97097fe552a850ba",
+        "teachingGoalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "preconditions": [],
+        "terminalEffects": [],
+        "personaRefs": [
+          "unbound-persona-jun",
+          "unbound-persona-nara"
+        ],
+        "cardPolicyRef": {
+          "policyVersionId": "unbound-card-policy",
+          "policyHash": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "assetRefs": [
+          "unbound-00000000-0000-4000-8000-000000000010-3-start",
+          "unbound-00000000-0000-4000-8000-000000000010-3-moment",
+          "unbound-00000000-0000-4000-8000-000000000010-3-reply_a",
+          "unbound-00000000-0000-4000-8000-000000000010-3-reply_b",
+          "unbound-00000000-0000-4000-8000-000000000010-3-original-reply"
+        ],
+        "sceneGraph": {
+          "startSceneId": "start",
+          "scenes": [
+            {
+              "sceneId": "start",
+              "actorId": "jun",
+              "dialogue": "아까 친구한테 들려주고 싶은 농담이 떠올랐어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-3-start",
+              "nextSceneId": "moment"
+            },
+            {
+              "sceneId": "moment",
+              "actorId": "jun",
+              "dialogue": "그런데 말하려는 순간 수업 종이 울렸어. 웃겨 주고 싶었는데 말을 못 해서 아쉬웠어.",
+              "expressionCue": "SAD",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-3-moment",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "label": "다음 쉬는 시간에 말할 수도 있겠네.",
+                  "nextSceneId": "reply_a",
+                  "effects": []
+                },
+                {
+                  "choiceId": "b",
+                  "label": "어떤 농담이었어?",
+                  "nextSceneId": "reply_b",
+                  "effects": []
+                }
+              ]
+            },
+            {
+              "sceneId": "reply_a",
+              "actorId": "jun",
+              "dialogue": "응. 그때까지 잊어버리지 않으려고 짧게 적어 뒀어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-3-reply_a",
+              "end": true
+            },
+            {
+              "sceneId": "reply_b",
+              "actorId": "jun",
+              "dialogue": "제목만 먼저 말하면 재미없어질 것 같아. 나중에 제대로 들려줄게.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-3-reply_b",
+              "end": true
+            }
+          ]
+        },
+        "emotionQuestionByTerminal": [
+          {
+            "terminalSceneId": "reply_a",
+            "targetActorId": "jun",
+            "prompt": "“그런데 말하려는 순간 수업 종이 울렸어. 웃겨 주고 싶었는데 말을 못 해서 아쉬웠어.”에서 준은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "DISAPPOINTMENT"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "DISAPPOINTMENT",
+                "label": "DISAPPOINTMENT"
+              },
+              {
+                "emotionId": "SAD",
+                "label": "SAD"
+              },
+              {
+                "emotionId": "DISTRESS",
+                "label": "DISTRESS"
+              },
+              {
+                "emotionId": "GRATITUDE",
+                "label": "GRATITUDE"
+              }
+            ]
+          },
+          {
+            "terminalSceneId": "reply_b",
+            "targetActorId": "jun",
+            "prompt": "“그런데 말하려는 순간 수업 종이 울렸어. 웃겨 주고 싶었는데 말을 못 해서 아쉬웠어.”에서 준은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "DISAPPOINTMENT"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "DISAPPOINTMENT",
+                "label": "DISAPPOINTMENT"
+              },
+              {
+                "emotionId": "SAD",
+                "label": "SAD"
+              },
+              {
+                "emotionId": "DISTRESS",
+                "label": "DISTRESS"
+              },
+              {
+                "emotionId": "GRATITUDE",
+                "label": "GRATITUDE"
+              }
+            ]
+          }
+        ],
+        "adaptiveSupport": {
+          "mode": "OFFER_NOT_FORCE",
+          "questionId": "support-3",
+          "prompt": "이야기를 다시 들어 볼까?",
+          "options": [
+            "다시 듣기",
+            "계속하기"
+          ],
+          "replaySceneIds": [
+            "start"
+          ]
+        },
+        "expressionPrompt": {
+          "text": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+          "socialStoryHelp": {
+            "entryStates": [
+              "EMOTION_PICK",
+              "EMOTION_SUPPORT_OPTIONAL",
+              "ASK_RESPONSE"
+            ],
+            "lines": [
+              "내 마음은 내가 정해요.",
+              "다른 마음이어도 괜찮아요.",
+              "말하고 싶지 않으면 쉬어도 돼요."
+            ],
+            "playbackSpeeds": [
+              0.75,
+              1,
+              1.25
+            ],
+            "trigger": "USER_BUTTON"
+          }
+        },
+        "characterReplyPolicy": {
+          "mode": "APPROVED_TEMPLATES",
+          "rules": [
+            {
+              "ruleId": "original-fallback",
+              "whenFunction": "UNKNOWN",
+              "text": "네 이야기를 들려줘서 고마워.",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-3-original-reply"
+            }
+          ]
+        }
+      },
+      "validationProfile": "GENERATED_1_TO_3",
+      "dependenciesStatus": "UNBOUND_NOT_PUBLISHABLE"
+    },
+    {
+      "slot": 4,
+      "materialId": "b22d2f16-cc0e-48db-9abb-4b99a6e03191",
+      "scenarioVersionId": "606f439d-6173-4ff3-b05c-37284b7bc491",
+      "subject": "Day 1 · 숟가락을 찾아 준 친구",
+      "summary": "나래가 식사 전에 필요한 물건을 찾도록 도와준 친구에게 고마웠던 일을 나눈다.",
+      "payload": {
+        "schemaVersion": "0.3.0",
+        "status": "DRAFT",
+        "scenarioVersionId": "st-00000000-0000-4000-8000-000000000010-4",
+        "arcVersionId": "st-day-00000000-0000-4000-8000-000000000010",
+        "storyletVersionId": "st-slot-00000000-0000-4000-8000-000000000010-4",
+        "contentHash": "cf80c190def12ecb05f1f077801703d6cbbf2730bfbbc0b5d16cfc7213eb5232",
+        "teachingGoalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "preconditions": [],
+        "terminalEffects": [],
+        "personaRefs": [
+          "unbound-persona-jun",
+          "unbound-persona-nara"
+        ],
+        "cardPolicyRef": {
+          "policyVersionId": "unbound-card-policy",
+          "policyHash": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "assetRefs": [
+          "unbound-00000000-0000-4000-8000-000000000010-4-start",
+          "unbound-00000000-0000-4000-8000-000000000010-4-moment",
+          "unbound-00000000-0000-4000-8000-000000000010-4-reply_a",
+          "unbound-00000000-0000-4000-8000-000000000010-4-reply_b",
+          "unbound-00000000-0000-4000-8000-000000000010-4-original-reply"
+        ],
+        "sceneGraph": {
+          "startSceneId": "start",
+          "scenes": [
+            {
+              "sceneId": "start",
+              "actorId": "nara",
+              "dialogue": "급식 줄을 다 지나왔는데 숟가락을 안 가져왔더라.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-4-start",
+              "nextSceneId": "moment"
+            },
+            {
+              "sceneId": "moment",
+              "actorId": "nara",
+              "dialogue": "옆에 있던 친구가 숟가락 있는 곳을 알려 줬어. 내가 찾고 있는 걸 알아봐 줘서 고마웠어.",
+              "expressionCue": "HAPPY",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-4-moment",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "label": "찾는 걸 알아봐 줬구나.",
+                  "nextSceneId": "reply_a",
+                  "effects": []
+                },
+                {
+                  "choiceId": "b",
+                  "label": "그래서 가져왔어?",
+                  "nextSceneId": "reply_b",
+                  "effects": []
+                }
+              ]
+            },
+            {
+              "sceneId": "reply_a",
+              "actorId": "nara",
+              "dialogue": "응. 내가 두리번거리고 있었거든.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-4-reply_a",
+              "end": true
+            },
+            {
+              "sceneId": "reply_b",
+              "actorId": "nara",
+              "dialogue": "응, 그 친구가 가리킨 곳에서 찾았어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-4-reply_b",
+              "end": true
+            }
+          ]
+        },
+        "emotionQuestionByTerminal": [
+          {
+            "terminalSceneId": "reply_a",
+            "targetActorId": "nara",
+            "prompt": "“옆에 있던 친구가 숟가락 있는 곳을 알려 줬어. 내가 찾고 있는 걸 알아봐 줘서 고마웠어.”에서 나래은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "GRATITUDE"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "GRATITUDE",
+                "label": "GRATITUDE"
+              },
+              {
+                "emotionId": "LOVE",
+                "label": "LOVE"
+              },
+              {
+                "emotionId": "HAPPY",
+                "label": "HAPPY"
+              },
+              {
+                "emotionId": "ANGRY",
+                "label": "ANGRY"
+              }
+            ]
+          },
+          {
+            "terminalSceneId": "reply_b",
+            "targetActorId": "nara",
+            "prompt": "“옆에 있던 친구가 숟가락 있는 곳을 알려 줬어. 내가 찾고 있는 걸 알아봐 줘서 고마웠어.”에서 나래은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "GRATITUDE"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "GRATITUDE",
+                "label": "GRATITUDE"
+              },
+              {
+                "emotionId": "LOVE",
+                "label": "LOVE"
+              },
+              {
+                "emotionId": "HAPPY",
+                "label": "HAPPY"
+              },
+              {
+                "emotionId": "ANGRY",
+                "label": "ANGRY"
+              }
+            ]
+          }
+        ],
+        "adaptiveSupport": {
+          "mode": "OFFER_NOT_FORCE",
+          "questionId": "support-4",
+          "prompt": "이야기를 다시 들어 볼까?",
+          "options": [
+            "다시 듣기",
+            "계속하기"
+          ],
+          "replaySceneIds": [
+            "start"
+          ]
+        },
+        "expressionPrompt": {
+          "text": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+          "socialStoryHelp": {
+            "entryStates": [
+              "EMOTION_PICK",
+              "EMOTION_SUPPORT_OPTIONAL",
+              "ASK_RESPONSE"
+            ],
+            "lines": [
+              "내 마음은 내가 정해요.",
+              "다른 마음이어도 괜찮아요.",
+              "말하고 싶지 않으면 쉬어도 돼요."
+            ],
+            "playbackSpeeds": [
+              0.75,
+              1,
+              1.25
+            ],
+            "trigger": "USER_BUTTON"
+          }
+        },
+        "characterReplyPolicy": {
+          "mode": "APPROVED_TEMPLATES",
+          "rules": [
+            {
+              "ruleId": "original-fallback",
+              "whenFunction": "UNKNOWN",
+              "text": "네 이야기를 들려줘서 고마워.",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-4-original-reply"
+            }
+          ]
+        }
+      },
+      "validationProfile": "GENERATED_1_TO_3",
+      "dependenciesStatus": "UNBOUND_NOT_PUBLISHABLE"
+    },
+    {
+      "slot": 5,
+      "materialId": "421323ab-b0ff-429b-8d51-a4f51312cdb6",
+      "scenarioVersionId": "afc4787f-fcc4-4e3d-82bb-ab2af74fd69e",
+      "subject": "Day 1 · 발표가 끝난 뒤",
+      "summary": "준이 발표에서 잠깐 막혔지만 끝낸 뒤 안심했던 마음을 이야기한다.",
+      "payload": {
+        "schemaVersion": "0.3.0",
+        "status": "DRAFT",
+        "scenarioVersionId": "st-00000000-0000-4000-8000-000000000010-5",
+        "arcVersionId": "st-day-00000000-0000-4000-8000-000000000010",
+        "storyletVersionId": "st-slot-00000000-0000-4000-8000-000000000010-5",
+        "contentHash": "70fc954cfa11a32cc03bf1888bce2d178f2bea7dc1b5096fab7c167ee014b424",
+        "teachingGoalIds": [
+          "EMOTION_CONTEXT",
+          "SELF_FEELING"
+        ],
+        "preconditions": [],
+        "terminalEffects": [],
+        "personaRefs": [
+          "unbound-persona-jun",
+          "unbound-persona-nara"
+        ],
+        "cardPolicyRef": {
+          "policyVersionId": "unbound-card-policy",
+          "policyHash": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "assetRefs": [
+          "unbound-00000000-0000-4000-8000-000000000010-5-start",
+          "unbound-00000000-0000-4000-8000-000000000010-5-moment",
+          "unbound-00000000-0000-4000-8000-000000000010-5-reply_a",
+          "unbound-00000000-0000-4000-8000-000000000010-5-reply_b",
+          "unbound-00000000-0000-4000-8000-000000000010-5-experience_reply",
+          "unbound-00000000-0000-4000-8000-000000000010-5-original-reply"
+        ],
+        "sceneGraph": {
+          "startSceneId": "start",
+          "scenes": [
+            {
+              "sceneId": "start",
+              "actorId": "jun",
+              "dialogue": "오늘 발표할 때 첫말이 잠깐 생각 안 났어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-5-start",
+              "nextSceneId": "moment"
+            },
+            {
+              "sceneId": "moment",
+              "actorId": "jun",
+              "dialogue": "종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.",
+              "expressionCue": "HAPPY",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-5-moment",
+              "choices": [
+                {
+                  "choiceId": "a",
+                  "label": "끝내서 마음이 놓였구나.",
+                  "nextSceneId": "reply_a",
+                  "effects": []
+                },
+                {
+                  "choiceId": "b",
+                  "label": "나는 발표할 때 재미있기도 해.",
+                  "nextSceneId": "reply_b",
+                  "effects": []
+                },
+                {
+                  "choiceId": "reported_experience",
+                  "label": "체육 시간에 팀이 바뀌었다.",
+                  "nextSceneId": "experience_reply",
+                  "effects": []
+                }
+              ]
+            },
+            {
+              "sceneId": "reply_a",
+              "actorId": "jun",
+              "dialogue": "응. 완벽하진 않았는데 끝까지 말한 건 좋았어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-5-reply_a",
+              "end": true
+            },
+            {
+              "sceneId": "reply_b",
+              "actorId": "jun",
+              "dialogue": "너는 재미있는 마음도 드는구나. 나는 시작 전에는 좀 떨리는 편이야.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-5-reply_b",
+              "end": true
+            },
+            {
+              "sceneId": "experience_reply",
+              "actorId": "jun",
+              "dialogue": "네가 꺼낸 이야기구나. 지금 네 말을 듣고 있어.",
+              "expressionCue": "NEUTRAL",
+              "animationCue": "NOD",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-5-experience_reply",
+              "end": true
+            }
+          ]
+        },
+        "emotionQuestionByTerminal": [
+          {
+            "terminalSceneId": "reply_a",
+            "targetActorId": "jun",
+            "prompt": "“종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.”에서 준은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "RELIEF"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "RELIEF",
+                "label": "RELIEF"
+              },
+              {
+                "emotionId": "SATISFACTION",
+                "label": "SATISFACTION"
+              },
+              {
+                "emotionId": "HAPPY",
+                "label": "HAPPY"
+              },
+              {
+                "emotionId": "FEAR",
+                "label": "FEAR"
+              }
+            ]
+          },
+          {
+            "terminalSceneId": "reply_b",
+            "targetActorId": "jun",
+            "prompt": "“종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.”에서 준은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "RELIEF"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "RELIEF",
+                "label": "RELIEF"
+              },
+              {
+                "emotionId": "SATISFACTION",
+                "label": "SATISFACTION"
+              },
+              {
+                "emotionId": "HAPPY",
+                "label": "HAPPY"
+              },
+              {
+                "emotionId": "FEAR",
+                "label": "FEAR"
+              }
+            ]
+          },
+          {
+            "terminalSceneId": "experience_reply",
+            "targetActorId": "jun",
+            "prompt": "“종이를 보고 다시 시작해서 끝까지 했어. 끝났다는 걸 알고 나니까 마음이 놓였어.”에서 준은 어떤 마음을 이야기했을까?",
+            "acceptedEmotionIds": [
+              "RELIEF"
+            ],
+            "evidenceSceneIds": [
+              "moment"
+            ],
+            "options": [
+              {
+                "emotionId": "RELIEF",
+                "label": "RELIEF"
+              },
+              {
+                "emotionId": "SATISFACTION",
+                "label": "SATISFACTION"
+              },
+              {
+                "emotionId": "HAPPY",
+                "label": "HAPPY"
+              },
+              {
+                "emotionId": "FEAR",
+                "label": "FEAR"
+              }
+            ]
+          }
+        ],
+        "adaptiveSupport": {
+          "mode": "OFFER_NOT_FORCE",
+          "questionId": "support-5",
+          "prompt": "이야기를 다시 들어 볼까?",
+          "options": [
+            "다시 듣기",
+            "계속하기"
+          ],
+          "replaySceneIds": [
+            "start"
+          ]
+        },
+        "expressionPrompt": {
+          "text": "너는 지금 어떤 마음이나 생각이 들어? 잘 모르겠거나 말하고 싶지 않아도 괜찮아.",
+          "socialStoryHelp": {
+            "entryStates": [
+              "EMOTION_PICK",
+              "EMOTION_SUPPORT_OPTIONAL",
+              "ASK_RESPONSE"
+            ],
+            "lines": [
+              "내 마음은 내가 정해요.",
+              "다른 마음이어도 괜찮아요.",
+              "말하고 싶지 않으면 쉬어도 돼요."
+            ],
+            "playbackSpeeds": [
+              0.75,
+              1,
+              1.25
+            ],
+            "trigger": "USER_BUTTON"
+          }
+        },
+        "characterReplyPolicy": {
+          "mode": "APPROVED_TEMPLATES",
+          "rules": [
+            {
+              "ruleId": "original-fallback",
+              "whenFunction": "UNKNOWN",
+              "text": "네 이야기를 들려줘서 고마워.",
+              "voiceRef": "unbound-00000000-0000-4000-8000-000000000010-5-original-reply"
+            }
+          ]
+        }
+      },
+      "validationProfile": "GENERATED_1_TO_3",
+      "dependenciesStatus": "UNBOUND_NOT_PUBLISHABLE"
+    }
+  ],
+  "mode": "MOCK",
+  "paidCalls": 0,
+  "publicationAllowed": false
+}

@@ -35,7 +35,14 @@ public final class RuntimeContracts {
             @NotNull UUID attemptId,@NotBlank @Pattern(regexp="[0-9a-f]{64}") String manifestHash,
             @NotNull @Min(0) Long worldRevision,@NotNull @Size(max=100) @UniqueElements List<@NotBlank @Size(max=128) String> selectedChoiceIds,
             @Size(max=128) String sceneId,@Size(max=128) String terminalSceneId,@Size(max=128) String selectedEmotionId,
-            @NotNull @Min(1) Long draftVersion,UUID confirmedExpressionRef) {}
+            @NotNull @Min(1) Long draftVersion,UUID confirmedExpressionRef,
+            @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+            @Valid PresentationCursor presentationCursor) {
+        public Checkpoint(Long revision,Integer slot,UUID attempt,String manifest,Long world,List<String> choices,String scene,String terminal,String emotion,Long draft,UUID expression) {
+            this(revision,slot,attempt,manifest,world,choices,scene,terminal,emotion,draft,expression,null);
+        }
+    }
+    public record PresentationCursor(@NotBlank @Size(max=128) String sceneId,@Min(0) @Max(9) int sentenceIndex) {}
     public record Commit(@NotNull UUID attemptId,@NotBlank @Pattern(regexp="[0-9a-f]{64}") String manifestHash,
             @NotNull UUID scenarioVersionId,@NotNull @Min(1) Long expectedCheckpointRevision,
             @NotNull @Valid LearningContracts.FinalizeRequest completion) {}

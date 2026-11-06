@@ -1,0 +1,35 @@
+{
+  "repository": "https://github.com/SillyTavern/SillyTavern",
+  "commit": "06bde939fb1e9c4c8d8641d810f0a916b5bce127",
+  "version": "1.19.0",
+  "license": "AGPL-3.0",
+  "files": [
+    {
+      "upstream": "src/validator/TavernCardValidator.js",
+      "local": "vendor/sillytavern/TavernCardValidator.js",
+      "sha256": "a0eba17805b004f5ab6927393e1f16fc1b4b6cd128d905046ece72f66673e1d4",
+      "change": "UNCHANGED"
+    },
+    {
+      "upstream": "src/endpoints/backends/chat-completions.js",
+      "snapshot": "vendor/sillytavern/upstream/chat-completions.js.txt",
+      "sha256": "53f429859efcfb29dd8becfebf7ff0ae49256ea795a0c81c320930fab5a407e7",
+      "derived": "vendor/sillytavern/chat-completion-request.mjs",
+      "sourceRanges": [
+        [
+          2641,
+          2670
+        ],
+        [
+          2676,
+          2685
+        ],
+        [
+          2689,
+          2689
+        ]
+      ],
+      "change": "Request/schema/fetch blocks wrapped as pure functions; removed custom-provider YAML branch, prompt/response logging and UI/secret-store dependencies. Transport injected; fixed OpenAI origin; no other providers or ST UI/plugin loader included."
+    }
+  ]
+}

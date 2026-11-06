@@ -1,0 +1,146 @@
+{
+  "contractVersion": "EF_ST_AGENT_DRAFT_V1",
+  "childId": "00000000-0000-4000-8000-000000000001",
+  "observationSnapshotId": "00000000-0000-4000-8000-000000000030",
+  "observationRevision": 1,
+  "period": {
+    "startInclusive": "2026-11-04T15:00:00Z",
+    "endExclusive": "2026-11-05T15:00:00Z"
+  },
+  "receipts": [
+    {
+      "receiptId": "00000000-0000-4000-8000-000000000101",
+      "sessionId": "00000000-0000-4000-8000-000000000020",
+      "slot": 1,
+      "starsAwarded": 1
+    },
+    {
+      "receiptId": "00000000-0000-4000-8000-000000000102",
+      "sessionId": "00000000-0000-4000-8000-000000000020",
+      "slot": 2,
+      "starsAwarded": 1
+    },
+    {
+      "receiptId": "00000000-0000-4000-8000-000000000103",
+      "sessionId": "00000000-0000-4000-8000-000000000020",
+      "slot": 3,
+      "starsAwarded": 1
+    }
+  ],
+  "observations": [
+    {
+      "eventId": "example-event-1",
+      "attemptId": "example-attempt-1",
+      "questionInstanceId": "example-question-instance-1",
+      "goalIds": [
+        "EMOTION_CONTEXT"
+      ],
+      "kind": "NPC_EMOTION",
+      "firstAttempt": true,
+      "presented": true,
+      "responseRecorded": true,
+      "itemValid": true,
+      "technicalFailure": false,
+      "outcome": "MATCH",
+      "support": "NONE",
+      "authoredBy": "PREPARED_CHOICE",
+      "refused": false,
+      "fixedStimulusId": null
+    },
+    {
+      "eventId": "example-event-2",
+      "attemptId": "example-attempt-2",
+      "questionInstanceId": "example-question-instance-2",
+      "goalIds": [
+        "EMOTION_CONTEXT"
+      ],
+      "kind": "NPC_EMOTION",
+      "firstAttempt": true,
+      "presented": true,
+      "responseRecorded": true,
+      "itemValid": true,
+      "technicalFailure": false,
+      "outcome": "MATCH",
+      "support": "REPLAY",
+      "authoredBy": "PREPARED_CHOICE",
+      "refused": false,
+      "fixedStimulusId": null
+    },
+    {
+      "eventId": "example-event-3",
+      "attemptId": "example-attempt-3",
+      "questionInstanceId": "example-question-instance-3",
+      "goalIds": [
+        "EMOTION_CONTEXT"
+      ],
+      "kind": "NPC_EMOTION",
+      "firstAttempt": true,
+      "presented": true,
+      "responseRecorded": true,
+      "itemValid": true,
+      "technicalFailure": false,
+      "outcome": "MISMATCH",
+      "support": "NONE",
+      "authoredBy": "PREPARED_CHOICE",
+      "refused": false,
+      "fixedStimulusId": null
+    },
+    {
+      "eventId": "example-event-4",
+      "attemptId": "example-attempt-4",
+      "questionInstanceId": null,
+      "goalIds": [
+        "SELF_FEELING"
+      ],
+      "kind": "SELF_EXPRESSION",
+      "firstAttempt": true,
+      "presented": true,
+      "responseRecorded": true,
+      "itemValid": true,
+      "technicalFailure": false,
+      "outcome": "UNSCORED",
+      "support": "NONE",
+      "authoredBy": "CHILD_ORIGINAL",
+      "refused": false,
+      "fixedStimulusId": null
+    },
+    {
+      "eventId": "example-event-5",
+      "attemptId": "example-attempt-5",
+      "questionInstanceId": null,
+      "goalIds": [
+        "SELF_FEELING"
+      ],
+      "kind": "SELF_EXPRESSION",
+      "firstAttempt": true,
+      "presented": true,
+      "responseRecorded": true,
+      "itemValid": true,
+      "technicalFailure": false,
+      "outcome": "UNSCORED",
+      "support": "NONE",
+      "authoredBy": "AI_COMPOSED",
+      "refused": false,
+      "fixedStimulusId": null
+    },
+    {
+      "eventId": "example-event-6",
+      "attemptId": "example-attempt-6",
+      "questionInstanceId": "example-question-instance-6",
+      "goalIds": [
+        "EMOTION_CONTEXT"
+      ],
+      "kind": "NPC_EMOTION",
+      "firstAttempt": true,
+      "presented": true,
+      "responseRecorded": true,
+      "itemValid": true,
+      "technicalFailure": true,
+      "outcome": "UNSCORED",
+      "support": "NONE",
+      "authoredBy": "PREPARED_CHOICE",
+      "refused": false,
+      "fixedStimulusId": null
+    }
+  ]
+}

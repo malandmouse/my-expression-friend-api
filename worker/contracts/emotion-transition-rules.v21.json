@@ -1,0 +1,135 @@
+{
+  "version": "rules-first-0.2-proposed",
+  "status": "PROPOSED_NOT_VALIDATED",
+  "scope": "NPC_FICTIONAL_STATE_ONLY",
+  "rules": [
+    {
+      "ruleId": "R00",
+      "priority": 0,
+      "eventCode": "UNCLEAR",
+      "requires": {},
+      "goalImpact": "UNKNOWN",
+      "nextEmotion": "KEEP",
+      "intensityPolicy": "KEEP",
+      "memoryEffect": "NONE",
+      "rationale": "불충분한 의미 정보는 상태를 바꾸지 않는다."
+    },
+    {
+      "ruleId": "R10",
+      "priority": 10,
+      "eventCode": "HELP_OFFER",
+      "requires": {
+        "previousEmotion": "FEAR",
+        "goalCategory": "NEEDS_HELP"
+      },
+      "goalImpact": "FACILITATES",
+      "nextEmotion": "RELIEF",
+      "intensityPolicy": "SET_LOW",
+      "memoryEffect": "HYPOTHETICAL_OFFER_ONLY",
+      "rationale": "도움이 필요한 목표를 지원하는 제안으로 낮은 강도의 안도를 표현할 수 있으나 성공은 확정하지 않는다."
+    },
+    {
+      "ruleId": "R11",
+      "priority": 20,
+      "eventCode": "INFORMATION_QUESTION",
+      "requires": {},
+      "goalImpact": "NEUTRAL",
+      "nextEmotion": "KEEP",
+      "intensityPolicy": "KEEP",
+      "memoryEffect": "BRANCH_ONLY",
+      "rationale": "질문은 목표 달성이나 태도 악화를 직접 확정하지 않는다."
+    },
+    {
+      "ruleId": "R12",
+      "priority": 20,
+      "eventCode": "ACKNOWLEDGEMENT",
+      "requires": {},
+      "goalImpact": "NEUTRAL",
+      "nextEmotion": "KEEP",
+      "intensityPolicy": "KEEP",
+      "memoryEffect": "BRANCH_ONLY",
+      "rationale": "상대 말에 반응했다는 사실만 기록한다."
+    },
+    {
+      "ruleId": "R13",
+      "priority": 20,
+      "eventCode": "RESPECTFUL_DECLINE",
+      "requires": {},
+      "goalImpact": "NEUTRAL",
+      "nextEmotion": "KEEP",
+      "intensityPolicy": "KEEP",
+      "memoryEffect": "BRANCH_ONLY",
+      "rationale": "정중한 거절을 적의로 해석하지 않는다."
+    },
+    {
+      "ruleId": "R14",
+      "priority": 30,
+      "eventCode": "DISMISSIVE_RESPONSE",
+      "requires": {
+        "goalCategory": "EXPECTS_SUPPORT"
+      },
+      "goalImpact": "OBSTRUCTS",
+      "nextEmotion": "DISAPPOINTMENT",
+      "intensityPolicy": "SET_LOW",
+      "memoryEffect": "BRANCH_ONLY",
+      "rationale": "기대한 협력이 이뤄지지 않는 조건에서만 낮은 강도의 실망을 가정한다."
+    },
+    {
+      "ruleId": "R20",
+      "priority": 35,
+      "eventCode": "GOAL_SUCCESS",
+      "requires": {
+        "verifiedSuccess": true,
+        "goalCategory": "COMPLETE_TASK"
+      },
+      "goalImpact": "FACILITATES",
+      "nextEmotion": "SATISFACTION",
+      "intensityPolicy": "SET_LOW",
+      "memoryEffect": "BRANCH_ONLY",
+      "rationale": "명시적으로 완료된 목표에 대해서만 만족으로 이동한다."
+    },
+    {
+      "ruleId": "R21",
+      "priority": 35,
+      "eventCode": "GOAL_BLOCKED",
+      "requires": {
+        "verifiedBlock": true
+      },
+      "goalImpact": "OBSTRUCTS",
+      "nextEmotion": "DISAPPOINTMENT",
+      "intensityPolicy": "SET_LOW",
+      "memoryEffect": "BRANCH_ONLY",
+      "rationale": "목표 차단이 분명한 경우 낮은 강도의 실망으로 이동한다."
+    },
+    {
+      "ruleId": "R30",
+      "priority": 50,
+      "eventCode": "UNEXPECTED_CHANGE",
+      "requires": {},
+      "goalImpact": "UNKNOWN",
+      "nextEmotion": "KEEP",
+      "intensityPolicy": "KEEP",
+      "memoryEffect": "BRANCH_ONLY",
+      "rationale": "예상 밖 사건만으로 충격이나 두려움을 정하지 않는다."
+    },
+    {
+      "ruleId": "R31",
+      "priority": 50,
+      "eventCode": "APOLOGY_REPAIR",
+      "requires": {},
+      "goalImpact": "FACILITATES",
+      "nextEmotion": "KEEP",
+      "intensityPolicy": "KEEP",
+      "memoryEffect": "BRANCH_ONLY",
+      "rationale": "사과와 화해 완료는 다르므로 기본 감정 유지."
+    }
+  ],
+  "defaultRule": {
+    "ruleId": "R99",
+    "eventCode": "NO_MATCH",
+    "goalImpact": "UNKNOWN",
+    "nextEmotion": "KEEP",
+    "intensityPolicy": "KEEP",
+    "reviewRequired": true
+  }
+}

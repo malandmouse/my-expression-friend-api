@@ -21,11 +21,14 @@ public class CorePublicationService {
     private final JdbcTemplate db;private final JsonMapper json;private final MemberGuard guard;
     private final ChildAccessPolicy access;private final ContentAuthority authority;private final CoreDependencyValidator validator;
     private final CoreScenarioValidator structure;private final Clock clock;private final boolean useEnabled;
+    private final PrototypeBinding prototype;
+    @Value("${emotion-friend.prototype.publication-enabled:false}") private boolean prototypeEnabled;
     public CorePublicationService(JdbcTemplate db,JsonMapper json,MemberGuard guard,ChildAccessPolicy access,
             ContentAuthority authority,CoreDependencyValidator validator,CoreScenarioValidator structure,Clock clock,
-            @Value("${emotion-friend.core.child-use-enabled:false}") boolean useEnabled) {
+            @Value("${emotion-friend.core.child-use-enabled:false}") boolean useEnabled,PrototypeBinding prototype) {
         this.db=db;this.json=json;this.guard=guard;this.access=access;this.authority=authority;
         this.validator=validator;this.structure=structure;this.clock=clock;this.useEnabled=useEnabled;
+        this.prototype=prototype;
     }
     public UUID artifact(CoreDependencyValidator.Artifact artifact) {
         guard.lockDomain();validator.artifact(artifact);
@@ -73,7 +76,9 @@ public class CorePublicationService {
     }
     public UUID plan(ActorPrincipal actor,UUID child,int day,String timezone,List<UUID> publications) {
         guard.lockDomain();guard.require(actor,Role.GUARDIAN,Role.THERAPIST,Role.ADMIN);
-        authority.require(actor,child,ContentAuthority.Capability.CONTENT_PUBLISH);requireChild(child);
+        boolean p1=publications!=null&&!publications.isEmpty()&&publications.stream().allMatch(id->Boolean.TRUE.equals(db.queryForObject("select exists(select 1 from learning.core_evidence where id=? and kind='PUBLICATION' and reference like 'prototype-summary-v1:%')",Boolean.class,id)));
+        if(p1){if(!prototypeEnabled)fail(ErrorCode.CONTENT_NOT_APPROVED);access.check(actor,child.toString(),ChildAccessChecker.Capability.MANAGE);}
+        else authority.require(actor,child,ContentAuthority.Capability.CONTENT_PUBLISH);requireChild(child);
         if(day<1 || timezone==null || !ZoneId.getAvailableZoneIds().contains(timezone) || publications==null
                 || publications.size()!=5 || new HashSet<>(publications).size()!=5) fail(ErrorCode.INVALID_SCHEMA);
         var previous=db.queryForList("select timezone from learning.plan where child_id=?",String.class,child);
@@ -130,6 +135,7 @@ public class CorePublicationService {
         guard.lockDomain();var e=one("select * from learning.core_evidence where id=? and kind='PUBLICATION'",id);
         if(!e.get("child_id").equals(child))fail(ErrorCode.CHILD_ACCESS_DENIED);
         var d=dependency((UUID)e.get("validation_id"));requireEvidence(id,"PUBLICATION",d);requireConfirmed(d);revalidate(d);
+        if(PrototypeBinding.VERSION.equals(d.get("validator_version"))) {requirePrototype(d,e);return d;}
         var parents=(java.sql.Array)e.get("parents");
         try {var ids=(UUID[])parents.getArray();if(ids.length!=2)fail(ErrorCode.CONTENT_NOT_APPROVED);requireEvidence(ids[0],"FULL_REVIEW",d);requireEvidence(ids[1],"CHILD_USE",d);}
         catch(java.sql.SQLException ex){throw new IllegalStateException(ex);}
@@ -150,7 +156,67 @@ public class CorePublicationService {
     public Map<String,Object> dependency(UUID id) {return one("select * from learning.core_dependency_validation where id=?",id);}
     public String hash(UUID validation) {return (String)dependency(validation).get("manifest_hash");}
     public Map<String,Object> manuscript(UUID material) {return one("select * from learning.core_manuscript where material_id=?",material);}
+    /** Trusted release coordinator only. P1 summary approval is recorded as SUMMARY_APPROVAL, never FULL_REVIEW. */
+    public UUID publishPrototype(ActorPrincipal actor,UUID release,int slot,UUID material,
+            tools.jackson.databind.JsonNode manifest,tools.jackson.databind.JsonNode presentation,List<UUID> artifacts) {
+        guard.lockDomain();if(!prototypeEnabled)fail(ErrorCode.CONTENT_NOT_APPROVED);
+        var approved=one("select * from learning.prototype_release where id=?",release);UUID child=(UUID)approved.get("child_id");
+        access.check(actor,child.toString(),ChildAccessChecker.Capability.MANAGE);requireChild(child);
+        if(!approved.get("approved_by").toString().equals(actor.actorId())||!Boolean.TRUE.equals(approved.get("child_use_allowed"))
+            ||!Set.of("MEDIA_RUNNING","READY").contains(approved.get("state"))||!manifest.path("approvalId").asText().equals(release.toString())
+            ||!manifest.path("approvedDraftHash").asText().equals(approved.get("draft_hash")))fail(ErrorCode.CONTENT_NOT_APPROVED);
+        var m=manuscript(material);
+        if(!m.get("child_id").equals(child)||!presentation.path("scenarioVersionId").asText().equals(m.get("scenario_version_id").toString()))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+        if(!Boolean.TRUE.equals(db.queryForObject("select exists(select 1 from learning.material where id=? and status='CONFIRMED' and summary_id::text in (select jsonb_array_elements_text(summary_ids) from learning.prototype_release where id=?))",Boolean.class,material,release)))fail(ErrorCode.CONTENT_NOT_APPROVED);
+        var loaded=artifacts.stream().map(this::readArtifact).toList();
+        var execution=prototype.validate((String)m.get("payload"),manifest,presentation,loaded);
+        String hash=manifest.path("manifestHash").asText();var old=db.queryForList("select id from learning.core_dependency_validation where material_id=? and manifest_hash=?",UUID.class,material,hash);
+        UUID validation;
+        if(old.isEmpty()) {
+            validation=UUID.randomUUID();var transport=json.createObjectNode().put("schemaVersion","prototype-publication-1").put("payloadHash",(String)m.get("payload_hash")).put("prototypeBindingHash",hash);
+            var refs=transport.putArray("artifacts");loaded.forEach(a->refs.addObject().put("id",a.id().toString()).put("kind","MEDIA").put("sourceId",a.sourceId()).put("bytesHash",a.bytesHash()));
+            db.update("insert into learning.core_dependency_validation(id,material_id,payload_hash,manifest_hash,manifest,paths,validator_version,validated_at) values(?,?,?,?,?,?::jsonb,?,?)",validation,material,m.get("payload_hash"),hash,transport.toString(),json.writeValueAsString(execution),PrototypeBinding.VERSION,ts());
+            var p=json.createObjectNode();p.set("dependencyManifest",manifest);p.set("presentation",presentation);
+            db.update("insert into learning.prototype_package(validation_id,release_id,slot,body,source_hash) values(?,?,?,?::jsonb,?)",validation,release,slot,p.toString(),manifest.path("sourceContentHash").asText());
+        }else validation=old.getFirst();
+        var d=dependency(validation);String reference="prototype-summary-v1:"+release;
+        UUID summary=prototypeEvidence(actor,d,"SUMMARY_APPROVAL",reference,List.of());
+        UUID use=prototypeEvidence(actor,d,"CHILD_USE",reference,List.of());
+        return prototypeEvidence(actor,d,"PUBLICATION",reference,List.of(summary,use));
+    }
+    private UUID prototypeEvidence(ActorPrincipal actor,Map<String,Object> d,String kind,String reference,List<UUID> parents) {
+        var old=db.queryForList("select id from learning.core_evidence where validation_id=? and kind=? and actor_id=? and reference=?",UUID.class,d.get("id"),kind,UUID.fromString(actor.actorId()),reference);
+        if(!old.isEmpty())return old.getFirst();UUID id=UUID.randomUUID();
+        db.update("insert into learning.core_evidence(id,validation_id,manifest_hash,kind,child_id,actor_id,consent_revision,reference,verification_ref,parents,recorded_at) values(?,?,?,?,?,?,?,?,null,?,?)",id,d.get("id"),d.get("manifest_hash"),kind,child(d),UUID.fromString(actor.actorId()),requireChild(child(d)),reference,parents.toArray(UUID[]::new),ts());return id;
+    }
+    private void requirePrototype(Map<String,Object> d,Map<String,Object> e) {
+        if(!prototypeEnabled)fail(ErrorCode.CONTENT_NOT_APPROVED);
+        var row=one("select r.*,p.body::text from learning.prototype_package p join learning.prototype_release r on r.id=p.release_id where p.validation_id=?",d.get("id"));
+        if(!Set.of("MEDIA_RUNNING","READY").contains(row.get("state"))||!Boolean.TRUE.equals(row.get("child_use_allowed"))||!row.get("approved_by").equals(e.get("actor_id"))
+            ||!row.get("child_id").equals(child(d))||((Number)row.get("consent_revision")).longValue()!=requireChild(child(d)))fail(ErrorCode.CONTENT_NOT_APPROVED);
+        var manifest=json.readTree((String)row.get("body")).path("dependencyManifest");
+        if(!manifest.path("approvedDraftHash").asText().equals(row.get("draft_hash"))||!manifest.path("manifestHash").asText().equals(d.get("manifest_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+        try {
+            var ids=(UUID[])((java.sql.Array)e.get("parents")).getArray();if(ids.length!=2)fail(ErrorCode.CONTENT_NOT_APPROVED);
+            requireEvidence(ids[0],"SUMMARY_APPROVAL",d);requireEvidence(ids[1],"CHILD_USE",d);
+        }catch(java.sql.SQLException error){throw new IllegalStateException(error);}
+    }
+    public tools.jackson.databind.JsonNode prototypePackage(UUID plan,int slot) {
+        execution(plan,slot);var row=one("select p.body::text,m.payload,a.result_json::text as agent_result from learning.plan_slot s join learning.core_evidence e on e.id=s.publication_id join learning.prototype_package p on p.validation_id=e.validation_id join learning.core_manuscript m on m.material_id=s.material_id join learning.prototype_release rel on rel.id=p.release_id join learning.generation_job j on j.id=rel.job_id join learning.agent_artifact a on a.id=j.artifact_id where s.plan_id=? and s.slot=?",plan,slot);
+        var body=(tools.jackson.databind.node.ObjectNode)json.readTree((String)row.get("body"));body.set("scenario",json.readTree((String)row.get("payload")));
+        // Read projection only: keep approved manuscript/audio/plan and stored package bytes untouched.
+        var authored=json.readTree((String)row.get("agent_result")).path("result").path("scenarios");
+        for(var item:authored)if(item.path("slot").asInt()==slot){String place=item.path("place").asText();if(List.of("Home","Class","Park","Traffic","School","Mall","Canteen").contains(place))((tools.jackson.databind.node.ObjectNode)body.path("presentation")).put("place",place);}
+        return body;
+    }
     private void revalidate(Map<String,Object> d) {
+        if(PrototypeBinding.VERSION.equals(d.get("validator_version"))) {
+            var row=one("select body::text from learning.prototype_package where validation_id=?",d.get("id"));var p=json.readTree((String)row.get("body"));var artifacts=new ArrayList<CoreDependencyValidator.Artifact>();
+            if(!p.path("dependencyManifest").path("manifestHash").asText().equals(d.get("manifest_hash"))||!manuscript((UUID)d.get("material_id")).get("payload_hash").equals(d.get("payload_hash")))fail(ErrorCode.CONTENT_HASH_MISMATCH);
+            for(var a:p.path("dependencyManifest").path("assets"))artifacts.add(readArtifact(UUID.fromString(a.path("assetId").asText())));
+            var paths=prototype.validate((String)manuscript((UUID)d.get("material_id")).get("payload"),p.path("dependencyManifest"),p.path("presentation"),artifacts);
+            if(!json.valueToTree(paths).equals(json.readTree(d.get("paths").toString())))fail(ErrorCode.CONTENT_HASH_MISMATCH);return;
+        }
         var manifest=json.readTree((String)d.get("manifest"));var artifacts=new ArrayList<CoreDependencyValidator.Artifact>();
         for(var a:manifest.path("artifacts")) {var loaded=readArtifact(UUID.fromString(a.path("id").asText()));if(!loaded.bytesHash().equals(a.path("bytesHash").asText()))fail(ErrorCode.CONTENT_HASH_MISMATCH);artifacts.add(loaded);}
         var cues=new TreeMap<String,String>();manifest.path("cueBindings").properties().forEach(e->cues.put(e.getKey(),e.getValue().asText()));
@@ -164,7 +230,7 @@ public class CorePublicationService {
         var old=db.queryForList("select id from learning.core_evidence where validation_id=? and kind=? and actor_id=? and consent_revision=? and reference=? and parents=?",UUID.class,d.get("id"),kind,UUID.fromString(actor.actorId()),revision,reference,parents.toArray(UUID[]::new));
         if(!old.isEmpty()){live(old.getFirst());return old.getFirst();}
         UUID verification=kind.equals("CHILD_USE")?guard.recent(actor,Role.GUARDIAN).verificationRef():null;
-        db.update("insert into learning.core_evidence values(?,?,?,?,?,?,?,?,?,?,?)",id,d.get("id"),d.get("manifest_hash"),kind,child,UUID.fromString(actor.actorId()),revision,reference,verification,parents.toArray(UUID[]::new),ts());return id;
+        db.update("insert into learning.core_evidence(id,validation_id,manifest_hash,kind,child_id,actor_id,consent_revision,reference,verification_ref,parents,recorded_at) values(?,?,?,?,?,?,?,?,?,?,?)",id,d.get("id"),d.get("manifest_hash"),kind,child,UUID.fromString(actor.actorId()),revision,reference,verification,parents.toArray(UUID[]::new),ts());return id;
     }
     private void requireEvidence(UUID id,String kind,Map<String,Object> d) {
         live(id);var e=one("select * from learning.core_evidence where id=?",id);
@@ -172,7 +238,9 @@ public class CorePublicationService {
                 || !e.get("child_id").equals(child(d)) || ((Number)e.get("consent_revision")).longValue()!=requireChild(child(d)))fail(ErrorCode.CONTENT_NOT_APPROVED);
         UUID actor=(UUID)e.get("actor_id");
         if(!Boolean.TRUE.equals(db.queryForObject("select exists(select 1 from identity.member where id=? and status='ACTIVE' and email_verified_at is not null)",Boolean.class,actor)))fail(ErrorCode.CONTENT_NOT_APPROVED);
-        if(!kind.equals("CHILD_USE")) authority.require(new ActorPrincipal(actor.toString(),ActorPrincipal.Kind.ADULT,null,null,null),child(d),kind.equals("FULL_REVIEW")?ContentAuthority.Capability.CONTENT_REVIEW:ContentAuthority.Capability.CONTENT_PUBLISH);
+        if(PrototypeBinding.VERSION.equals(d.get("validator_version"))) {
+            if(!prototypeEnabled||!e.get("reference").toString().startsWith("prototype-summary-v1:")||!actor.equals(db.queryForObject("select guardian_id from care.child where id=?",UUID.class,child(d))))fail(ErrorCode.CONTENT_NOT_APPROVED);
+        }else if(!kind.equals("CHILD_USE")) authority.require(new ActorPrincipal(actor.toString(),ActorPrincipal.Kind.ADULT,null,null,null),child(d),kind.equals("FULL_REVIEW")?ContentAuthority.Capability.CONTENT_REVIEW:ContentAuthority.Capability.CONTENT_PUBLISH);
         else if(!actor.equals(db.queryForObject("select guardian_id from care.child where id=?",UUID.class,child(d))))fail(ErrorCode.CONTENT_NOT_APPROVED);
     }
     private void requireConfirmed(Map<String,Object> d) {

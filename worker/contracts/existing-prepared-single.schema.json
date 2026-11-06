@@ -1,0 +1,364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "string",
+      "enum": [
+        "EF_PREPARED_CONVERSATION_V1"
+      ]
+    },
+    "npcId": {
+      "type": "string",
+      "enum": [
+        "JungHoon",
+        "MainPlayer"
+      ]
+    },
+    "topic": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 400
+    },
+    "startNodeId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "emotionId": {
+            "type": "string",
+            "enum": [
+              "NEUTRAL",
+              "HAPPY",
+              "GRATITUDE",
+              "SATISFACTION",
+              "LOVE",
+              "RELIEF",
+              "SURPRISE",
+              "DISAPPOINTMENT",
+              "DISTRESS",
+              "SHOCK",
+              "SYMPATHY",
+              "FEAR",
+              "UNFAIRNESS",
+              "ANGRY",
+              "DISGUST",
+              "SAD"
+            ]
+          },
+          "emotionIntensity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "emotionCause": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "emotionEvidenceQuote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "causeNodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "minItems": 1,
+            "maxItems": 8
+          },
+          "faceCue": {
+            "type": "string",
+            "enum": [
+              "NEUTRAL",
+              "CURIOUS",
+              "HAPPY",
+              "SAD"
+            ]
+          },
+          "animationCue": {
+            "type": "string",
+            "enum": [
+              "ASK",
+              "NOD"
+            ]
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "choiceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "targetNodeId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "observationFocus": {
+                  "type": "string",
+                  "enum": [
+                    "CONVERSATION_COMPREHENSION",
+                    "CONTEXTUAL_RESPONSE",
+                    "PERSPECTIVE",
+                    "CLARIFICATION",
+                    "BOUNDARY",
+                    "SELF_EXPRESSION"
+                  ]
+                },
+                "contextualMeaning": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 240
+                }
+              },
+              "required": [
+                "choiceId",
+                "text",
+                "targetNodeId",
+                "observationFocus",
+                "contextualMeaning"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0,
+            "maxItems": 3
+          },
+          "nextNodeId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isEnding": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "nodeId",
+          "text",
+          "emotionId",
+          "emotionIntensity",
+          "emotionCause",
+          "emotionEvidenceQuote",
+          "causeNodeIds",
+          "faceCue",
+          "animationCue",
+          "choices",
+          "nextNodeId",
+          "isEnding"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 4,
+      "maxItems": 32
+    },
+    "emotionQuestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "terminalNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "targetNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "correctEmotionId": {
+            "type": "string",
+            "enum": [
+              "HAPPY",
+              "GRATITUDE",
+              "SATISFACTION",
+              "LOVE",
+              "RELIEF",
+              "SURPRISE",
+              "DISAPPOINTMENT",
+              "DISTRESS",
+              "SHOCK",
+              "SYMPATHY",
+              "FEAR",
+              "UNFAIRNESS",
+              "ANGRY",
+              "DISGUST",
+              "SAD"
+            ]
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "emotionId": {
+                  "type": "string",
+                  "enum": [
+                    "HAPPY",
+                    "GRATITUDE",
+                    "SATISFACTION",
+                    "LOVE",
+                    "RELIEF",
+                    "SURPRISE",
+                    "DISAPPOINTMENT",
+                    "DISTRESS",
+                    "SHOCK",
+                    "SYMPATHY",
+                    "FEAR",
+                    "UNFAIRNESS",
+                    "ANGRY",
+                    "DISGUST",
+                    "SAD"
+                  ]
+                },
+                "relation": {
+                  "type": "string",
+                  "enum": [
+                    "CORRECT",
+                    "SIMILAR",
+                    "DIFFERENT"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 240
+                }
+              },
+              "required": [
+                "emotionId",
+                "relation",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": [
+          "terminalNodeId",
+          "targetNodeId",
+          "prompt",
+          "correctEmotionId",
+          "options"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 16
+    },
+    "expressionSupport": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "feelings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "HAPPY",
+              "GRATITUDE",
+              "SATISFACTION",
+              "LOVE",
+              "RELIEF",
+              "SURPRISE",
+              "DISAPPOINTMENT",
+              "DISTRESS",
+              "SHOCK",
+              "SYMPATHY",
+              "FEAR",
+              "UNFAIRNESS",
+              "ANGRY",
+              "DISGUST",
+              "SAD"
+            ]
+          },
+          "minItems": 2,
+          "maxItems": 8
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "minItems": 1,
+          "maxItems": 6
+        },
+        "wishes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "minItems": 1,
+          "maxItems": 6
+        }
+      },
+      "required": [
+        "prompt",
+        "feelings",
+        "reasons",
+        "wishes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "format",
+    "npcId",
+    "topic",
+    "summary",
+    "startNodeId",
+    "nodes",
+    "emotionQuestions",
+    "expressionSupport"
+  ],
+  "additionalProperties": false
+}

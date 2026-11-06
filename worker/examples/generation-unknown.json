@@ -1,0 +1,17 @@
+{
+  "contractVersion": "EF_ST_AGENT_DRAFT_V1",
+  "jobId": "00000000-0000-4000-8000-000000000010",
+  "error": {
+    "code": "OUTCOME_UNKNOWN",
+    "stage": "PROVIDER",
+    "providerAttempted": true,
+    "executionState": "UNKNOWN",
+    "automaticRetryAllowed": false,
+    "issues": [
+      {
+        "path": "providerResponse",
+        "reason": "응답을 받지 못했습니다. 같은 작업을 자동 재전송하지 않고 backend 작업 상태를 보존합니다."
+      }
+    ]
+  }
+}

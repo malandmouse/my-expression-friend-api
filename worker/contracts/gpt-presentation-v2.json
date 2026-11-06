@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "EF_GPT_PRESENTATION_V2",
+  "source": "SAME_GPT_TURN",
+  "faces": {
+    "NEUTRAL": "기본/평온",
+    "HAPPY": "기쁨",
+    "GRATITUDE": "고마움",
+    "SATISFACTION": "만족",
+    "LOVE": "좋아함",
+    "RELIEF": "안도",
+    "SURPRISE": "놀람",
+    "DISAPPOINTMENT": "아쉬움",
+    "DISTRESS": "괴로움",
+    "SHOCK": "충격",
+    "SYMPATHY": "안타까움",
+    "FEAR": "두려움",
+    "UNFAIRNESS": "억울함",
+    "ANGRY": "화남",
+    "DISGUST": "불쾌함",
+    "SAD": "슬픔"
+  },
+  "motions": [
+    {
+      "id": "NONE",
+      "description": "말에 집중하며 기존 기본 대기 자세를 유지. 동작을 꼭 넣을 필요 없음.",
+      "seconds": 0,
+      "loop": false
+    },
+    {
+      "id": "ASK",
+      "description": "기존 작은 질문 포즈. 전용 Mixamo 질문 클립은 아님.",
+      "seconds": 1.8,
+      "loop": false
+    },
+    {
+      "id": "NOD",
+      "description": "기존 작은 끄덕임 포즈.",
+      "seconds": 1.8,
+      "loop": false
+    },
+    {
+      "id": "LOOK_AWAY",
+      "description": "잠깐 다른 쪽을 바라봄. 눈동자 추적이 아니라 준비된 몸/고개 동작.",
+      "seconds": 1.8,
+      "loop": false
+    },
+    {
+      "id": "DISMISS",
+      "description": "말이나 생각을 일축/거절. 해당 대사에만 제한적으로 사용.",
+      "seconds": 3.2667,
+      "loop": false
+    },
+    {
+      "id": "WEIGHT_SHIFT",
+      "description": "제자리에서 체중 이동. 걷기/이동 아님.",
+      "seconds": 9.4333,
+      "loop": true
+    },
+    {
+      "id": "SARCASTIC_NOD",
+      "description": "비꼬는 고개 끄덕임. 대사가 장난/비꼼을 명시할 때만, 아동 조롱 금지.",
+      "seconds": 2.1667,
+      "loop": false
+    },
+    {
+      "id": "SHAKE_NO",
+      "description": "아니라고 고개 젓기.",
+      "seconds": 1.7,
+      "loop": false
+    },
+    {
+      "id": "NOD_YES",
+      "description": "그렇다고 고개 끄덕이기.",
+      "seconds": 2.4,
+      "loop": false
+    },
+    {
+      "id": "COCKY",
+      "description": "우쭐/자신만만한 자세. 아동과 비교하거나 낮추지 않기.",
+      "seconds": 2.8667,
+      "loop": false
+    },
+    {
+      "id": "ANNOYED_SHAKE",
+      "description": "짜증스러워 고개 젓기.",
+      "seconds": 2.4333,
+      "loop": false
+    },
+    {
+      "id": "HARD_NOD",
+      "description": "단호하고 강한 긍정/동의.",
+      "seconds": 1.6333,
+      "loop": false
+    },
+    {
+      "id": "ANGRY_GESTURE",
+      "description": "화난 사건을 설명할 때의 손/몸 동작. 아동 위협 금지.",
+      "seconds": 2.1667,
+      "loop": false
+    },
+    {
+      "id": "HAPPY_HAND",
+      "description": "기쁜 이야기에 가벼운 손짓.",
+      "seconds": 2.7333,
+      "loop": false
+    },
+    {
+      "id": "ACKNOWLEDGE",
+      "description": "상대의 말을 알아들었다는 가벼운 반응.",
+      "seconds": 1.5667,
+      "loop": false
+    },
+    {
+      "id": "LENGTHY_NOD",
+      "description": "충분히 듣고 천천히 동의.",
+      "seconds": 1.7,
+      "loop": false
+    },
+    {
+      "id": "THOUGHTFUL_SHAKE",
+      "description": "생각하며 고개를 작게 움직임.",
+      "seconds": 3.0667,
+      "loop": false
+    },
+    {
+      "id": "RELIEVED_SIGH",
+      "description": "마음이 놓여 한숨을 내쉬는 몸 동작.",
+      "seconds": 3.0,
+      "loop": false
+    }
+  ],
+  "jevCalls": 0,
+  "newAnimationAssetGeneration": false
+}

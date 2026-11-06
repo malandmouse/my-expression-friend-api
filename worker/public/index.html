@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>표현친구 · Agent 실험실</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<header><div><span class="eyebrow">EXPRESSION FRIEND / SCENARIO LAB</span><h1>설정에서 하루의 이야기까지</h1><p>준·나래와 나눌 대화를 준비하고, 선택별 흐름을 살펴보세요.</p></div><div class="mode"><span class="dot"></span>모의 실행 전용<strong>유료 호출 0회</strong></div></header>
+<div class="notice"><b>지금은 연결 확인 단계예요.</b> 결과 본문은 미리 작성한 허구 템플릿입니다. 실제 GPT가 새로 쓴 대화가 아니며, 아동 앱에 발행되지 않습니다.</div>
+<nav class="steps" aria-label="작업 순서"><a href="#settings-title"><b>1</b> 기본 설정</a><a href="#generate"><b>2</b> 하루 5편 요청</a><a href="#result-title"><b>3</b> 결과 확인·다운로드</a></nav>
+<main>
+<section class="settings panel" aria-labelledby="settings-title">
+<div class="panel-heading"><div><span class="eyebrow">INPUT</span><h2 id="settings-title">기본 설정</h2></div><span id="revision" class="pill">불러오는 중</span></div>
+<div class="tabs" role="tablist" aria-label="설정 종류"><button id="tab-profile" role="tab" aria-selected="true" aria-controls="pane-profile">아동·하루</button><button id="tab-writing" role="tab" aria-selected="false" aria-controls="pane-writing">제작 지침</button><button id="tab-json" role="tab" aria-selected="false" aria-controls="pane-json">고급 JSON</button></div>
+<div id="pane-profile" role="tabpanel" aria-labelledby="tab-profile">
+<p class="hint">현재는 가상 아동 예시가 들어 있습니다. 입력한 설정과 결과는 이 실험 레포의 로컬 data 폴더에만 저장합니다.</p>
+<div class="grid2"><label>아동 가명<input id="nickname" maxlength="40"></label><label>프로그램 일차<input id="programDay" type="number" min="1" max="30"></label></div>
+<div class="grid2"><label>학습 날짜<input id="localDate" type="date"></label><label>등장 캐릭터<select id="characterPreference"><option value="BOTH">준·나래를 편마다 나누어 등장</option><option value="JUN">준</option><option value="NARA">나래</option><option value="RECOMMEND">추천</option></select></label></div>
+<fieldset><legend>연령 구간 · 복수 선택</legend><div id="ageBands" class="checks"></div></fieldset>
+<label>평소 경험을 설명하는 방식<select id="experienceNarrative"></select></label>
+<fieldset><legend>평소 감정을 표현하는 방식 · 복수 선택</legend><div id="emotionExpression" class="checks"></div><small>선택하지 않으면 ‘잘 모르겠어요’로 전달합니다.</small></fieldset>
+<label>한 번에 듣기 편한 정보량<select id="informationAmount"></select></label>
+<label>감정의 이유를 이해하기 편한 설명<select id="causeExplanation"></select></label>
+<label>대화 속 인물을 따라가기 편한 방식<select id="personReference"></select></label>
+<fieldset><legend>우선 연습할 감정 목표 · 최대 2개</legend><div id="priorityGoals" class="checks"></div></fieldset>
+<label>관심사<input id="interests" placeholder="동물, 만화 — 쉼표로 나누기"></label>
+<label>좋아하는 활동<input id="preferredActivities" placeholder="산책, 음악 듣기"></label>
+<label>피하고 싶은 소재<input id="avoidTopics" placeholder="큰 소리로 다투는 장면"></label>
+<label>감각 관련 선호 · 선택<textarea id="sensoryPreferences" rows="2" maxlength="500" placeholder="필요할 때만 적어 주세요."></textarea></label>
+<label>아동의 실제 표현 예시 · 선택<textarea id="expressionExamples" rows="2" placeholder="한 줄에 하나씩. 어휘·말투의 참고 자료입니다."></textarea></label>
+<label>최근 있었던 일 · 선택<textarea id="dailyEvents" rows="3" placeholder="한 줄에 한 사건, 최대 5개. 아동의 답변 후보에만 참고합니다."></textarea></label><small>보고하지 않은 감정·이유를 추가하지 않습니다. 입력이 없어도 요청할 수 있습니다.</small>
+<label>캐릭터와의 만남 상태<select id="meetingState"><option value="FIRST_MEETING_CONFIRMED">처음 만나는 것으로 설정</option><option value="PRIOR_INTERACTION_CONFIRMED">이전 대화가 있음</option><option value="UNKNOWN">알 수 없음</option></select></label>
+<p class="hint">자세한 NPC별 기억·장소 초대 근거는 고급 JSON에서 설정할 수 있습니다. 기록 없음이 자동으로 첫 만남을 뜻하지는 않습니다.</p>
+</div>
+<div id="pane-writing" role="tabpanel" aria-labelledby="tab-writing" hidden>
+<div class="card-stamp" id="card-stamp"></div><p class="hint">사용자가 제공한 v0.3.0 카드의 설명·성격·예시를 사용합니다. 카드의 ‘다음 한 턴만’ 지침은 하루 제작 지침과 분리합니다.</p>
+<label>시나리오 제작 시스템 지침<textarea id="systemInstruction" rows="15"></textarea></label>
+<div class="grid2"><label>후속 실제 호출용 모델<select id="modelRef"><option>gpt-5.4</option><option>gpt-5.4-mini</option></select></label><label>출력 토큰 상한<input id="maxOutputTokens" type="number" min="2000" max="64000"></label></div>
+<label>추론 설정<select id="reasoningEffort"><option value="low">low</option><option value="medium">medium</option><option value="high">high</option></select></label>
+<label class="checkbox"><input id="ragEnabled" type="checkbox">필요한 참고 문서 사용 · 최대 3개</label>
+<fieldset><legend>사용 가능한 장소</legend><div id="permittedPlaces" class="checks"></div></fieldset>
+<p class="hint">모델 설정을 바꿔도 실제 API는 호출하지 않습니다. Home은 고급 JSON의 캐릭터별 초대 근거가 있어야 사용 가능합니다.</p>
+</div>
+<div id="pane-json" role="tabpanel" aria-labelledby="tab-json" hidden>
+<p class="hint">백엔드가 보낼 전체 요청 형식입니다. 기본 화면에서 입력한 값으로 채우거나, 직접 수정한 JSON을 사용할 수 있습니다.</p>
+<button id="refresh-json" class="secondary">기본 설정으로 JSON 채우기</button>
+<label class="checkbox"><input id="useAdvanced" type="checkbox">이 고급 JSON을 요청 본문으로 사용</label>
+<label>전체 생성 요청 JSON<textarea id="advancedRequest" class="code" rows="22" spellcheck="false"></textarea></label>
+</div>
+<div class="actions"><button id="save-settings" class="secondary">설정 저장</button><button id="preview-request" class="secondary">요청 내용 미리보기</button></div>
+<button id="generate" class="primary full">모의로 하루 5편 만들기 <span>→</span></button>
+<p id="status" role="status" aria-live="polite">설정을 불러오고 있습니다.</p>
+</section>
+
+<section class="workspace" aria-labelledby="result-title">
+<div class="panel output-heading"><div><span class="eyebrow">OUTPUT</span><h2 id="result-title">오늘의 시나리오</h2><p id="result-caption">설정을 저장하고 요청하면 다섯 편을 여기에서 확인할 수 있어요.</p></div><button id="download" class="secondary" disabled>하루 JSON 다운로드</button></div>
+<div id="empty" class="panel empty"><div class="empty-mark">5</div><h3>하루의 대화를 한 묶음으로</h3><p>캐릭터 대사와 아동의 답변,<br>선택별 반응과 감정 확인을 함께 살펴봅니다.</p><div class="mini-flow">설정 <span>→</span> 5편 요청 <span>→</span> 분기 확인</div></div>
+<section id="preview-panel" class="panel" hidden><div class="panel-heading"><h3>모델에 보낼 내용 미리보기</h3><button id="close-preview" class="text-button">닫기</button></div><p class="hint">외부 전송 없이 실제 ST 요청 조립 코드를 실행한 결과입니다. 참고 문서는 아직 교육 적합성 검토 전입니다.</p><pre id="preview-content"></pre></section>
+<div id="stories"></div>
+<details class="panel record"><summary>학습 기록 정리 실험 · LLM 호출 0회</summary><p class="hint">로컬 시험 기록을 집계합니다. 실제 아동 기록이나 backend가 검증한 기록으로 간주하지 않습니다. JSON에서 기록·다시 듣기·장애 여부를 바꿔 비교할 수 있습니다.</p>
+<div class="actions"><button id="load-observations" class="secondary">허구 기록 예시 불러오기</button><button id="summarize" class="primary">기록 정리</button></div>
+<label>학습 관찰 요청 JSON<textarea id="observations" rows="10" class="code" spellcheck="false"></textarea></label><p id="summary-status" role="status"></p><div id="summary-result"></div><button id="apply-next" class="secondary" disabled>다음 생성 요청에 참고 적용</button></details>
+<footer>별도 로컬 실험 레포 · 기존 backend·Unity 연결 없음 · 자동 검수·수정 반복 없음<br>실제 재사용 코드: SillyTavern 1.19.0 카드 검증·구조화 요청·전송 설정 · AGPL-3.0</footer>
+</section>
+</main>
+</body></html>

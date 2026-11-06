@@ -30,11 +30,13 @@ public class LearningLedger {
     private final Clock clock;
     private final Validator validator;
     private final CorePublicationService publications;
+    private final com.planb.emotionfriend.api.agent.PrototypeCalendar calendar;
     public LearningLedger(JdbcTemplate jdbc,JsonMapper mapper,MemberGuard guard,AuditTrail audit,
-            RequestFingerprint fingerprint,ConfirmedExpressions expressions,Clock clock,Validator validator,CorePublicationService publications) {
+            RequestFingerprint fingerprint,ConfirmedExpressions expressions,Clock clock,Validator validator,CorePublicationService publications,com.planb.emotionfriend.api.agent.PrototypeCalendar calendar) {
         this.jdbc=jdbc;this.mapper=mapper;this.guard=guard;this.audit=audit;this.fingerprint=fingerprint;
         this.expressions=expressions;this.clock=clock;this.validator=validator;
         this.publications=publications;
+        this.calendar=calendar;
     }
     public record Started(int status,Session session) {}
     public Started start(UUID child,SessionStart request) {
@@ -58,6 +60,7 @@ public class LearningLedger {
         ZoneId zone=ZoneId.of((String)plans.getFirst().get("timezone"));
         Instant now=clock.instant();
         LocalDate date=now.atZone(zone).toLocalDate();
+        var p1=dbDate(plan);if(p1!=null){date=calendar.today();if(!p1.equals(date))throw new ApiException(ErrorCode.REWARD_WINDOW_EXPIRED);}
         if(prepared.get("unlocked_date")==null) {
             if(((Number)prepared.get("day_index")).intValue()!=1) throw new ApiException(ErrorCode.MATERIAL_NOT_READY);
             jdbc.update("update learning.plan set unlocked_date=?,unlocked_at=? where id=?",java.sql.Date.valueOf(date),ts(now),plan);
@@ -70,7 +73,7 @@ public class LearningLedger {
         jdbc.update("""
                 insert into learning.session(id,plan_id,device_id,local_date,reward_expires_at,started_at,world_revision)
                 values(?,?,?,?,?,?,?)
-                """,session,plan,request.deviceId(),java.sql.Date.valueOf(date),ts(date.plusDays(1).atStartOfDay(zone).toInstant()),ts(now),world);
+                """,session,plan,request.deviceId(),java.sql.Date.valueOf(date),ts(p1==null?date.plusDays(1).atStartOfDay(zone).toInstant():now.plus(Duration.ofHours(48))),ts(now),world);
         if(prepared.get("manifest")!=null) jdbc.update("insert into learning.session_pin values(?,?,?,?,?)",session,prepared.get("manifest_hash"),world,prepared.get("manifest"),ts(now));
         return new Started(201,sessionView(session));
     }
@@ -79,10 +82,11 @@ public class LearningLedger {
         guard.lockDomain();
         var current=jdbc.queryForList("select * from learning.plan where child_id=? and unlocked_date is not null order by day_index desc limit 1",child);
         if(current.isEmpty())return;
-        var p=current.getFirst();var today=clock.instant().atZone(ZoneId.of((String)p.get("timezone"))).toLocalDate();
+        var p=current.getFirst();var today=dbDate((UUID)p.get("id"))==null?clock.instant().atZone(ZoneId.of((String)p.get("timezone"))).toLocalDate():calendar.today();
         if(!today.isAfter(((java.sql.Date)p.get("unlocked_date")).toLocalDate()))return;
         var next=jdbc.queryForList("select id from learning.plan where child_id=? and day_index=? and revoked_at is null",UUID.class,child,((Number)p.get("day_index")).intValue()+1);
         if(next.isEmpty())return;
+        var nextDate=dbDate(next.getFirst());if(nextDate!=null&&!nextDate.equals(today))return;
         for(int slot=1;slot<=5;slot++)requireMaterial(next.getFirst(),slot);
         jdbc.update("update learning.plan set unlocked_date=?,unlocked_at=? where id=? and unlocked_date is null",java.sql.Date.valueOf(today),ts(clock.instant()),next.getFirst());
     }
@@ -115,7 +119,7 @@ public class LearningLedger {
         if(state.revision()!=request.expectedSessionRevision()) throw new ApiException(ErrorCode.STALE_CHECKPOINT);
         if(state.worldRevision()!=request.expectedWorldRevision()) throw new ApiException(ErrorCode.STALE_WORLD_STATE);
         var material=requireMaterial(state.planId(),slot);
-        expressions.require(request.confirmedExpressionRef(),session,slot,actorId,request.draftVersion());
+        PrototypeExpressionProof.require(jdbc,mapper,expressions,clock,request.confirmedExpressionRef(),session,slot,actorId,request.draftVersion(),request.expressionChoice());
         var path=material.paths().stream().filter(p->p.choiceIds().equals(request.selectedChoiceIds())
                 && p.terminalSceneId().equals(request.terminalSceneId()) && p.emotionIds().contains(request.selectedEmotionId()))
                 .findFirst().orElseThrow(()->new ApiException(ErrorCode.INVALID_BRANCH_PATH));
@@ -123,12 +127,14 @@ public class LearningLedger {
         Instant now=clock.instant();
         var result=new Receipt(receipt,session,state.planId(),slot,now,state.worldRevision()+1,1,
                 state.stars()+1,state.completedCount()+1,request.confirmedExpressionRef(),request.draftVersion(),
-                "ORIGINAL",path.actorId(),"CHARACTER_REPLY");
+                request.expressionChoice(),path.actorId(),"CHARACTER_REPLY");
         jdbc.update("""
                 insert into learning.receipt(id,session_id,plan_id,slot,client_commit_id,request_digest,response,completed_at)
                 values(?,?,?,?,?,?,?::jsonb,?)
                 """,receipt,session,state.planId(),slot,request.clientCommitId(),digest,mapper.writeValueAsString(result),ts(now));
         jdbc.update("insert into learning.star_award(receipt_id,session_id,slot,amount) values(?,?,?,1)",receipt,session,slot);
+        ReceiptPaths.record(jdbc,mapper,state,slot,request,result,path.actorId());
+        PrototypeReactionService.record(jdbc,state,slot,request,result,path.actorId());
         jdbc.update("insert into learning.story_event(receipt_id,child_id,world_revision,effects,recorded_at) values(?,?,?,?::jsonb,?)",
                 receipt,state.childId(),result.worldRevision(),mapper.writeValueAsString(path.effects()),ts(now));
         jdbc.update("""
@@ -198,6 +204,7 @@ public class LearningLedger {
         Instant end=jdbc.queryForObject("select reward_expires_at from learning.session where id=?",Timestamp.class,session).toInstant();
         if(!clock.instant().isBefore(end)) throw new ApiException(ErrorCode.REWARD_WINDOW_EXPIRED);
     }
+    private LocalDate dbDate(UUID plan) {var rows=jdbc.queryForList("select local_date from learning.prototype_day where plan_id=?",java.sql.Date.class,plan);return rows.isEmpty()?null:rows.getFirst().toLocalDate();}
     private void requireWritable(Session state,int slot) {
         if(state.completedCount()+1!=slot || state.status()!=SessionStatus.ACTIVE) throw new ApiException(ErrorCode.RESOURCE_STATE_CONFLICT);
     }

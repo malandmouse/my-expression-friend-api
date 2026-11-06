@@ -1,0 +1,2209 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Expression Friend — ST Agent proposal",
+    "version": "0.1.0-proposed",
+    "description": "Design only. Not current foundation Swagger. Service JWT issuer/audience and deployment are pending agreement."
+  },
+  "paths": {
+    "/api/plugins/scenario-agent/v1/daily-scenarios/generate": {
+      "post": {
+        "operationId": "generateDay",
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "description": "PROPOSED, NOT IMPLEMENTED. Existing backend reservation/claim is authoritative. No new provider call on replay.",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateDayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Draft only or deterministic summary; not publication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateDayResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins/scenario-agent/v1/training/summarize": {
+      "post": {
+        "operationId": "summarizeTraining",
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "description": "PROPOSED, NOT IMPLEMENTED. Existing backend reservation/claim is authoritative. No new provider call on replay.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SummarizeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Draft only or deterministic summary; not publication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummarizeResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "See documented error semantics; do not automatically repeat provider calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "serviceBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Snapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "snapshotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inputRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "profileVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "authorityRevision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "snapshotId",
+          "inputRevision",
+          "profileVersion",
+          "authorityRevision"
+        ]
+      },
+      "Understanding": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "informationAmount": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ONE_EVENT",
+                  "SEQUENTIAL_EVENTS",
+                  "BACKGROUND_AND_REASONS",
+                  "VARIABLE"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "causeExplanation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "EXPLICIT_LINK",
+                  "EVENT_REMINDER",
+                  "CONTEXT_INFERENCE",
+                  "VARIABLE"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "personReference": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "NAMES_EXPLICIT",
+                  "PRONOUN_AFTER_NAME",
+                  "MULTIPLE_REFERENTS",
+                  "VARIABLE"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "informationAmount",
+          "causeExplanation",
+          "personReference"
+        ]
+      },
+      "ExpressionExample": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "CAREGIVER_REPORTED_CHILD_UTTERANCE"
+            ]
+          },
+          "recordedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "text",
+          "context",
+          "source",
+          "recordedAt"
+        ]
+      },
+      "ChildProfile": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "childId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nickname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "ageBands": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ELEMENTARY_MIDDLE",
+                "TARGET_8_TO_13"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 2
+          },
+          "language": {
+            "const": "ko"
+          },
+          "caregiverObservedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "experienceNarrative": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "KEY_POINT",
+                  "SEQUENCE",
+                  "CAUSE_RESULT",
+                  "BACKGROUND_THOUGHT",
+                  "VARIABLE"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "emotionExpression": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "BROAD_FEELING",
+                    "EMOTION_WORDS",
+                    "SIMILAR_FEELING_WORDS",
+                    "FEELING_CAUSE",
+                    "INTENSITY_OR_MIXED",
+                    "SELF_FEELING_DIFFICULT"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 6
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "understanding": {
+            "$ref": "#/components/schemas/Understanding"
+          },
+          "priorityGoals": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "EMOTION_CONTEXT",
+                "EMOTION_CAUSE",
+                "DIFFERENT_FEELINGS",
+                "SIMILAR_EMOTIONS",
+                "SELF_FEELING",
+                "SELF_CAUSE",
+                "INTENSITY_MIXED",
+                "THOUGHT_WISH"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 2
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 0,
+            "maxItems": 20
+          },
+          "preferredActivities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 0,
+            "maxItems": 20
+          },
+          "avoidTopics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 0,
+            "maxItems": 20
+          },
+          "sensoryPreferences": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expressionExamples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpressionExample"
+            },
+            "minItems": 0,
+            "maxItems": 5
+          },
+          "characterPreference": {
+            "type": "string",
+            "enum": [
+              "JUN",
+              "NARA",
+              "BOTH",
+              "RECOMMEND"
+            ]
+          }
+        },
+        "required": [
+          "childId",
+          "nickname",
+          "ageBands",
+          "language",
+          "caregiverObservedAt",
+          "experienceNarrative",
+          "emotionExpression",
+          "understanding",
+          "priorityGoals",
+          "interests",
+          "preferredActivities",
+          "avoidTopics",
+          "sensoryPreferences",
+          "expressionExamples",
+          "characterPreference"
+        ]
+      },
+      "DailyEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "occurredOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "source": {
+            "const": "CAREGIVER_REPORT"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "reportedFeeling": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "allowedUse": {
+            "const": "CHILD_REPLY_CANDIDATE_ONLY"
+          }
+        },
+        "required": [
+          "eventId",
+          "occurredOn",
+          "source",
+          "text",
+          "reportedFeeling",
+          "allowedUse"
+        ]
+      },
+      "KnownFact": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "factId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "heardByNpcIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "JungHoon",
+                "MainPlayer"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "evidenceEventId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "factId",
+          "text",
+          "heardByNpcIds",
+          "evidenceEventId"
+        ]
+      },
+      "Relationship": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "npcId": {
+            "type": "string",
+            "enum": [
+              "JungHoon",
+              "MainPlayer"
+            ]
+          },
+          "meetingState": {
+            "type": "string",
+            "enum": [
+              "FIRST_MEETING_CONFIRMED",
+              "PRIOR_INTERACTION_CONFIRMED",
+              "UNKNOWN"
+            ]
+          },
+          "evidenceRefs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "minItems": 0,
+            "maxItems": 10
+          }
+        },
+        "required": [
+          "npcId",
+          "meetingState",
+          "evidenceRefs"
+        ]
+      },
+      "PlacePermission": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "place": {
+            "type": "string",
+            "enum": [
+              "Home",
+              "Class",
+              "Park",
+              "Traffic",
+              "School",
+              "Mall",
+              "Canteen"
+            ]
+          },
+          "npcId": {
+            "type": "string",
+            "enum": [
+              "JungHoon",
+              "MainPlayer"
+            ]
+          },
+          "evidenceRef": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "place",
+          "npcId",
+          "evidenceRef"
+        ]
+      },
+      "Continuity": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Relationship"
+            },
+            "minItems": 0,
+            "maxItems": 2
+          },
+          "knownFacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnownFact"
+            },
+            "minItems": 0,
+            "maxItems": 10
+          },
+          "openThreads": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "minItems": 0,
+            "maxItems": 3
+          },
+          "recentTopics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "minItems": 0,
+            "maxItems": 10
+          },
+          "placePermissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlacePermission"
+            },
+            "minItems": 0,
+            "maxItems": 14
+          }
+        },
+        "required": [
+          "revision",
+          "relationships",
+          "knownFacts",
+          "openThreads",
+          "recentTopics",
+          "placePermissions"
+        ]
+      },
+      "Program": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "programDay": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "localDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "timeZone": {
+            "const": "Asia/Seoul"
+          },
+          "sessionsPerDay": {
+            "const": 5
+          }
+        },
+        "required": [
+          "programDay",
+          "localDate",
+          "timeZone",
+          "sessionsPerDay"
+        ]
+      },
+      "NextTrainingContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "priorityGoals": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "EMOTION_CONTEXT",
+                "EMOTION_CAUSE",
+                "DIFFERENT_FEELINGS",
+                "SIMILAR_EMOTIONS",
+                "SELF_FEELING",
+                "SELF_CAUSE",
+                "INTENSITY_MIXED",
+                "THOUGHT_WISH"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "explanationHint": {
+            "type": "string",
+            "enum": [
+              "MAINTAIN",
+              "RECAP_CAUSE"
+            ]
+          },
+          "reasonCodes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "minItems": 1,
+            "maxItems": 6
+          },
+          "evidenceEventIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "minItems": 0,
+            "maxItems": 100
+          },
+          "repeatItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "minItems": 0,
+            "maxItems": 10
+          },
+          "profileChanged": {
+            "const": false
+          },
+          "publishedScenarioChanged": {
+            "const": false
+          }
+        },
+        "required": [
+          "priorityGoals",
+          "explanationHint",
+          "reasonCodes",
+          "evidenceEventIds",
+          "repeatItemIds",
+          "profileChanged",
+          "publishedScenarioChanged"
+        ]
+      },
+      "GenerateDayRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "EF_ST_AGENT_DRAFT_V1"
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSnapshot": {
+            "$ref": "#/components/schemas/Snapshot"
+          },
+          "configurationRef": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "program": {
+            "$ref": "#/components/schemas/Program"
+          },
+          "childProfile": {
+            "$ref": "#/components/schemas/ChildProfile"
+          },
+          "dailyEvents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyEvent"
+            },
+            "minItems": 0,
+            "maxItems": 5
+          },
+          "continuity": {
+            "$ref": "#/components/schemas/Continuity"
+          },
+          "nextTraining": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NextTrainingContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "contractVersion",
+          "jobId",
+          "sourceSnapshot",
+          "configurationRef",
+          "program",
+          "childProfile",
+          "dailyEvents",
+          "continuity",
+          "nextTraining"
+        ]
+      },
+      "PreparedSingleDraft": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "EF_PREPARED_CONVERSATION_V1"
+            ]
+          },
+          "npcId": {
+            "type": "string",
+            "enum": [
+              "JungHoon",
+              "MainPlayer"
+            ]
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "startNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nodeId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "emotionId": {
+                  "type": "string",
+                  "enum": [
+                    "NEUTRAL",
+                    "HAPPY",
+                    "GRATITUDE",
+                    "SATISFACTION",
+                    "LOVE",
+                    "RELIEF",
+                    "SURPRISE",
+                    "DISAPPOINTMENT",
+                    "DISTRESS",
+                    "SHOCK",
+                    "SYMPATHY",
+                    "FEAR",
+                    "UNFAIRNESS",
+                    "ANGRY",
+                    "DISGUST",
+                    "SAD"
+                  ]
+                },
+                "emotionIntensity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "emotionCause": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 400
+                },
+                "emotionEvidenceQuote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "causeNodeIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "minItems": 1,
+                  "maxItems": 8
+                },
+                "faceCue": {
+                  "type": "string",
+                  "enum": [
+                    "NEUTRAL",
+                    "CURIOUS",
+                    "HAPPY",
+                    "SAD"
+                  ]
+                },
+                "animationCue": {
+                  "type": "string",
+                  "enum": [
+                    "ASK",
+                    "NOD"
+                  ]
+                },
+                "choices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "choiceId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                      },
+                      "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "targetNodeId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                      },
+                      "observationFocus": {
+                        "type": "string",
+                        "enum": [
+                          "CONVERSATION_COMPREHENSION",
+                          "CONTEXTUAL_RESPONSE",
+                          "PERSPECTIVE",
+                          "CLARIFICATION",
+                          "BOUNDARY",
+                          "SELF_EXPRESSION"
+                        ]
+                      },
+                      "contextualMeaning": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 240
+                      }
+                    },
+                    "required": [
+                      "choiceId",
+                      "text",
+                      "targetNodeId",
+                      "observationFocus",
+                      "contextualMeaning"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0,
+                  "maxItems": 3
+                },
+                "nextNodeId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "isEnding": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "nodeId",
+                "text",
+                "emotionId",
+                "emotionIntensity",
+                "emotionCause",
+                "emotionEvidenceQuote",
+                "causeNodeIds",
+                "faceCue",
+                "animationCue",
+                "choices",
+                "nextNodeId",
+                "isEnding"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 4,
+            "maxItems": 32
+          },
+          "emotionQuestions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "terminalNodeId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "targetNodeId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "correctEmotionId": {
+                  "type": "string",
+                  "enum": [
+                    "HAPPY",
+                    "GRATITUDE",
+                    "SATISFACTION",
+                    "LOVE",
+                    "RELIEF",
+                    "SURPRISE",
+                    "DISAPPOINTMENT",
+                    "DISTRESS",
+                    "SHOCK",
+                    "SYMPATHY",
+                    "FEAR",
+                    "UNFAIRNESS",
+                    "ANGRY",
+                    "DISGUST",
+                    "SAD"
+                  ]
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "emotionId": {
+                        "type": "string",
+                        "enum": [
+                          "HAPPY",
+                          "GRATITUDE",
+                          "SATISFACTION",
+                          "LOVE",
+                          "RELIEF",
+                          "SURPRISE",
+                          "DISAPPOINTMENT",
+                          "DISTRESS",
+                          "SHOCK",
+                          "SYMPATHY",
+                          "FEAR",
+                          "UNFAIRNESS",
+                          "ANGRY",
+                          "DISGUST",
+                          "SAD"
+                        ]
+                      },
+                      "relation": {
+                        "type": "string",
+                        "enum": [
+                          "CORRECT",
+                          "SIMILAR",
+                          "DIFFERENT"
+                        ]
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 240
+                      }
+                    },
+                    "required": [
+                      "emotionId",
+                      "relation",
+                      "reason"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              },
+              "required": [
+                "terminalNodeId",
+                "targetNodeId",
+                "prompt",
+                "correctEmotionId",
+                "options"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 16
+          },
+          "expressionSupport": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "feelings": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "HAPPY",
+                    "GRATITUDE",
+                    "SATISFACTION",
+                    "LOVE",
+                    "RELIEF",
+                    "SURPRISE",
+                    "DISAPPOINTMENT",
+                    "DISTRESS",
+                    "SHOCK",
+                    "SYMPATHY",
+                    "FEAR",
+                    "UNFAIRNESS",
+                    "ANGRY",
+                    "DISGUST",
+                    "SAD"
+                  ]
+                },
+                "minItems": 2,
+                "maxItems": 8
+              },
+              "reasons": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "minItems": 1,
+                "maxItems": 6
+              },
+              "wishes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "minItems": 1,
+                "maxItems": 6
+              }
+            },
+            "required": [
+              "prompt",
+              "feelings",
+              "reasons",
+              "wishes"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "format",
+          "npcId",
+          "topic",
+          "summary",
+          "startNodeId",
+          "nodes",
+          "emotionQuestions",
+          "expressionSupport"
+        ],
+        "additionalProperties": false
+      },
+      "QuestionBinding": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "terminalNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "targetNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "bankItemId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "bankVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "REVIEWED_BANK_TEMPLATE",
+              "DOCUMENTATION_FIXTURE"
+            ]
+          },
+          "semanticReview": {
+            "type": "string",
+            "enum": [
+              "PENDING_HUMAN",
+              "DOCUMENTATION_FIXTURE_NOT_REVIEWED"
+            ]
+          }
+        },
+        "required": [
+          "terminalNodeId",
+          "targetNodeId",
+          "bankItemId",
+          "bankVersion",
+          "source",
+          "semanticReview"
+        ]
+      },
+      "Scenario": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "place": {
+            "type": "string",
+            "enum": [
+              "Home",
+              "Class",
+              "Park",
+              "Traffic",
+              "School",
+              "Mall",
+              "Canteen"
+            ]
+          },
+          "meetingReason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "draft": {
+            "$ref": "#/components/schemas/PreparedSingleDraft"
+          },
+          "questionBindings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionBinding"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "slot",
+          "place",
+          "meetingReason",
+          "draft",
+          "questionBindings"
+        ]
+      },
+      "WebPreviewItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "npcId": {
+            "type": "string",
+            "enum": [
+              "JungHoon",
+              "MainPlayer"
+            ]
+          },
+          "place": {
+            "type": "string",
+            "enum": [
+              "Home",
+              "Class",
+              "Park",
+              "Traffic",
+              "School",
+              "Mall",
+              "Canteen"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "goalIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "EMOTION_CONTEXT",
+                "EMOTION_CAUSE",
+                "DIFFERENT_FEELINGS",
+                "SIMILAR_EMOTIONS",
+                "SELF_FEELING",
+                "SELF_CAUSE",
+                "INTENSITY_MIXED",
+                "THOUGHT_WISH"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "targetEmotionId": {
+            "type": "string",
+            "enum": [
+              "HAPPY",
+              "GRATITUDE",
+              "SATISFACTION",
+              "LOVE",
+              "RELIEF",
+              "SURPRISE",
+              "DISAPPOINTMENT",
+              "DISTRESS",
+              "SHOCK",
+              "SYMPATHY",
+              "FEAR",
+              "UNFAIRNESS",
+              "ANGRY",
+              "DISGUST",
+              "SAD"
+            ]
+          },
+          "usesReportedExperience": {
+            "type": "boolean"
+          },
+          "reviewStatus": {
+            "const": "PENDING_HUMAN_REVIEW"
+          }
+        },
+        "required": [
+          "slot",
+          "npcId",
+          "place",
+          "title",
+          "summary",
+          "goalIds",
+          "targetEmotionId",
+          "usesReportedExperience",
+          "reviewStatus"
+        ]
+      },
+      "Usage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "inputTokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "outputTokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalTokens": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "inputTokens",
+          "outputTokens",
+          "totalTokens"
+        ]
+      },
+      "CardVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "npcId": {
+            "type": "string",
+            "enum": [
+              "JungHoon",
+              "MainPlayer"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "fileSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "npcId",
+          "version",
+          "fileSha256"
+        ]
+      },
+      "Provenance": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "generationMode": {
+            "type": "string",
+            "enum": [
+              "LIVE",
+              "DOCUMENTATION_FIXTURE"
+            ]
+          },
+          "sillyTavernCommit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "configurationRef": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "cardVersions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CardVersion"
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "ragItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "minItems": 0,
+            "maxItems": 3
+          },
+          "quizBankVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "modelRef": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modelCalls": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "providerRequestId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Usage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "automaticRepairCalls": {
+            "const": 0
+          },
+          "quizLlmCalls": {
+            "const": 0
+          },
+          "summaryLlmCalls": {
+            "const": 0
+          }
+        },
+        "required": [
+          "generationMode",
+          "sillyTavernCommit",
+          "configurationRef",
+          "cardVersions",
+          "ragItemIds",
+          "quizBankVersion",
+          "modelRef",
+          "modelCalls",
+          "providerRequestId",
+          "usage",
+          "automaticRepairCalls",
+          "quizLlmCalls",
+          "summaryLlmCalls"
+        ]
+      },
+      "GenerateDayResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "EF_ST_AGENT_DRAFT_V1"
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inputRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "const": "DRAFT_READY"
+          },
+          "publicationAllowed": {
+            "const": false
+          },
+          "program": {
+            "$ref": "#/components/schemas/Program"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Scenario"
+            },
+            "minItems": 5,
+            "maxItems": 5
+          },
+          "webPreview": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebPreviewItem"
+            },
+            "minItems": 5,
+            "maxItems": 5
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "jobId",
+          "inputRevision",
+          "status",
+          "publicationAllowed",
+          "program",
+          "scenarios",
+          "webPreview",
+          "provenance"
+        ]
+      },
+      "Receipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slot": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "starsAwarded": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "receiptId",
+          "sessionId",
+          "slot",
+          "starsAwarded"
+        ]
+      },
+      "Observation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "attemptId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "questionInstanceId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "goalIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "EMOTION_CONTEXT",
+                "EMOTION_CAUSE",
+                "DIFFERENT_FEELINGS",
+                "SIMILAR_EMOTIONS",
+                "SELF_FEELING",
+                "SELF_CAUSE",
+                "INTENSITY_MIXED",
+                "THOUGHT_WISH"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 2
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "NPC_EMOTION",
+              "SELF_EXPRESSION"
+            ]
+          },
+          "firstAttempt": {
+            "type": "boolean"
+          },
+          "presented": {
+            "type": "boolean"
+          },
+          "responseRecorded": {
+            "type": "boolean"
+          },
+          "itemValid": {
+            "type": "boolean"
+          },
+          "technicalFailure": {
+            "type": "boolean"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "MATCH",
+              "MISMATCH",
+              "UNSCORED"
+            ]
+          },
+          "support": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "REPLAY",
+              "HINT",
+              "EXPLICIT_EXPLANATION",
+              "UNKNOWN"
+            ]
+          },
+          "authoredBy": {
+            "type": "string",
+            "enum": [
+              "CHILD_ORIGINAL",
+              "PREPARED_CHOICE",
+              "CARDS",
+              "AI_COMPOSED",
+              "UNKNOWN"
+            ]
+          },
+          "refused": {
+            "type": "boolean"
+          },
+          "fixedStimulusId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "eventId",
+          "attemptId",
+          "questionInstanceId",
+          "goalIds",
+          "kind",
+          "firstAttempt",
+          "presented",
+          "responseRecorded",
+          "itemValid",
+          "technicalFailure",
+          "outcome",
+          "support",
+          "authoredBy",
+          "refused",
+          "fixedStimulusId"
+        ]
+      },
+      "SummarizeRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "EF_ST_AGENT_DRAFT_V1"
+          },
+          "childId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "observationSnapshotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "observationRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "period": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "startInclusive": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "endExclusive": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "startInclusive",
+              "endExclusive"
+            ]
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Receipt"
+            },
+            "minItems": 0,
+            "maxItems": 150
+          },
+          "observations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Observation"
+            },
+            "minItems": 0,
+            "maxItems": 500
+          }
+        },
+        "required": [
+          "contractVersion",
+          "childId",
+          "observationSnapshotId",
+          "observationRevision",
+          "period",
+          "receipts",
+          "observations"
+        ]
+      },
+      "RecognitionCounts": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "validFirstResponses": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "matched": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mismatched": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "matchedWithoutRecordedSupport": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "matchedWithReplayOrHint": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "supportUnknown": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "validFirstResponses",
+          "matched",
+          "mismatched",
+          "matchedWithoutRecordedSupport",
+          "matchedWithReplayOrHint",
+          "supportUnknown"
+        ]
+      },
+      "ExpressionCounts": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "childOriginal": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "preparedChoice": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "cards": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "aiComposed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "refused": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "childOriginal",
+          "preparedChoice",
+          "cards",
+          "aiComposed",
+          "unknown",
+          "refused"
+        ]
+      },
+      "ExcludedCounts": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "duplicateEvents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "invalidOrUnpresented": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "technicalFailure": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "noResponse": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "duplicateEvents",
+          "invalidOrUnpresented",
+          "technicalFailure",
+          "noResponse"
+        ]
+      },
+      "SummaryCounts": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "completedSlots": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "starsFromReceipts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "recognition": {
+            "$ref": "#/components/schemas/RecognitionCounts"
+          },
+          "expression": {
+            "$ref": "#/components/schemas/ExpressionCounts"
+          },
+          "excluded": {
+            "$ref": "#/components/schemas/ExcludedCounts"
+          }
+        },
+        "required": [
+          "completedSlots",
+          "starsFromReceipts",
+          "recognition",
+          "expression",
+          "excluded"
+        ]
+      },
+      "SummarizeResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "EF_ST_AGENT_DRAFT_V1"
+          },
+          "childId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "observationSnapshotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "observationRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "counts": {
+            "$ref": "#/components/schemas/SummaryCounts"
+          },
+          "caregiverText": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "minItems": 1,
+            "maxItems": 10
+          },
+          "nextTraining": {
+            "$ref": "#/components/schemas/NextTrainingContext"
+          },
+          "schedulerMode": {
+            "type": "string",
+            "enum": [
+              "DISABLED_NO_FIXED_BANK",
+              "FIXED_ITEMS_FSRS"
+            ]
+          },
+          "modelCalls": {
+            "const": 0
+          },
+          "completionWrites": {
+            "const": 0
+          },
+          "starWrites": {
+            "const": 0
+          }
+        },
+        "required": [
+          "contractVersion",
+          "childId",
+          "observationSnapshotId",
+          "observationRevision",
+          "counts",
+          "caregiverText",
+          "limitations",
+          "nextTraining",
+          "schedulerMode",
+          "modelCalls",
+          "completionWrites",
+          "starWrites"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "EF_ST_AGENT_DRAFT_V1"
+          },
+          "jobId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "AUTH_REQUIRED",
+                  "FORBIDDEN",
+                  "INPUT_INVALID",
+                  "CONFIG_UNAVAILABLE",
+                  "VERSION_CONFLICT",
+                  "PROVIDER_REJECTED",
+                  "OUTPUT_INCOMPLETE",
+                  "OUTPUT_INVALID",
+                  "UNSUPPORTED_CONTRACT",
+                  "OUTCOME_UNKNOWN"
+                ]
+              },
+              "stage": {
+                "type": "string",
+                "enum": [
+                  "AUTH",
+                  "INPUT",
+                  "PROVIDER",
+                  "ASSEMBLY"
+                ]
+              },
+              "providerAttempted": {
+                "type": "boolean"
+              },
+              "executionState": {
+                "type": "string",
+                "enum": [
+                  "NOT_STARTED",
+                  "KNOWN_COMPLETED",
+                  "KNOWN_FAILED",
+                  "UNKNOWN"
+                ]
+              },
+              "automaticRetryAllowed": {
+                "const": false
+              },
+              "issues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "reason"
+                  ]
+                },
+                "minItems": 0,
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "code",
+              "stage",
+              "providerAttempted",
+              "executionState",
+              "automaticRetryAllowed",
+              "issues"
+            ]
+          }
+        },
+        "required": [
+          "contractVersion",
+          "jobId",
+          "error"
+        ]
+      }
+    }
+  }
+}

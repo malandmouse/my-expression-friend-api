@@ -1,0 +1,85 @@
+{
+  "contractVersion": "EF_ST_AGENT_DRAFT_V1",
+  "jobId": "00000000-0000-4000-8000-000000000010",
+  "sourceSnapshot": {
+    "snapshotId": "00000000-0000-4000-8000-000000000011",
+    "inputRevision": 1,
+    "profileVersion": 3,
+    "authorityRevision": 1
+  },
+  "configurationRef": "example-st-authoring-0.1",
+  "program": {
+    "programDay": 1,
+    "localDate": "2026-11-05",
+    "timeZone": "Asia/Seoul",
+    "sessionsPerDay": 5
+  },
+  "childProfile": {
+    "childId": "00000000-0000-4000-8000-000000000001",
+    "nickname": "가상 아동",
+    "ageBands": [
+      "TARGET_8_TO_13"
+    ],
+    "language": "ko",
+    "caregiverObservedAt": null,
+    "experienceNarrative": "SEQUENCE",
+    "emotionExpression": [
+      "EMOTION_WORDS",
+      "SELF_FEELING_DIFFICULT"
+    ],
+    "understanding": {
+      "informationAmount": "SEQUENTIAL_EVENTS",
+      "causeExplanation": "EVENT_REMINDER",
+      "personReference": "NAMES_EXPLICIT"
+    },
+    "priorityGoals": [
+      "EMOTION_CONTEXT",
+      "SELF_FEELING"
+    ],
+    "interests": [
+      "동물",
+      "만화"
+    ],
+    "preferredActivities": [],
+    "avoidTopics": [
+      "큰 소리로 다투는 장면"
+    ],
+    "sensoryPreferences": null,
+    "expressionExamples": [],
+    "characterPreference": "BOTH"
+  },
+  "dailyEvents": [
+    {
+      "eventId": "fictional-report-01",
+      "occurredOn": "2026-11-04",
+      "source": "CAREGIVER_REPORT",
+      "text": "체육 시간에 팀이 바뀌었다.",
+      "reportedFeeling": null,
+      "allowedUse": "CHILD_REPLY_CANDIDATE_ONLY"
+    }
+  ],
+  "continuity": {
+    "revision": 0,
+    "relationships": [
+      {
+        "npcId": "JungHoon",
+        "meetingState": "FIRST_MEETING_CONFIRMED",
+        "evidenceRefs": [
+          "fictional-enrolment-01"
+        ]
+      },
+      {
+        "npcId": "MainPlayer",
+        "meetingState": "FIRST_MEETING_CONFIRMED",
+        "evidenceRefs": [
+          "fictional-enrolment-01"
+        ]
+      }
+    ],
+    "knownFacts": [],
+    "openThreads": [],
+    "recentTopics": [],
+    "placePermissions": []
+  },
+  "nextTraining": null
+}

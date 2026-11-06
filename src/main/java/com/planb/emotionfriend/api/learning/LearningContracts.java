@@ -29,7 +29,7 @@ public final class LearningContracts {
             @NotNull @Size(max=100) @UniqueElements List<@NotBlank @Size(max=128) String> selectedChoiceIds,
             @NotBlank @Size(max=128) String terminalSceneId,
             @NotBlank @Size(max=128) String selectedEmotionId,
-            @NotNull @Pattern(regexp="ORIGINAL") String expressionChoice,
+            @NotNull @Pattern(regexp="ORIGINAL|AI_COMPOSED") String expressionChoice,
             @NotNull @Min(1) Long expectedSessionRevision,
             @NotNull @Min(0) Long expectedWorldRevision,
             @NotBlank @Size(max=128) String clientCommitId) {}

@@ -1,0 +1,16 @@
+{
+  "name": "expression-friend-st-agent-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check:vendor": "node scripts/check-vendor.mjs",
+    "start:foundation": "node integration/server.mjs"
+  }
+}

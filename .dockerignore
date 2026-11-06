@@ -10,6 +10,10 @@
 !src/
 !src/main/
 !src/main/**
+!worker/
+!worker/**
+!runtime/
+!runtime/**
 
 # Never import local overrides, keys or cached artifacts through an allowed tree.
 **/.gradle/
@@ -28,3 +32,7 @@
 **/*.jks
 **/*.keystore
 **/*.log
+**/node_modules/
+**/data/
+**/__pycache__/
+**/*.pyc

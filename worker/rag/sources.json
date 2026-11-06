@@ -1,0 +1,45 @@
+[
+  {
+    "id": "emotion-agency",
+    "title": "감정 이해와 자기표현의 선택권",
+    "file": "emotion-expression-agency.md",
+    "tags": ["감정", "감정인식", "감정표현", "자기표현", "선택권", "거절", "모름", "EMOTION_CONTEXT", "EMOTION_CAUSE", "SELF_FEELING"],
+    "sources": [
+      {
+        "title": "AACessTalk: Fostering Communication between Minimally Verbal Autistic Children and Parents with Contextual Guidance and Card Recommendation (CHI 2025, arXiv v4)",
+        "url": "https://arxiv.org/abs/2409.09641v4"
+      },
+      {
+        "title": "A randomized waitlist-controlled trial of cognitive behavior therapy to improve emotion regulation in children with autism (Weiss et al., 2018)",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6220772/"
+      }
+    ],
+    "note": "작성: Codex, 2026-11-04. 연구 요약과 제품 적용은 구분한다. AACessTalk 공식 저자 공개 초록을 이번에 확인(11쌍·2주·최소 발화 아동/보호자). Weiss 원문은 기존 연구 자료의 확인 기록을 참고했으며 이번에 전문을 다시 읽지 않았다. 대상·중재·매체가 달라 본 실험의 효과로 일반화하지 않는다. 임상 전문가 검토 NOT_COMPLETED. LOCAL_UNPUBLISHED_REFERENCE. 독자적 요약이며 논문·유료 PEERS 교재·척도 문항을 복제하지 않았다. 자료가 선택돼 본문이 전달됐다는 사실만으로 근거 적용의 타당성이 입증되지는 않는다."
+  },
+  {
+    "id": "dialogue-authoring",
+    "title": "작은 구체성과 반응으로 재미있는 친구 대화 만들기",
+    "file": "interesting-peer-dialogue.md",
+    "tags": ["재미", "친구", "일상", "대화", "시나리오", "질문", "답변", "선택별반응", "의견", "발견", "유머", "1대1"],
+    "sources": [
+      {
+        "title": "Re3: Generating Longer Stories With Recursive Reprompting and Revision (EMNLP 2022, arXiv v3)",
+        "url": "https://arxiv.org/abs/2210.06774v3"
+      }
+    ],
+    "note": "작성: Codex, 2026-11-04. Re3 공식 저자 공개 초록을 이번에 확인했다. 장문 생성의 계획/상태 제공 발상만 참고하고 구체적인 아동 대화·유머 소재·선택별 반응 지침은 작성자 창작/제품 제안이다. 현재 V2.1은 계획1+턴40 생성이며 Re3의 리랭킹·반복 수정은 미구현이다. 재미·교육 효과 사람 검토 NOT_COMPLETED. LOCAL_UNPUBLISHED_REFERENCE. 논문 문장·예제·코드를 복제하지 않았다."
+  },
+  {
+    "id": "continuity-scenes",
+    "title": "확인한 이야기로 가까워지기와 장소별 만남",
+    "file": "continuity-scenes.md",
+    "tags": ["관계", "친밀감", "기억", "연속성", "첫만남", "후일담", "장소", "집", "교실", "공원", "도로", "학교", "쇼핑몰", "급식", "Home", "Class", "Park", "Traffic", "School", "Mall", "Canteen"],
+    "sources": [
+      {
+        "title": "Re3: Generating Longer Stories With Recursive Reprompting and Revision (EMNLP 2022, arXiv v3)",
+        "url": "https://arxiv.org/abs/2210.06774v3"
+      }
+    ],
+    "note": "작성: Codex, 2026-11-04. 공식 저자 공개 초록에서 계획과 현재 상태 제공의 구분만 참고했다. 관계 표현·확정 기억 경계·7개 장소와 만남 조건은 작성자의 제품 설계로 임상/관계 형성 효과 근거가 아니다. 전문가 검토 NOT_COMPLETED. LOCAL_UNPUBLISHED_REFERENCE. 원문·유료 교재·기존 아동 기록을 복제하지 않았다. 이 파일을 사용해도 운영 기억·초대·Unity 장면 구현이 새로 생기지 않는다."
+  }
+]

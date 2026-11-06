@@ -1,3 +1,7 @@
 /gradlew text eol=lf
 *.bat text eol=crlf
 *.jar binary
+
+# Worker source checks hash the original LF bytes.
+/worker/** text=auto eol=lf
+/runtime/check-image.sh text eol=lf

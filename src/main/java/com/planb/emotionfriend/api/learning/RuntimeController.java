@@ -10,8 +10,8 @@ import java.util.UUID;
 
 @RestController
 public class RuntimeController {
-    private final RuntimeCredentials auth;private final RuntimeLearningService learning;private final CurrentActor actors;private final CoreMediaDelivery media;
-    public RuntimeController(RuntimeCredentials auth,RuntimeLearningService learning,CurrentActor actors,CoreMediaDelivery media) {this.auth=auth;this.learning=learning;this.actors=actors;this.media=media;}
+    private final RuntimeCredentials auth;private final RuntimeLearningService learning;private final CurrentActor actors;private final CoreMediaDelivery media;private final PrototypeExpressionService p1;
+    public RuntimeController(RuntimeCredentials auth,RuntimeLearningService learning,CurrentActor actors,CoreMediaDelivery media,PrototypeExpressionService p1) {this.auth=auth;this.learning=learning;this.actors=actors;this.media=media;this.p1=p1;}
     private ActorPrincipal child(){return actors.require(ActorPrincipal.Kind.CHILD);}
     private ActorPrincipal adult(){return actors.require(ActorPrincipal.Kind.ADULT);}
     private ResponseEntity<Object> ok(Object value){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(value);}
@@ -38,13 +38,24 @@ public class RuntimeController {
     @PutMapping("/api/v1/sessions/{sessionId}/checkpoint")
     public ResponseEntity<byte[]> checkpoint(@PathVariable UUID sessionId,@Valid @RequestBody Checkpoint body,@RequestHeader("Idempotency-Key") String key){return learning.checkpoint(child(),sessionId,body,key).toResponseEntity();}
     @PostMapping("/api/v1/sessions/{sessionId}/slots/{slot}/confirmed-expressions")
-    public ResponseEntity<byte[]> expression(@PathVariable UUID sessionId,@PathVariable int slot,@Valid @RequestBody LearningContracts.ExpressionRequest body,@RequestHeader("Idempotency-Key") String key){return learning.expression(child(),sessionId,slot,body,key).toResponseEntity();}
+    public ResponseEntity<byte[]> expression(@PathVariable UUID sessionId,@PathVariable int slot,@RequestBody tools.jackson.databind.JsonNode body,@RequestHeader("Idempotency-Key") String key){if(body.has("schemaVersion"))return p1.confirm(child(),sessionId,slot,body,key).toResponseEntity();
+        var old=new tools.jackson.databind.json.JsonMapper().treeToValue(body,LearningContracts.ExpressionRequest.class);try(var factory=jakarta.validation.Validation.buildDefaultValidatorFactory()){if(!factory.getValidator().validate(old).isEmpty())throw new ApiException(ErrorCode.INVALID_SCHEMA);}return learning.expression(child(),sessionId,slot,old,key).toResponseEntity();}
+    @GetMapping("/api/v1/sessions/{sessionId}/slots/{slot}/expression-context")
+    public ResponseEntity<Object> context(@PathVariable UUID sessionId,@PathVariable int slot){return ok(p1.context(child(),sessionId,slot));}
+    @GetMapping("/api/v1/sessions/{sessionId}/slots/{slot}/expression-options/{offer}")
+    public ResponseEntity<Object> offer(@PathVariable UUID sessionId,@PathVariable int slot,@PathVariable UUID offer){return ok(p1.offer(child(),sessionId,slot,offer));}
+    @PostMapping("/api/v1/sessions/{sessionId}/slots/{slot}/expression-options")
+    public ResponseEntity<Object> options(@PathVariable UUID sessionId,@PathVariable int slot,@RequestBody tools.jackson.databind.JsonNode body,@RequestHeader("Idempotency-Key") String key){return ok(p1.generate(child(),sessionId,slot,body,key,true));}
+    @PostMapping("/api/v1/sessions/{sessionId}/slots/{slot}/expression-expansions")
+    public ResponseEntity<Object> expand(@PathVariable UUID sessionId,@PathVariable int slot,@RequestBody tools.jackson.databind.JsonNode body,@RequestHeader("Idempotency-Key") String key){return ok(p1.generate(child(),sessionId,slot,body,key,false));}
     @PostMapping("/api/v1/sessions/{sessionId}/loops/{slot}/finalize")
     public ResponseEntity<byte[]> complete(@PathVariable UUID sessionId,@PathVariable int slot,@Valid @RequestBody Commit body,@RequestHeader("Idempotency-Key") String key){return learning.complete(child(),sessionId,slot,body,key).toResponseEntity();}
     @GetMapping("/api/v1/sessions/{sessionId}/loops/{slot}/receipt")
     public ResponseEntity<Object> receipt(@PathVariable UUID sessionId,@PathVariable int slot){return ok(learning.receipt(child(),sessionId,slot));}
     @GetMapping("/api/v1/sessions/{sessionId}/slots/{slot}/content")
     public ResponseEntity<Object> content(@PathVariable UUID sessionId,@PathVariable int slot){return ok(learning.content(child(),sessionId,slot));}
+    @GetMapping("/api/v1/sessions/{sessionId}/slots/{slot}/package")
+    public ResponseEntity<Object> runtimePackage(@PathVariable UUID sessionId,@PathVariable int slot){return ok(learning.runtimePackage(child(),sessionId,slot));}
     @PostMapping("/api/v1/sessions/{sessionId}/playback-leases")
     public ResponseEntity<byte[]> lease(@PathVariable UUID sessionId,@Valid @RequestBody LeaseRequest body,@RequestHeader("Idempotency-Key") String key){return learning.lease(child(),sessionId,body,key).toResponseEntity();}
     @GetMapping("/api/v1/sessions/{sessionId}/content/{slot}/assets/{assetId}")

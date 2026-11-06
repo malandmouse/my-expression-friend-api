@@ -2,7 +2,7 @@
 
 Java 21 · Spring Boot 4.1.2 · PostgreSQL · Flyway · Spring Security · Swagger.
 
-공통 기반·인증과 회원 승인·역할 관리, 아동 등록·프로필·치료사 연결·목적별 동의, 생성 콘텐츠 요약 검토와 학습 세션·완료·별·receipt·기록 관리를 구현했다. Core 콘텐츠의 불변 의존성 검증·승인·발행 증거와 아동 기기 인증·checkpoint·lease·여러 Day 실행 adapter도 포함한다. 운영 콘텐츠 권한과 사용 허가·미디어 제공은 기본 차단이며 합성 격리 검증 범위다. 신규 회원은 PENDING이며 이메일 확인 후 운영자가 신청 역할을 승인한다. 이메일 확인 메일은 설정 활성화 시 Resend HTTPS API로 전송한다. 치료사 초대·회원 변경 알림의 외부 전송, 실제 생성기·미디어 공급자·기기 연결은 후속 작업이다.
+공통 기반·인증과 회원 승인·역할 관리, 아동 등록·프로필·치료사 연결·목적별 동의, 생성 콘텐츠 요약 검토와 학습 세션·완료·별·receipt·기록 관리를 구현했다. Core 콘텐츠의 불변 의존성 검증·승인·발행 증거와 아동 기기 인증·checkpoint·lease·여러 Day 실행 adapter도 포함한다. 운영 콘텐츠 권한과 사용 허가·미디어 제공은 기본 차단이며 합성 격리 검증 범위다. 신규 회원은 PENDING이며 이메일 확인 후 운영자가 신청 역할을 승인한다. 이메일 확인 메일은 설정 활성화 시 Resend HTTPS API로 전송한다. 치료사 초대·회원 변경 알림의 외부 전송은 후속 작업이다. 추가된 V2.1 실제 생성기·Typecast·iPad 연결과 잔여 인수 범위는 [프로토타입 연결 안내](docs/PROTOTYPE_CONNECTIONS.md)를 따른다. 최신 Dockerfile은 Java·Worker·Python을 포함하며 [배포 구성](docs/DEPLOY_PROTOTYPE.md)의 환경을 설정해야 한다. 실제 이미지 빌드/배포는 아직 별도 확인이다.
 
 ## 소스 구성
 
@@ -11,7 +11,7 @@ Java 21 · Spring Boot 4.1.2 · PostgreSQL · Flyway · Spring Security · Swagg
 - `gradle`, `gradlew*`, `build.gradle`, `settings.gradle`: 재현 가능한 빌드 입력.
 - `Dockerfile`, `.dockerignore`: Render 빌드 및 실행 이미지 구성.
 
-로컬 `docs/`, `tools/`, `build/`, IDE 설정·키·로그는 Git 업로드 대상에서 제외한다. 루트 허용 목록을 쓰므로 새 최상위 빌드 파일이 필요해지면 `.gitignore`에도 추가한다.
+배포 안내와 API 계약 문서 5개는 `docs/`에 포함한다. 나머지 로컬 문서와 `tools/`, `build/`, IDE 설정·키·로그는 Git 업로드 대상에서 제외한다. 루트 허용 목록을 쓰므로 새 최상위 빌드 파일이 필요해지면 `.gitignore`에도 추가한다.
 
 ## 실행 환경 변수
 

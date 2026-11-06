@@ -1,0 +1,22 @@
+{
+  "source": "existing ExpressionFriend Typecast adapter",
+  "baseline": "c442b154",
+  "files": {
+    "providers/typecast_tts.py": {
+      "source": "services/agent/providers/typecast_tts.py",
+      "sha256": "ee081fdc25a6b1f525e21990ee3591a03b668184f8c7136bfcdbd5580e08ae0b"
+    },
+    "typecast_emotion.py": {
+      "source": "services/agent/typecast_emotion.py",
+      "sha256": "68a7e40b6033533191c37b01e56ed10290fd32861fab608a40673d34a256b34a"
+    }
+  },
+  "externalTypecastCodeIncluded": false,
+  "note": "Calls the paid Typecast HTTP API only when the worker is explicitly LIVE; secrets stay in the process environment.",
+  "localModifications": {
+    "typecast_emotion.py": {
+      "sha256": "99b00619923029bbaa78f35319c1a7fb1d6fd69a00c7a581dbfd4537f0f00e75",
+      "note": "V2: gentle NPC preset strength caps; records the exact acting parameters. Existing audio is immutable."
+    }
+  }
+}
