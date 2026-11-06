@@ -40,7 +40,7 @@ public class RuntimeCredentials {
             UUID device;
             if(devices.isEmpty()) {device=UUID.randomUUID();db.update("insert into learning.runtime_device(id,child_id,device_id,consent_revision) values(?,?,?,?)",device,child,request.deviceId(),consent(child));}
             else {device=(UUID)devices.getFirst().get("id");if(Boolean.TRUE.equals(devices.getFirst().get("revoked")))db.update("update learning.runtime_device set generation=generation+1,revoked=false,consent_revision=? where id=?",consent(child),device);}
-            var d=device(device);String code=secret();UUID id=UUID.randomUUID();Instant until=clock.instant().plusSeconds(300);
+            var d=device(device);String code=secret();UUID id=UUID.randomUUID();Instant until=clock.instant().plus(Duration.ofDays(1));
             db.update("insert into learning.device_grant(id,device,generation,code_hash,expires_at,issuer_scope,request_key,issuer_id,issuer_session_id) values(?,?,?,?,?,?,?,?,?)",id,device,d.get("generation"),LearningCatalog.hash(code),ts(until),fingerprint.actorScope(adult),fingerprint.key(key),UUID.fromString(adult.actorId()),UUID.fromString(adult.sessionId()));
             return response(201,new Grant(id,child,request.deviceId(),code,until));
         });
