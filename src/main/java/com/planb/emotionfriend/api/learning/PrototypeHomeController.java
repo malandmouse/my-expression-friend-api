@@ -18,8 +18,9 @@ public class PrototypeHomeController {
         var rows=db.queryForList("""
             select d.program_day as "programDay",d.local_date as "localDate",d.plan_id as "planId",
               coalesce(s.completed_count,0) as "completedCount",coalesce(s.stars,0) as stars,
-              (d.local_date=? and d.plan_id is not null and p.revoked_at is null and p.unlocked_date is not null
-               and p.unlocked_date<=? and r.state='READY' and coalesce(s.completed_count,0)<5) as "canLaunch"
+              (d.local_date=? and d.plan_id is not null and p.revoked_at is null
+               and ((p.day_index=1 and p.unlocked_date is null) or (p.unlocked_date is not null and p.unlocked_date<=?))
+               and r.state='READY' and coalesce(s.completed_count,0)<5) as "canLaunch"
             from learning.prototype_day d left join learning.plan p on p.id=d.plan_id
             left join learning.session s on s.plan_id=d.plan_id left join learning.prototype_release r on r.id=d.release_id
             where d.child_id=? order by d.program_day limit 30

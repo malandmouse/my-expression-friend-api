@@ -90,6 +90,37 @@ class CoreRuntimeIntegrationTest {
     }
     @AfterEach void close(){client.close();}
 
+    @Test void dayMenuAllowsReadyDayOneBeforeStartAndKeepsDayTwoLockedUntilEntry() throws Exception {
+        var first = day(1);
+        var firstDate = LocalDate.of(2026, 11, 2);
+        bindReadyPrototypeDay(first.plan(), 1, firstDate);
+        String credential = connect();
+        String menu = "/api/v1/child-sessions/day-index";
+
+        var firstRow = accepted(send("GET", menu, null, credential, null), 200).path("days").get(0);
+        assertThat(id(firstRow, "planId")).isEqualTo(first.plan());
+        assertThat(firstRow.path("canLaunch").isBoolean()).isTrue();
+        assertThat(firstRow.path("canLaunch").asBoolean()).isTrue();
+        assertThat(db.queryForObject("select unlocked_date from learning.plan where id=?", LocalDate.class, first.plan())).isNull();
+        assertThat(count("session")).isZero();
+
+        accepted(send("POST", "/api/v1/daily-plans/" + id(firstRow, "planId") + "/sessions", startBody(), credential, key()), 201);
+        assertThat(db.queryForObject("select unlocked_date from learning.plan where id=?", LocalDate.class, first.plan())).isEqualTo(firstDate);
+
+        clock.now = clock.now.plus(Duration.ofDays(1));
+        var second = day(2);
+        bindReadyPrototypeDay(second.plan(), 2, firstDate.plusDays(1));
+        credential = connect();
+        var days = accepted(send("GET", menu, null, credential, null), 200).path("days");
+        assertThat(days.get(0).path("canLaunch").asBoolean()).isFalse();
+        assertThat(id(days.get(1), "planId")).isEqualTo(second.plan());
+        assertThat(days.get(1).path("canLaunch").isBoolean()).isTrue();
+        assertThat(days.get(1).path("canLaunch").asBoolean()).isFalse();
+
+        accepted(send("POST", entryPath(), entry(), credential, key()), 200);
+        assertThat(accepted(send("GET", menu, null, credential, null), 200).path("days").get(1).path("canLaunch").asBoolean()).isTrue();
+    }
+
     @Test void approvalPublicationAuthenticationFiveSlotsReconnectAndDayTwoKeepOneLedgerAndPastReceipt() throws Exception {
         Day day=day(1);String pre=connect();var persistent=accepted(send("POST","/api/v1/child-sessions/persist",device(),pre,key()),200);
         var start=start(day,pre);String token=token(start.path("runtimeCredential"));UUID session=id(start.path("session"),"sessionId");
@@ -605,6 +636,24 @@ class CoreRuntimeIntegrationTest {
         }
         assertCode(send("POST",finalizePath(s,1),cmd,t,key()),"AUTH_REQUIRED");
     }
+    private void bindReadyPrototypeDay(UUID plan, int day, LocalDate date) {
+        UUID job = UUID.randomUUID(), release = UUID.randomUUID();
+        String hash = LearningCatalog.hash(job.toString());
+        db.update("""
+                insert into learning.generation_job(id,child_id,requester_id,kind,source_ref,input_revision,authority_revision,
+                  settings_ref,business_fingerprint,deadline,created_at,state,artifact_id,artifact_hash)
+                values(?,?,?,'AUTHORING',?,1,1,?,?,?,?,'RESULT_READY',?,?)
+                """, job, child, guardian.id(), UUID.randomUUID(), UUID.randomUUID(), hash,
+                Timestamp.from(clock.now.plusSeconds(60)), ts(), UUID.randomUUID(), hash);
+        db.update("""
+                insert into learning.prototype_release(id,child_id,job_id,state,draft_hash,approved_by,consent_revision,
+                  child_use_allowed,summary_ids,actor_pin,mode,plan_id,approved_at,updated_at)
+                values(?,?,?,'READY',?,?,1,true,'[]','{}','MOCK',?,?,?)
+                """, release, child, job, hash, guardian.id(), plan, ts(), ts());
+        db.update("insert into learning.prototype_day(child_id,local_date,program_day,job_id,release_id,plan_id,created_at) values(?,?,?,?,?,?,?)",
+                child, java.sql.Date.valueOf(date), day, job, release, plan, ts());
+    }
+
     private Day day(int day) throws Exception {
         return day(day,true);
     }
